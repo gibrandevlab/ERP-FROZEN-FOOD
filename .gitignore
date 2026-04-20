@@ -1,0 +1,56 @@
+*.log
+.DS_Store
+.env
+.env.backup
+.env.production
+.phpactor.json
+.phpunit.result.cache
+/.fleet
+/.idea
+/.nova
+/.phpunit.cache
+/.vscode
+/.zed
+/auth.json
+/node_modules
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+/vendor
+Homestead.json
+Homestead.yaml
+Thumbs.db
+# --- Laravel Core ---
+/node_modules
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/vendor
+.env
+.env.backup
+.env.production
+composer.lock
+package-lock.json (Opsional: tim biasanya menyertakan ini, tapi kalau sering konflik boleh diignore)
+
+# --- Docker / Sail ---
+.phpunit.result.cache
+docker-compose.override.yml
+
+# --- PHP / IDE (VS Code & XAMPP) ---
+.vscode/
+.idea/
+.phpunit.cache
+php_errors.log
+.php-cs-fixer.cache
+
+# --- OS Sampah (Windows & Mac) ---
+Thumbs.db
+.DS_Store
+.history/
+
+# --- Proyek UMKM Spesifik ---
+/public/sitemap.xml
+/public/robots.txt
