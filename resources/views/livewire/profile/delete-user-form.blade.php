@@ -24,55 +24,39 @@ new class extends Component
 }; ?>
 
 <section class="space-y-6">
-    <header>
-        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-            {{ __('Delete Account') }}
-        </h2>
-
-        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            {{ __('Once your account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain.') }}
-        </p>
-    </header>
-
-    <x-danger-button
-        x-data=""
-        x-on:click.prevent="$dispatch('open-modal', 'confirm-user-deletion')"
-    >{{ __('Delete Account') }}</x-danger-button>
+    <button x-data=""
+            x-on:click.prevent="$dispatch('open-modal', 'confirm-user-deletion')"
+            class="px-6 py-2.5 bg-red-50 text-red-600 rounded-xl text-sm font-semibold border border-red-200 hover:bg-red-100 hover:text-red-700 transition-colors w-full sm:w-auto">
+        Hapus Akun Permanen
+    </button>
 
     <x-modal name="confirm-user-deletion" :show="$errors->isNotEmpty()" focusable>
-        <form wire:submit="deleteUser" class="p-6">
-
-            <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                {{ __('Are you sure you want to delete your account?') }}
+        <form wire:submit="deleteUser" class="p-6 bg-white rounded-2xl">
+            <h2 class="text-lg font-bold text-slate-800">
+                Apakah Anda yakin ingin menghapus akun ini?
             </h2>
 
-            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                {{ __('Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.') }}
+            <p class="mt-2 text-sm text-slate-500 leading-relaxed">
+                Setelah akun dihapus, semua data dan informasi akan hilang secara permanen. Silakan masukkan kata sandi Anda untuk mengonfirmasi penghapusan.
             </p>
 
             <div class="mt-6">
-                <x-input-label for="password" value="{{ __('Password') }}" class="sr-only" />
-
-                <x-text-input
-                    wire:model="password"
-                    id="password"
-                    name="password"
-                    type="password"
-                    class="mt-1 block w-3/4"
-                    placeholder="{{ __('Password') }}"
-                />
-
-                <x-input-error :messages="$errors->get('password')" class="mt-2" />
+                <label for="password" class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wide">Kata Sandi</label>
+                <input wire:model="password" id="password" name="password" type="password" placeholder="Masukkan kata sandi"
+                       class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-400 transition-all shadow-sm" />
+                @error('password') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
             </div>
 
-            <div class="mt-6 flex justify-end">
-                <x-secondary-button x-on:click="$dispatch('close')">
-                    {{ __('Cancel') }}
-                </x-secondary-button>
+            <div class="mt-6 flex justify-end gap-3">
+                <button type="button" x-on:click="$dispatch('close')"
+                        class="px-4 py-2 text-sm font-semibold text-slate-500 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">
+                    Batal
+                </button>
 
-                <x-danger-button class="ms-3">
-                    {{ __('Delete Account') }}
-                </x-danger-button>
+                <button type="submit"
+                        class="px-5 py-2 text-sm font-semibold text-white bg-red-600 rounded-xl hover:bg-red-700 shadow-lg shadow-red-200/50 transition-all">
+                    Hapus Akun
+                </button>
             </div>
         </form>
     </x-modal>

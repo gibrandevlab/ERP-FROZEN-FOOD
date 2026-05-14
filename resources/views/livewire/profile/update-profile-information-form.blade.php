@@ -63,52 +63,46 @@ new class extends Component
 }; ?>
 
 <section>
-    <header>
-        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-            {{ __('Profile Information') }}
-        </h2>
-
-        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            {{ __("Update your account's profile information and email address.") }}
-        </p>
-    </header>
-
-    <form wire:submit="updateProfileInformation" class="mt-6 space-y-6">
+    <form wire:submit="updateProfileInformation" class="space-y-4">
         <div>
-            <x-input-label for="name" :value="__('Name')" />
-            <x-text-input wire:model="name" id="name" name="name" type="text" class="mt-1 block w-full" required autofocus autocomplete="name" />
-            <x-input-error class="mt-2" :messages="$errors->get('name')" />
+            <label for="name" class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wide">Nama Lengkap</label>
+            <input wire:model="name" id="name" type="text"
+                   class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all shadow-sm" required autofocus />
+            @error('name') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
         </div>
 
         <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input wire:model="email" id="email" name="email" type="email" class="mt-1 block w-full" required autocomplete="username" />
-            <x-input-error class="mt-2" :messages="$errors->get('email')" />
+            <label for="email" class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wide">Alamat Email</label>
+            <input wire:model="email" id="email" type="email"
+                   class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all shadow-sm" required />
+            @error('email') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
 
             @if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! auth()->user()->hasVerifiedEmail())
-                <div>
-                    <p class="text-sm mt-2 text-gray-800 dark:text-gray-200">
-                        {{ __('Your email address is unverified.') }}
-
-                        <button wire:click.prevent="sendVerification" class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
-                            {{ __('Click here to re-send the verification email.') }}
+                <div class="mt-3 bg-orange-50 border border-orange-100 p-3 rounded-xl">
+                    <p class="text-xs text-orange-800">
+                        Email Anda belum diverifikasi.
+                        <button wire:click.prevent="sendVerification" class="font-bold underline hover:text-orange-900 focus:outline-none">
+                            Klik di sini untuk mengirim ulang email verifikasi.
                         </button>
                     </p>
 
                     @if (session('status') === 'verification-link-sent')
-                        <p class="mt-2 font-medium text-sm text-green-600 dark:text-green-400">
-                            {{ __('A new verification link has been sent to your email address.') }}
+                        <p class="mt-2 font-bold text-xs text-emerald-600">
+                            Tautan verifikasi baru telah dikirim ke alamat email Anda.
                         </p>
                     @endif
                 </div>
             @endif
         </div>
 
-        <div class="flex items-center gap-4">
-            <x-primary-button>{{ __('Save') }}</x-primary-button>
+        <div class="flex items-center gap-4 pt-2">
+            <button type="submit"
+                    class="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl text-sm font-semibold shadow-lg shadow-blue-200/50 hover:opacity-90 transition-all">
+                Simpan Profil
+            </button>
 
-            <x-action-message class="me-3" on="profile-updated">
-                {{ __('Saved.') }}
+            <x-action-message class="text-sm text-emerald-600 font-semibold" on="profile-updated">
+                Berhasil disimpan.
             </x-action-message>
         </div>
     </form>

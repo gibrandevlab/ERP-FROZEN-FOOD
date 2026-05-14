@@ -7,7 +7,8 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Jalankan migration.
+     * Kategori: AUTENTIKASI
      */
     public function up(): void
     {
@@ -15,12 +16,21 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+
+            // Sistem pemulihan akun dengan kata rahasia (bukan email reset)
+            $table->string('recovery_phrase')->nullable()
+                  ->comment('Kata rahasia terenkripsi untuk reset password. Tidak bisa dipulihkan jika lupa.');
+
+            // Penanda apakah user adalah pemilik/admin sistem
+            $table->boolean('is_admin')->default(false)
+                  ->comment('Admin memiliki akses penuh ke semua fitur tanpa perlu diatur satu per satu.');
+
             $table->rememberToken();
             $table->timestamps();
         });
 
+        // Tabel token untuk keperluan sistem Laravel (bisa diabaikan jika tidak pakai email reset)
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();
             $table->string('token');
@@ -38,7 +48,7 @@ return new class extends Migration
     }
 
     /**
-     * Reverse the migrations.
+     * Batalkan migration.
      */
     public function down(): void
     {

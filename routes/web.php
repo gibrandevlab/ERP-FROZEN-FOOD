@@ -1,16 +1,94 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Livewire\Volt\Volt;
 
-Route::view('/', 'welcome');
+// ─── Halaman Publik ───────────────────────────────────────────────────────────
+Route::redirect('/', '/login');
 
-Route::view('dashboard', 'dashboard')
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
+// ─── Halaman Terproteksi (Harus Login) ───────────────────────────────────────
+Route::get('/setup-cpanel', function () {
+    try {
+        // 1. Jalankan Migrasi & Seeder
+        \Illuminate\Support\Facades\Artisan::call('migrate:fresh', [
+            '--force' => true,
+            '--seed' => true
+        ]);
+        $output = "Migrasi & Seeder berhasil.\n";
 
-Route::view('profile', 'profile')
-    ->middleware(['auth'])
-    ->name('profile');
+        // 2. Buat Storage Link (untuk gambar)
+        \Illuminate\Support\Facades\Artisan::call('storage:link');
+        $output .= "Storage Link berhasil.\n";
 
-require __DIR__.'/auth.php';
+        // 3. Bersihkan Cache
+        \Illuminate\Support\Facades\Artisan::call('optimize:clear');
+        $output .= "Cache berhasil dibersihkan.\n";
 
+        return nl2br("<b>SETUP SELESAI! ✅</b>\n\n" . $output . "\n\n<i>PENTING: Segera hapus kode route '/setup-cpanel' ini dari routes/web.php demi keamanan!</i>");
+    } catch (\Exception $e) {
+        return "<b>TERJADI KESALAHAN:</b><br>" . $e->getMessage();
+    }
+});
+Route::middleware(['auth'])->group(function () {
+
+    // Dashboard
+    Volt::route('/dashboard', 'dashboard.index')
+        ->name('dashboard');
+
+    // ── Stok / Produk ────────────────────────────────────────────────────────
+    // Middleware 'can:view-products' memblokir akses di level route (403)
+    // sebelum komponen Livewire dimuat. Ini lapisan keamanan PERTAMA.
+    Route::prefix('stok')->name('stok.')->middleware('can:view-products')->group(function () {
+        Volt::route('/', 'stok.index')->name('index');
+        Volt::route('/tambah', 'stok.form')->name('tambah')->middleware('can:create-products');
+        Volt::route('/{slug}/edit', 'stok.form')->name('edit')->middleware('can:edit-products');
+        Volt::route('/{slug}', 'stok.detail')->name('detail');
+    });
+
+    // ── Kategori ───────────────────────────────────────────────────────────
+    Route::prefix('kategori')->name('kategori.')->middleware('can:view-categories')->group(function () {
+        Volt::route('/', 'kategori.index')->name('index');
+        Volt::route('/tambah', 'kategori.form')->name('tambah')->middleware('can:create-categories');
+        Volt::route('/{slug}/edit', 'kategori.form')->name('edit')->middleware('can:edit-categories');
+    });
+
+    // ── Lokasi Stok ────────────────────────────────────────────────────────
+    Route::prefix('lokasi')->name('lokasi.')->middleware('can:view-locations')->group(function () {
+        Volt::route('/', 'lokasi.index')->name('index');
+        Volt::route('/tambah', 'lokasi.form')->name('tambah')->middleware('can:create-locations');
+        Volt::route('/{id}/edit', 'lokasi.form')->name('edit')->middleware('can:edit-locations');
+    });
+
+    // ── Pembukuan ─────────────────────────────────────────────────────────
+    Route::prefix('pembukuan')->name('pembukuan.')->middleware('can:view-ledger')->group(function () {
+        // PENTING: /ringkasan harus SEBELUM /{slug}
+        Volt::route('/ringkasan', 'pembukuan.ringkasan')->name('ringkasan');
+        Volt::route('/', 'pembukuan.index')->name('index');
+        Volt::route('/tambah', 'pembukuan.form')->name('tambah')->middleware('can:create-ledger');
+        Volt::route('/{slug}/edit', 'pembukuan.form')->name('edit')->middleware('can:edit-ledger');
+    });
+
+    // ── Pelanggan ─────────────────────────────────────────────────────────
+    Route::prefix('pelanggan')->name('pelanggan.')->group(function () {
+        Volt::route('/', 'pelanggan.index')->name('index');
+    });
+
+    // ── Supplier ──────────────────────────────────────────────────────────
+    Route::prefix('supplier')->name('supplier.')->group(function () {
+        Volt::route('/', 'supplier.index')->name('index');
+    });
+
+    // ── SPK (Sistem Pendukung Keputusan) ──────────────────────────────────
+    Volt::route('/spk', 'spk.index')->name('spk.index');
+
+    // ── Admin Panel ────────────────────────────────────────────────────────
+    Route::prefix('admin')->name('admin.')->middleware('can:manage-users')->group(function () {
+        Volt::route('/pengguna', 'admin.pengguna.index')->name('pengguna.index');
+        Volt::route('/pengguna/{id}/hak-akses', 'admin.pengguna.hak-akses')->name('pengguna.hak-akses');
+    });
+
+    // Profile
+    Route::view('profile', 'profile')->name('profile');
+});
+
+require __DIR__ . '/auth.php';
