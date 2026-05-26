@@ -45,7 +45,7 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function hapus(int $id): void
     {
-        $this->authorize('delete-ledger');
+        Gate::authorize('delete-ledger');
         Ledger::findOrFail($id)->delete();
         session()->flash('success', 'Transaksi berhasil dihapus.');
     }
@@ -69,13 +69,11 @@ new #[Layout('layouts.app')] class extends Component {
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
                 <span class="hidden sm:inline">Ringkasan</span>
             </a>
-            @can('create-ledger')
             <a href="{{ route('pembukuan.tambah') }}" wire:navigate @click="playClick()"
                class="btn-sound flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white shadow-lg shadow-blue-200/50 hover:opacity-90 transition-all"
                style="background:linear-gradient(135deg,#2563EB,#4F46E5);">
                 <span>+</span><span class="hidden sm:inline">Catat Transaksi</span>
             </a>
-            @endcan
         </div>
     </div>
 
@@ -149,15 +147,11 @@ new #[Layout('layouts.app')] class extends Component {
                 @endif
                 
                 <div class="flex items-center gap-2">
-                    @can('edit-ledger')
                     <a href="{{ route('pembukuan.edit', $l->slug) }}" wire:navigate @click="playClick()"
                        class="btn-sound px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 text-xs font-bold hover:bg-blue-100 transition-colors">Edit</a>
-                    @endcan
-                    @can('delete-ledger')
                     <button wire:click="hapus({{ $l->id }})" wire:confirm="Hapus catatan '{{ $l->title }}'?"
                             @click="playDanger()"
                             class="btn-sound px-3 py-1.5 rounded-lg bg-red-50 text-red-500 text-xs font-bold hover:bg-red-100 transition-colors">Hapus</button>
-                    @endcan
                 </div>
             </div>
         </div>
@@ -215,15 +209,12 @@ new #[Layout('layouts.app')] class extends Component {
                     </td>
                     <td class="px-5 py-4 text-right">
                         <div class="flex items-center justify-end gap-2">
-                            @can('edit-ledger')
-                            <a href="{{ route('pembukuan.edit', $l->slug) }}" wire:navigate @click="playClick()"
-                               class="btn-sound px-2.5 py-1 rounded-lg bg-blue-50 text-blue-600 text-xs font-medium border border-blue-100/60 hover:bg-blue-100 transition-colors">Edit</a>
-                            @endcan
-                            @can('delete-ledger')
-                            <button wire:click="hapus({{ $l->id }})" wire:confirm="Hapus catatan '{{ $l->title }}'?"
-                                    @click="playDanger()"
-                                    class="btn-sound px-2.5 py-1 rounded-lg bg-red-50 text-red-500 text-xs font-medium border border-red-100/60 hover:bg-red-100 transition-colors">Hapus</button>
-                            @endcan
+                            <a href="{{ route('pembukuan.edit', $l->slug) }}" wire:navigate class="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            </a>
+                            <button wire:click="hapus({{ $l->id }})" wire:confirm="Hapus catatan '{{ $l->title }}'?" class="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </button>
                         </div>
                     </td>
                 </tr>

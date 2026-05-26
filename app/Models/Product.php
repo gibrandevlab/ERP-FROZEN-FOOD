@@ -25,6 +25,7 @@ class Product extends Model
         'unit',
         'image',
         'is_active',
+        'updated_by',
     ];
 
     // ─── Casting ──────────────────────────────────────────────
@@ -50,6 +51,12 @@ class Product extends Model
         static::creating(function (Product $product) {
             if (empty($product->slug)) {
                 $product->slug = Str::slug($product->name);
+            }
+        });
+
+        static::updating(function (Product $product) {
+            if (auth()->check()) {
+                $product->updated_by = auth()->id();
             }
         });
     }

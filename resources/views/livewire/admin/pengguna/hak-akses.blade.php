@@ -56,6 +56,26 @@ new #[Layout('layouts.app')] class extends Component {
 
 <div class="space-y-5 max-w-3xl mx-auto lg:max-w-none">
 
+    {{-- Flash Messages (for Livewire actions) --}}
+    @if (session('success'))
+        <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)"
+             x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+             class="p-3 bg-green-50/90 border border-green-200 text-green-700 text-sm rounded-xl flex items-center justify-between shadow-sm">
+            <span class="flex items-center gap-2"><span>✅</span> {{ session('success') }}</span>
+            <button type="button" @click="show = false" class="text-green-400 hover:text-green-600 ml-3 text-lg leading-none">&times;</button>
+        </div>
+    @endif
+    @if (session('error'))
+        <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)"
+             x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+             class="p-3 bg-red-50/90 border border-red-200 text-red-700 text-sm rounded-xl flex items-center justify-between shadow-sm">
+            <span class="flex items-center gap-2"><span>❌</span> {{ session('error') }}</span>
+            <button type="button" @click="show = false" class="text-red-400 hover:text-red-600 ml-3 text-lg leading-none">&times;</button>
+        </div>
+    @endif
+
     {{-- ── Header ─────────────────────────────────────────────────────────── --}}
     <div class="flex items-center gap-3">
         <a href="{{ route('admin.pengguna.index') }}" wire:navigate @click="playClick()"
@@ -81,18 +101,17 @@ new #[Layout('layouts.app')] class extends Component {
 
     {{-- ── Matrix Table ────────────────────────────────────────────────────── --}}
     <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden" style="box-shadow: 0 4px 40px rgba(0,0,0,0.05), 0 1px 8px rgba(0,0,0,0.04);">
-        <table class="w-full text-sm">
-            <thead style="background: linear-gradient(135deg, rgba(248,250,252,0.95), rgba(241,245,249,0.95));">
-                <tr class="border-b border-slate-100">
-                    <th class="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Fitur / Modul</th>
-                    <th class="px-4 py-3.5 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Lihat</th>
-                    <th class="px-4 py-3.5 text-center text-xs font-bold text-slate-500 uppercase tracking-wider hidden sm:table-cell">Tambah</th>
-                    <th class="px-4 py-3.5 text-center text-xs font-bold text-slate-500 uppercase tracking-wider hidden sm:table-cell">Edit</th>
-                    <th class="px-4 py-3.5 text-center text-xs font-bold text-slate-500 uppercase tracking-wider hidden sm:table-cell">Hapus</th>
-                    {{-- Mobile view: TTEH (Tambah/Edit/Hapus) disingkat --}}
-                    <th class="px-4 py-3.5 text-center text-xs font-bold text-slate-500 uppercase tracking-wider sm:hidden">Aksi (T/E/H)</th>
-                </tr>
-            </thead>
+        <div class="hidden sm:block">
+            <table class="w-full text-sm">
+                <thead style="background: linear-gradient(135deg, rgba(248,250,252,0.95), rgba(241,245,249,0.95));">
+                    <tr class="border-b border-slate-100">
+                        <th class="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Fitur / Modul</th>
+                        <th class="px-4 py-3.5 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Lihat</th>
+                        <th class="px-4 py-3.5 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Tambah</th>
+                        <th class="px-4 py-3.5 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Edit</th>
+                        <th class="px-4 py-3.5 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Hapus</th>
+                    </tr>
+                </thead>
             <tbody class="divide-y divide-slate-50">
                 @php $lastCategory = null; @endphp
                 @foreach($matrix as $key => $akses)
@@ -116,30 +135,61 @@ new #[Layout('layouts.app')] class extends Component {
                             <input wire:model="matrix.{{ $key }}.view" type="checkbox" @click="playClick()"
                                    class="btn-sound w-5 h-5 rounded text-blue-600 border-slate-300 focus:ring-blue-500/30 cursor-pointer shadow-sm" />
                         </td>
-                        <td class="px-4 py-4 text-center hidden sm:table-cell">
+                        <td class="px-4 py-4 text-center">
                             <input wire:model="matrix.{{ $key }}.create" type="checkbox" @click="playClick()"
                                    class="btn-sound w-5 h-5 rounded text-blue-600 border-slate-300 focus:ring-blue-500/30 cursor-pointer shadow-sm" />
                         </td>
-                        <td class="px-4 py-4 text-center hidden sm:table-cell">
+                        <td class="px-4 py-4 text-center">
                             <input wire:model="matrix.{{ $key }}.edit" type="checkbox" @click="playClick()"
                                    class="btn-sound w-5 h-5 rounded text-blue-600 border-slate-300 focus:ring-blue-500/30 cursor-pointer shadow-sm" />
                         </td>
-                        <td class="px-4 py-4 text-center hidden sm:table-cell">
+                        <td class="px-4 py-4 text-center">
                             <input wire:model="matrix.{{ $key }}.delete" type="checkbox" @click="playClick()"
                                    class="btn-sound w-5 h-5 rounded text-blue-600 border-slate-300 focus:ring-blue-500/30 cursor-pointer shadow-sm" />
-                        </td>
-                        {{-- Mobile: Condensed actions --}}
-                        <td class="px-4 py-4 text-center sm:hidden">
-                            <div class="flex items-center justify-center gap-2">
-                                <input wire:model="matrix.{{ $key }}.create" title="Tambah" type="checkbox" @click="playClick()" class="btn-sound w-4 h-4 rounded text-blue-600 border-slate-300 focus:ring-blue-500/30 cursor-pointer" />
-                                <input wire:model="matrix.{{ $key }}.edit" title="Edit" type="checkbox" @click="playClick()" class="btn-sound w-4 h-4 rounded text-blue-600 border-slate-300 focus:ring-blue-500/30 cursor-pointer" />
-                                <input wire:model="matrix.{{ $key }}.delete" title="Hapus" type="checkbox" @click="playClick()" class="btn-sound w-4 h-4 rounded text-red-500 border-slate-300 focus:ring-red-500/30 cursor-pointer" />
-                            </div>
                         </td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
+        </div>
+
+        {{-- Mobile Card Layout --}}
+        <div class="sm:hidden divide-y divide-slate-100">
+            @php $lastCategoryMobile = null; @endphp
+            @foreach($matrix as $key => $akses)
+                @if($akses['category'] !== $lastCategoryMobile)
+                    <div class="px-5 py-2.5 bg-slate-50/50">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{{ $akses['category'] }}</span>
+                    </div>
+                    @php $lastCategoryMobile = $akses['category']; @endphp
+                @endif
+                <div class="p-5 hover:bg-blue-50/30 transition-colors">
+                    <button type="button" wire:click="tandaiSemua('{{ $key }}')" @click="playClick()"
+                            class="btn-sound font-bold text-slate-800 hover:text-blue-600 transition-colors text-left w-full mb-4 flex items-center justify-between">
+                        <span>{{ $akses['label'] }}</span>
+                        <span class="text-xs text-blue-500 font-normal px-2 py-1 bg-blue-50 rounded-md">Pilih Semua</span>
+                    </button>
+                    <div class="grid grid-cols-2 gap-y-4 gap-x-2">
+                        <label class="flex items-center gap-2.5 cursor-pointer">
+                            <input wire:model="matrix.{{ $key }}.view" type="checkbox" @click="playClick()" class="btn-sound w-5 h-5 rounded text-blue-600 border-slate-300 focus:ring-blue-500/30 shadow-sm" />
+                            <span class="text-sm text-slate-600 font-medium">Lihat</span>
+                        </label>
+                        <label class="flex items-center gap-2.5 cursor-pointer">
+                            <input wire:model="matrix.{{ $key }}.create" type="checkbox" @click="playClick()" class="btn-sound w-5 h-5 rounded text-blue-600 border-slate-300 focus:ring-blue-500/30 shadow-sm" />
+                            <span class="text-sm text-slate-600 font-medium">Tambah</span>
+                        </label>
+                        <label class="flex items-center gap-2.5 cursor-pointer">
+                            <input wire:model="matrix.{{ $key }}.edit" type="checkbox" @click="playClick()" class="btn-sound w-5 h-5 rounded text-blue-600 border-slate-300 focus:ring-blue-500/30 shadow-sm" />
+                            <span class="text-sm text-slate-600 font-medium">Edit</span>
+                        </label>
+                        <label class="flex items-center gap-2.5 cursor-pointer">
+                            <input wire:model="matrix.{{ $key }}.delete" type="checkbox" @click="playClick()" class="btn-sound w-5 h-5 rounded text-red-500 border-slate-300 focus:ring-red-500/30 shadow-sm" />
+                            <span class="text-sm text-slate-600 font-medium">Hapus</span>
+                        </label>
+                    </div>
+                </div>
+            @endforeach
+        </div>
 
         {{-- Action Footer --}}
         <div class="px-5 py-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-50/50">

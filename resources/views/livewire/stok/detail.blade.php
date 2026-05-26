@@ -27,13 +27,11 @@ new #[Layout('layouts.app')] class extends Component {
             <h1 class="text-2xl font-extrabold text-slate-800">{{ $product->name }}</h1>
             <p class="text-sm text-slate-500 mt-0.5">Detail produk dan riwayat transaksi</p>
         </div>
-        @can('edit-products')
         <a href="{{ route('stok.edit', $product->slug) }}" wire:navigate @click="playClick()"
-           class="btn-sound flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 shadow-sm transition-all">
-            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+           class="btn-sound hidden sm:flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 transition-all shadow-sm">
+            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
             Edit Produk
         </a>
-        @endcan
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -68,15 +66,11 @@ new #[Layout('layouts.app')] class extends Component {
                     </div>
                 @endif
                 
-                @can('create-ledger')
-                <div class="mt-6">
-                    <a href="{{ route('pembukuan.tambah') }}" wire:navigate @click="playClick()"
-                       class="btn-sound flex items-center justify-center gap-2 w-full py-3 bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-200 rounded-xl text-sm font-bold text-slate-600 hover:text-blue-600 transition-all group">
-                        <svg class="w-5 h-5 text-slate-400 group-hover:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                        Catat Mutasi Stok
-                    </a>
-                </div>
-                @endcan
+                <a href="{{ route('pembukuan.tambah', ['produk' => $product->id]) }}" wire:navigate @click="playClick()"
+                   class="btn-sound inline-flex items-center gap-2 px-3 py-1.5 mt-6 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 text-xs font-semibold transition-colors">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    Catat Transaksi
+                </a>
             </div>
         </div>
 

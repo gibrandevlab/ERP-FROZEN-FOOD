@@ -32,7 +32,7 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function hapus(int $id): void
     {
-        // $this->authorize('delete-products');
+        Gate::authorize('delete-suppliers');
         $s = Supplier::findOrFail($id);
         $s->delete();
         session()->flash('success', "Supplier '{$s->name}' berhasil dihapus.");

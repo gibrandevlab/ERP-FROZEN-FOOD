@@ -5,30 +5,6 @@ use Livewire\Volt\Volt;
 
 // ─── Halaman Publik ───────────────────────────────────────────────────────────
 Route::redirect('/', '/login');
-
-// ─── Halaman Terproteksi (Harus Login) ───────────────────────────────────────
-Route::get('/setup-cpanel', function () {
-    try {
-        // 1. Jalankan Migrasi & Seeder
-        \Illuminate\Support\Facades\Artisan::call('migrate:fresh', [
-            '--force' => true,
-            '--seed' => true
-        ]);
-        $output = "Migrasi & Seeder berhasil.\n";
-
-        // 2. Buat Storage Link (untuk gambar)
-        \Illuminate\Support\Facades\Artisan::call('storage:link');
-        $output .= "Storage Link berhasil.\n";
-
-        // 3. Bersihkan Cache
-        \Illuminate\Support\Facades\Artisan::call('optimize:clear');
-        $output .= "Cache berhasil dibersihkan.\n";
-
-        return nl2br("<b>SETUP SELESAI! ✅</b>\n\n" . $output . "\n\n<i>PENTING: Segera hapus kode route '/setup-cpanel' ini dari routes/web.php demi keamanan!</i>");
-    } catch (\Exception $e) {
-        return "<b>TERJADI KESALAHAN:</b><br>" . $e->getMessage();
-    }
-});
 Route::middleware(['auth'])->group(function () {
 
     // Dashboard

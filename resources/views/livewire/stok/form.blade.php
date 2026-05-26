@@ -114,6 +114,8 @@ new #[Layout('layouts.app')] class extends Component {
             $this->product->update($validated);
             session()->flash('success', "Produk '{$this->product->name}' berhasil diperbarui.");
         } else {
+            $validated['user_id'] = auth()->id();
+            $validated['updated_by'] = auth()->id();
             $prod = Product::create($validated);
             session()->flash('success', "Produk '{$validated['name']}' berhasil ditambahkan.");
 

@@ -270,6 +270,8 @@ new #[Layout('layouts.app')] class extends Component {
             $this->ledger->update($validated);
             session()->flash('success', 'Catatan transaksi berhasil diperbarui.');
         } else {
+            $validated['user_id'] = auth()->id();
+            $validated['updated_by'] = auth()->id();
             Ledger::create($validated);
             session()->flash('success', 'Transaksi berhasil dicatat.');
         }

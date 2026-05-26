@@ -44,7 +44,7 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function hapus(int $id): void
     {
-        $this->authorize('delete-products');
+        Gate::authorize('delete-products');
         $p = Product::findOrFail($id);
         $p->delete();
         session()->flash('success', "Produk '{$p->name}' berhasil dihapus.");
@@ -64,13 +64,12 @@ new #[Layout('layouts.app')] class extends Component {
             <h1 class="text-xl font-extrabold" style="color: #1E293B;">Stok Produk</h1>
             <p class="text-xs text-slate-500 mt-0.5">{{ $this->products->total() }} produk ditemukan</p>
         </div>
-        @can('create-products')
-        <a href="{{ route('stok.tambah') }}" wire:navigate @click="playClick()"
-           class="btn-sound flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white shadow-lg shadow-blue-200/50 transition-all hover:opacity-90"
-           style="background: linear-gradient(135deg, #2563EB, #4F46E5);">
-            <span>+</span><span class="hidden sm:inline">Tambah Produk</span>
-        </a>
-        @endcan
+            <a href="{{ route('stok.tambah') }}" wire:navigate
+               @click="playClick()"
+               class="btn-sound inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-colors shadow-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                Tambah Produk
+            </a>
     </div>
 
     {{-- ── Filter Bar ──────────────────────────────────────────────────────── --}}
@@ -123,15 +122,8 @@ new #[Layout('layouts.app')] class extends Component {
                 <div class="flex items-center gap-2">
                     <a href="{{ route('stok.detail', $p->slug) }}" wire:navigate @click="playClick()"
                        class="btn-sound px-2.5 py-1 rounded-lg bg-slate-50 text-slate-500 text-xs font-medium hover:bg-slate-100 transition-colors">Detail</a>
-                    @can('edit-products')
-                    <a href="{{ route('stok.edit', $p->slug) }}" wire:navigate @click="playClick()"
-                       class="btn-sound px-2.5 py-1 rounded-lg bg-blue-50 text-blue-600 text-xs font-medium hover:bg-blue-100 transition-colors">Edit</a>
-                    @endcan
-                    @can('delete-products')
-                    <button wire:click="hapus({{ $p->id }})" wire:confirm="Hapus produk '{{ $p->name }}'?"
-                            @click="playDanger()"
-                            class="btn-sound px-2.5 py-1 rounded-lg bg-red-50 text-red-500 text-xs font-medium hover:bg-red-100 transition-colors">Hapus</button>
-                    @endcan
+                    <a href="{{ route('stok.edit', $p->slug) }}" wire:navigate class="px-2 py-1 bg-slate-100 text-slate-600 rounded text-xs font-medium hover:bg-slate-200">Edit</a>
+                    <button wire:click="hapus({{ $p->id }})" wire:confirm="Hapus produk '{{ $p->name }}'?" class="px-2 py-1 bg-red-50 text-red-500 rounded text-xs font-medium hover:bg-red-100">Hapus</button>
                 </div>
             </div>
         </div>
@@ -182,15 +174,12 @@ new #[Layout('layouts.app')] class extends Component {
                         <div class="flex items-center justify-end gap-2">
                             <a href="{{ route('stok.detail', $p->slug) }}" wire:navigate @click="playClick()"
                                class="btn-sound px-2.5 py-1 rounded-lg bg-slate-50 text-slate-500 text-xs font-medium border border-slate-100 hover:bg-slate-100 transition-colors">Detail</a>
-                            @can('edit-products')
-                            <a href="{{ route('stok.edit', $p->slug) }}" wire:navigate @click="playClick()"
-                               class="btn-sound px-2.5 py-1 rounded-lg bg-blue-50 text-blue-600 text-xs font-medium border border-blue-100/60 hover:bg-blue-100 transition-colors">Edit</a>
-                            @endcan
-                            @can('delete-products')
-                            <button wire:click="hapus({{ $p->id }})" wire:confirm="Hapus produk '{{ $p->name }}'?"
-                                    @click="playDanger()"
-                                    class="btn-sound px-2.5 py-1 rounded-lg bg-red-50 text-red-500 text-xs font-medium border border-red-100/60 hover:bg-red-100 transition-colors">Hapus</button>
-                            @endcan
+                            <a href="{{ route('stok.edit', $p->slug) }}" wire:navigate class="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            </a>
+                            <button wire:click="hapus({{ $p->id }})" wire:confirm="Hapus produk '{{ $p->name }}'?" class="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </button>
                         </div>
                     </td>
                 </tr>

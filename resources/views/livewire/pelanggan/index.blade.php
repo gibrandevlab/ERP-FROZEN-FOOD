@@ -33,7 +33,7 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function hapus(int $id): void
     {
-        // $this->authorize('delete-customers');
+        Gate::authorize('delete-customers');
         $c = Customer::findOrFail($id);
         $c->delete();
         session()->flash('success', "Pelanggan '{$c->name}' berhasil dihapus.");

@@ -31,16 +31,22 @@ new #[Layout('layouts.app')] class extends Component {
             'is_admin' => ['boolean'],
         ]);
 
-        User::create([
+        $user = User::create([
             'name'     => $this->name,
             'email'    => $this->email,
             'password' => $this->password,
             'is_admin' => $this->is_admin,
         ]);
 
+        if (! $user->is_admin) {
+            session()->flash('success', "Pengguna '{$user->name}' berhasil ditambahkan. Silakan atur hak aksesnya di bawah ini.");
+            $this->redirectRoute('admin.pengguna.hak-akses', ['id' => $user->id], navigate: true);
+            return;
+        }
+
         $nama = $this->name;
         $this->reset(['name', 'email', 'password', 'is_admin', 'showForm']);
-        session()->flash('success', "Pengguna '{$nama}' berhasil ditambahkan.");
+        session()->flash('success', "Admin '{$nama}' berhasil ditambahkan.");
     }
 
     public function hapusUser(int $id): void
@@ -58,6 +64,26 @@ new #[Layout('layouts.app')] class extends Component {
 }; ?>
 
 <div class="space-y-5 max-w-3xl mx-auto lg:max-w-none">
+
+    {{-- Flash Messages (for Livewire actions) --}}
+    @if (session('success'))
+        <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)"
+             x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+             class="p-3 bg-green-50/90 border border-green-200 text-green-700 text-sm rounded-xl flex items-center justify-between shadow-sm">
+            <span class="flex items-center gap-2"><span>✅</span> {{ session('success') }}</span>
+            <button type="button" @click="show = false" class="text-green-400 hover:text-green-600 ml-3 text-lg leading-none">&times;</button>
+        </div>
+    @endif
+    @if (session('error'))
+        <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)"
+             x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+             class="p-3 bg-red-50/90 border border-red-200 text-red-700 text-sm rounded-xl flex items-center justify-between shadow-sm">
+            <span class="flex items-center gap-2"><span>❌</span> {{ session('error') }}</span>
+            <button type="button" @click="show = false" class="text-red-400 hover:text-red-600 ml-3 text-lg leading-none">&times;</button>
+        </div>
+    @endif
 
     {{-- ── Header ──────────────────────────────────────────────── --}}
     <div class="flex items-center justify-between">
@@ -132,7 +158,7 @@ new #[Layout('layouts.app')] class extends Component {
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                         </svg>
-                        Tambah Pengguna
+                        Simpan & Atur Hak Akses
                     </button>
                 </div>
             </form>

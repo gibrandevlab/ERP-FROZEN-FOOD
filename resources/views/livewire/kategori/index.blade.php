@@ -23,7 +23,7 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function hapus(int $id): void
     {
-        $this->authorize('delete-categories');
+        Gate::authorize('delete-categories');
         $k = Category::withCount('products')->findOrFail($id);
         if ($k->products_count > 0) {
             session()->flash('error', "Kategori '{$k->name}' masih punya {$k->products_count} produk. Pindahkan produknya dulu.");
@@ -42,13 +42,11 @@ new #[Layout('layouts.app')] class extends Component {
             <h1 class="text-xl font-extrabold" style="color: #1E293B;">Kategori Produk</h1>
             <p class="text-xs text-slate-500 mt-0.5">{{ $this->kategori->count() }} kategori terdaftar</p>
         </div>
-        @can('create-categories')
         <a href="{{ route('kategori.tambah') }}" wire:navigate @click="playClick()"
            class="btn-sound flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white shadow-lg shadow-blue-200/50 transition-all hover:opacity-90"
            style="background: linear-gradient(135deg, #2563EB, #4F46E5);">
             <span>+</span><span class="hidden sm:inline">Tambah Kategori</span>
         </a>
-        @endcan
     </div>
 
     {{-- ── Search ──────────────────────────────────────────────────────────── --}}
@@ -79,15 +77,11 @@ new #[Layout('layouts.app')] class extends Component {
                     </td>
                     <td class="px-5 py-4 text-right">
                         <div class="flex items-center justify-end gap-2">
-                            @can('edit-categories')
                             <a href="{{ route('kategori.edit', $k->slug) }}" wire:navigate @click="playClick()"
                                class="btn-sound px-2.5 py-1 rounded-lg bg-blue-50 text-blue-600 text-xs font-medium border border-blue-100/60 hover:bg-blue-100 transition-colors">Edit</a>
-                            @endcan
-                            @can('delete-categories')
                             <button wire:click="hapus({{ $k->id }})" wire:confirm="Hapus kategori '{{ $k->name }}'?"
                                     @click="playDanger()"
                                     class="btn-sound px-2.5 py-1 rounded-lg bg-red-50 text-red-500 text-xs font-medium border border-red-100/60 hover:bg-red-100 transition-colors">Hapus</button>
-                            @endcan
                         </div>
                     </td>
                 </tr>

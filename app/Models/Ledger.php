@@ -29,6 +29,7 @@ class Ledger extends Model
         'proof_image',
         'customer_id',
         'supplier_id',
+        'updated_by',
     ];
 
     // ─── Casting ──────────────────────────────────────────────
@@ -70,6 +71,12 @@ class Ledger extends Model
                 } elseif ($ledger->stock_movement === 'out') {
                     $stock->decrement('quantity', $ledger->quantity);
                 }
+            }
+        });
+
+        static::updating(function (Ledger $ledger) {
+            if (auth()->check()) {
+                $ledger->updated_by = auth()->id();
             }
         });
     }

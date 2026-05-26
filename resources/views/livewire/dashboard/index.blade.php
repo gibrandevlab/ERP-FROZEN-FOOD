@@ -172,7 +172,6 @@ new #[Layout('layouts.app')] class extends Component {
                 <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Aksi Cepat</h2>
             </div>
 
-            @can('create-products')
             <a href="{{ route('stok.tambah') }}" wire:navigate
                @click="playClick()"
                class="btn-sound flex items-center gap-4 px-5 py-4 border-b border-slate-50 hover:bg-blue-50/40 active:bg-blue-100/50 transition-colors group">
@@ -189,9 +188,7 @@ new #[Layout('layouts.app')] class extends Component {
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                 </svg>
             </a>
-            @endcan
 
-            @can('create-ledger')
             <a href="{{ route('pembukuan.tambah') }}" wire:navigate
                @click="playClick()"
                class="btn-sound flex items-center gap-4 px-5 py-4 border-b border-slate-50 hover:bg-blue-50/40 active:bg-blue-100/50 transition-colors group">
@@ -208,9 +205,7 @@ new #[Layout('layouts.app')] class extends Component {
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                 </svg>
             </a>
-            @endcan
 
-            @can('view-ledger')
             <a href="{{ route('pembukuan.ringkasan') }}" wire:navigate
                @click="playClick()"
                class="btn-sound flex items-center gap-4 px-5 py-4 {{ auth()->user()->is_admin ? 'border-b border-slate-50' : '' }} hover:bg-blue-50/40 active:bg-blue-100/50 transition-colors group">
@@ -227,7 +222,6 @@ new #[Layout('layouts.app')] class extends Component {
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                 </svg>
             </a>
-            @endcan
 
             @if(auth()->user()->is_admin)
             <a href="{{ route('admin.pengguna.index') }}" wire:navigate
