@@ -29,4 +29,20 @@ class Supplier extends Model
     {
         return $this->hasMany(Ledger::class);
     }
+
+    /**
+     * Produk yang disuplai oleh supplier ini (melalui transaksi pembukuan/ledger).
+     */
+    public function products()
+    {
+        return $this->hasManyThrough(
+            Product::class,
+            Ledger::class,
+            'supplier_id', // Foreign key on ledgers table
+            'id',          // Foreign key on products table
+            'id',          // Local key on suppliers table
+            'product_id'   // Local key on ledgers table
+        )->distinct();
+    }
 }
+

@@ -240,6 +240,40 @@ new #[Layout('layouts.app')] class extends Component {
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                 </svg>
             </a>
+
+            <a href="{{ route('pembukuan.histori') }}" wire:navigate
+               @click="playClick()"
+               class="btn-sound flex items-center gap-4 px-5 py-4 border-b border-slate-50 hover:bg-indigo-50/40 active:bg-indigo-100/50 transition-colors group">
+                <div class="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:bg-indigo-100 transition-colors">
+                    <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                    </svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-semibold text-slate-700 group-hover:text-indigo-600 transition-colors">Histori Pembukuan</p>
+                    <p class="text-xs text-slate-400 mt-0.5">Lihat siapa yang menginput transaksi</p>
+                </div>
+                <svg class="w-4 h-4 text-slate-300 group-hover:text-indigo-400 group-hover:translate-x-0.5 transition-all flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+            </a>
+
+            <a href="{{ route('stok.histori') }}" wire:navigate
+               @click="playClick()"
+               class="btn-sound flex items-center gap-4 px-5 py-4 border-b border-slate-50 hover:bg-teal-50/40 active:bg-teal-100/50 transition-colors group">
+                <div class="w-10 h-10 bg-teal-50 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:bg-teal-100 transition-colors">
+                    <svg class="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                    </svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-semibold text-slate-700 group-hover:text-teal-600 transition-colors">Histori Mutasi Stok</p>
+                    <p class="text-xs text-slate-400 mt-0.5">Lacak pergerakan stok masuk & keluar</p>
+                </div>
+                <svg class="w-4 h-4 text-slate-300 group-hover:text-teal-400 group-hover:translate-x-0.5 transition-all flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+            </a>
             @endif
 
             <a href="{{ route('spk.index') }}" wire:navigate

@@ -11,16 +11,20 @@ new #[Layout('layouts.app')] class extends Component {
     public string $search = '';
     public string $filterType = '';
 
-    // Modal state
+    // ── Modal: Tambah ────────────────────────────
     public bool $showModal = false;
     public string $newCustName = '';
     public string $newCustPhone = '';
     public string $newCustType = 'non_seller';
 
-    public function mount(): void
-    {
-        // $this->authorize('view-customers'); // We don't have this permission yet, bypass or use view-ledger
-    }
+    // ── Modal: Edit ──────────────────────────────
+    public bool   $showEditModal  = false;
+    public int    $editId         = 0;
+    public string $editCustName   = '';
+    public string $editCustPhone  = '';
+    public string $editCustType   = 'non_seller';
+
+    public function mount(): void {}
 
     public function getCustomersProperty()
     {
@@ -42,26 +46,49 @@ new #[Layout('layouts.app')] class extends Component {
     public function saveCustomer()
     {
         $this->validate([
-            'newCustName' => 'required|string|max:255',
+            'newCustName'  => 'required|string|max:255',
             'newCustPhone' => 'nullable|string|max:20',
-            'newCustType' => 'required|in:seller,non_seller',
+            'newCustType'  => 'required|in:seller,non_seller',
         ]);
-        
         Customer::create([
-            'name' => $this->newCustName,
+            'name'  => $this->newCustName,
             'phone' => $this->newCustPhone,
-            'type' => $this->newCustType,
+            'type'  => $this->newCustType,
         ]);
-        
-        $this->newCustName = '';
-        $this->newCustPhone = '';
+        $this->reset(['newCustName', 'newCustPhone']);
         $this->newCustType = 'non_seller';
         $this->showModal = false;
         $this->resetPage();
         session()->flash('success', 'Pelanggan berhasil ditambahkan.');
     }
 
-    public function updatedSearch(): void { $this->resetPage(); }
+    public function openEdit(int $id): void
+    {
+        $c = Customer::findOrFail($id);
+        $this->editId        = $c->id;
+        $this->editCustName  = $c->name;
+        $this->editCustPhone = $c->phone ?? '';
+        $this->editCustType  = $c->type;
+        $this->showEditModal = true;
+    }
+
+    public function updateCustomer(): void
+    {
+        $this->validate([
+            'editCustName'  => 'required|string|max:255',
+            'editCustPhone' => 'nullable|string|max:20',
+            'editCustType'  => 'required|in:seller,non_seller',
+        ]);
+        Customer::findOrFail($this->editId)->update([
+            'name'  => $this->editCustName,
+            'phone' => $this->editCustPhone ?: null,
+            'type'  => $this->editCustType,
+        ]);
+        $this->showEditModal = false;
+        session()->flash('success', 'Data pelanggan berhasil diperbarui.');
+    }
+
+    public function updatedSearch():     void { $this->resetPage(); }
     public function updatedFilterType(): void { $this->resetPage(); }
 }; ?>
 
@@ -121,7 +148,9 @@ new #[Layout('layouts.app')] class extends Component {
                     <p class="text-xs font-bold text-emerald-600">Rp {{ number_format($c->totalProfit(), 0, ',', '.') }}</p>
                 </div>
             </div>
-            <div class="mt-3 flex justify-end">
+            <div class="mt-3 flex justify-end gap-2">
+                <button wire:click="openEdit({{ $c->id }})" @click="playClick()"
+                        class="btn-sound px-2.5 py-1 rounded-lg bg-blue-50 text-blue-600 text-[10px] font-medium hover:bg-blue-100 transition-colors">Edit</button>
                 <button wire:click="hapus({{ $c->id }})" wire:confirm="Hapus pelanggan '{{ $c->name }}'?"
                         @click="playDanger()"
                         class="btn-sound px-2.5 py-1 rounded-lg bg-red-50 text-red-500 text-[10px] font-medium hover:bg-red-100 transition-colors">Hapus</button>
@@ -153,21 +182,24 @@ new #[Layout('layouts.app')] class extends Component {
                     <td class="px-5 py-4 font-semibold text-slate-800">{{ $c->name }}</td>
                     <td class="px-5 py-4 text-slate-500 font-mono text-xs">{{ $c->phone ?? '-' }}</td>
                     <td class="px-5 py-4 text-center">
-                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold
-                                     {{ $c->type == 'seller' ? 'bg-purple-50 text-purple-600' : 'bg-slate-100 text-slate-500' }}">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold {{ $c->type == 'seller' ? 'bg-purple-50 text-purple-600' : 'bg-slate-100 text-slate-500' }}">
                             {{ $c->type == 'seller' ? 'Seller' : 'Umum' }}
                         </span>
                     </td>
-                    <td class="px-5 py-4 text-right text-slate-700 font-medium">
-                        {{ $c->totalItemsBought() }} item
-                    </td>
-                    <td class="px-5 py-4 text-right font-bold text-emerald-600">
-                        Rp {{ number_format($c->totalProfit(), 0, ',', '.') }}
-                    </td>
+                    <td class="px-5 py-4 text-right text-slate-700 font-medium">{{ $c->totalItemsBought() }} item</td>
+                    <td class="px-5 py-4 text-right font-bold text-emerald-600">Rp {{ number_format($c->totalProfit(), 0, ',', '.') }}</td>
                     <td class="px-5 py-4 text-right">
-                        <button wire:click="hapus({{ $c->id }})" wire:confirm="Hapus pelanggan '{{ $c->name }}'?"
-                                @click="playDanger()"
-                                class="btn-sound px-2.5 py-1 rounded-lg bg-red-50 text-red-500 text-xs font-medium border border-red-100/60 hover:bg-red-100 transition-colors">Hapus</button>
+                        <div class="flex items-center justify-end gap-2">
+                            <button wire:click="openEdit({{ $c->id }})" @click="playClick()"
+                                    class="btn-sound w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            </button>
+                            <button wire:click="hapus({{ $c->id }})" wire:confirm="Hapus pelanggan '{{ $c->name }}'?"
+                                    @click="playDanger()"
+                                    class="btn-sound w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </button>
+                        </div>
                     </td>
                 </tr>
                 @empty
@@ -181,11 +213,9 @@ new #[Layout('layouts.app')] class extends Component {
         </table>
     </div>
 
-    <div class="mt-4">
-        {{ $this->customers->links() }}
-    </div>
+    <div class="mt-4">{{ $this->customers->links() }}</div>
 
-    {{-- Modal Tambah Pelanggan --}}
+    {{-- ── Modal: Tambah Pelanggan ─────────────────────────────────────────── --}}
     @if($showModal)
     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
         <div class="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl p-6"
@@ -198,7 +228,7 @@ new #[Layout('layouts.app')] class extends Component {
                     @error('newCustName') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">Nomor Telepon <span class="text-slate-400 font-normal">(ops)</span></label>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Nomor Telepon <span class="text-slate-400 font-normal">(opsional)</span></label>
                     <input wire:model="newCustPhone" type="text" placeholder="Misal: 0812345678" class="w-full px-4 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
                     @error('newCustPhone') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
@@ -212,6 +242,46 @@ new #[Layout('layouts.app')] class extends Component {
                 <div class="flex justify-end gap-3 mt-6 pt-4 border-t">
                     <button type="button" wire:click="$set('showModal', false)" class="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-lg">Batal</button>
                     <button type="button" wire:click="saveCustomer" class="px-5 py-2 text-sm font-semibold text-white bg-orange-600 hover:bg-orange-700 rounded-lg shadow-md">Simpan Pelanggan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    {{-- ── Modal: Edit Pelanggan ───────────────────────────────────────────── --}}
+    @if($showEditModal)
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
+        <div class="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl p-6"
+             x-data @click.outside="$wire.set('showEditModal', false)">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-slate-800">Edit Pelanggan</h3>
+                <button wire:click="$set('showEditModal', false)" class="text-slate-400 hover:text-slate-600 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Nama Pelanggan</label>
+                    <input wire:model="editCustName" type="text" class="w-full px-4 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                    @error('editCustName') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Nomor Telepon <span class="text-slate-400 font-normal">(opsional)</span></label>
+                    <input wire:model="editCustPhone" type="text" class="w-full px-4 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                    @error('editCustPhone') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Tipe Pelanggan</label>
+                    <select wire:model="editCustType" class="w-full px-4 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                        <option value="non_seller">Non Seller (Umum)</option>
+                        <option value="seller">Seller</option>
+                    </select>
+                </div>
+                <div class="flex justify-end gap-3 mt-6 pt-4 border-t">
+                    <button type="button" wire:click="$set('showEditModal', false)" class="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-lg">Batal</button>
+                    <button type="button" wire:click="updateCustomer"
+                            class="px-5 py-2 text-sm font-semibold text-white rounded-lg shadow-md"
+                            style="background:linear-gradient(135deg,#F97316,#EA580C);">Simpan Perubahan</button>
                 </div>
             </div>
         </div>

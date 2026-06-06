@@ -19,8 +19,8 @@ class UserPermissionSeeder extends Seeder
      */
     public function run(): void
     {
-        // Ambil user sara
-        $adminUser = User::where('email', 'sara@gmail.com')->first();
+        // Ambil user sari
+        $adminUser = User::where('email', 'sari@gmail.com')->first();
         $allPermissions = Permission::all();
 
         // ─── Admin: Akses penuh ke semua fitur ────────────────

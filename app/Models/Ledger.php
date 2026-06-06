@@ -29,6 +29,7 @@ class Ledger extends Model
         'proof_image',
         'customer_id',
         'supplier_id',
+        'user_id',
         'updated_by',
     ];
 
@@ -113,6 +114,22 @@ class Ledger extends Model
     public function supplier()
     {
         return $this->belongsTo(Supplier::class);
+    }
+
+    /**
+     * Pengguna yang membuat catatan ini.
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
+     * Pengguna yang terakhir memperbarui catatan ini.
+     */
+    public function updater()
+    {
+        return $this->belongsTo(User::class, 'updated_by');
     }
 
     // ─── Scope ───────────────────────────────────────────────

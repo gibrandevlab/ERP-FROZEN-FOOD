@@ -15,6 +15,7 @@ Route::middleware(['auth'])->group(function () {
     // Middleware 'can:view-products' memblokir akses di level route (403)
     // sebelum komponen Livewire dimuat. Ini lapisan keamanan PERTAMA.
     Route::prefix('stok')->name('stok.')->middleware('can:view-products')->group(function () {
+        Volt::route('/histori', 'stok.histori')->name('histori');
         Volt::route('/', 'stok.index')->name('index');
         Volt::route('/tambah', 'stok.form')->name('tambah')->middleware('can:create-products');
         Volt::route('/{slug}/edit', 'stok.form')->name('edit')->middleware('can:edit-products');
@@ -39,6 +40,7 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('pembukuan')->name('pembukuan.')->middleware('can:view-ledger')->group(function () {
         // PENTING: /ringkasan harus SEBELUM /{slug}
         Volt::route('/ringkasan', 'pembukuan.ringkasan')->name('ringkasan');
+        Volt::route('/histori', 'pembukuan.histori')->name('histori');
         Volt::route('/', 'pembukuan.index')->name('index');
         Volt::route('/tambah', 'pembukuan.form')->name('tambah')->middleware('can:create-ledger');
         Volt::route('/{slug}/edit', 'pembukuan.form')->name('edit')->middleware('can:edit-ledger');
