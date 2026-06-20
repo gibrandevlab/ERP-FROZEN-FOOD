@@ -15,7 +15,7 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function mount(): void
     {
-        $this->authorize('view-products');
+        $this->authorize('view-stok');
     }
 
     public function getKategoriListProperty()
@@ -44,7 +44,7 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function hapus(int $id): void
     {
-        Gate::authorize('delete-products');
+        Gate::authorize('delete-stok');
         $p = Product::findOrFail($id);
         $p->delete();
         session()->flash('success', "Produk '{$p->name}' berhasil dihapus.");

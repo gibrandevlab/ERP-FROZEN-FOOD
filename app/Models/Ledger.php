@@ -54,7 +54,7 @@ class Ledger extends Model
     {
         static::creating(function (Ledger $ledger) {
             if (empty($ledger->slug)) {
-                $ledger->slug = Str::slug($ledger->title . '-' . now()->format('Ymd-His') . '-' . Str::random(4));
+                $ledger->slug = Str::slug($ledger->title . '-' . now()->format('Ymd-His') . '-' . Str::random(12));
             }
         });
 

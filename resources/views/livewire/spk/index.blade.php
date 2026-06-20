@@ -122,6 +122,39 @@ new #[Layout('layouts.app')] class extends Component {
         </div>
     </div>
 
+    {{-- ── Dynamic Weights Card (Entropy) ── --}}
+    <div class="bg-white rounded-3xl border border-slate-100 p-5 shadow-lg shadow-slate-100/50 space-y-4">
+        <div class="flex items-center gap-2">
+            <span class="text-xl">📊</span>
+            <div>
+                <h3 class="text-sm font-black text-slate-800 uppercase tracking-wider">Pembobotan Kriteria Dinamis (Metode Entropy)</h3>
+                <p class="text-[11px] text-slate-400 font-medium">Bobot dihitung secara otomatis berdasarkan penyebaran/keberagaman data alternatif saat ini.</p>
+            </div>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+            <div class="bg-slate-50/50 p-3.5 rounded-2xl border border-slate-100 flex flex-col justify-between hover:bg-slate-50 transition-colors">
+                <span class="text-[10px] font-bold text-slate-400 uppercase">C1: Sisa Stok (Cost)</span>
+                <span class="text-lg font-black text-indigo-600 mt-1">{{ number_format(($this->spkData['weights']['c1_stok'] ?? 0) * 100, 1) }}%</span>
+                <span class="text-[9px] text-slate-400 mt-0.5">Entropy: {{ number_format($this->spkData['entropy']['c1_stok'] ?? 0, 4) }}</span>
+            </div>
+            <div class="bg-slate-50/50 p-3.5 rounded-2xl border border-slate-100 flex flex-col justify-between hover:bg-slate-50 transition-colors">
+                <span class="text-[10px] font-bold text-slate-400 uppercase">C2: Penjualan (Benefit)</span>
+                <span class="text-lg font-black text-indigo-600 mt-1">{{ number_format(($this->spkData['weights']['c2_terjual'] ?? 0) * 100, 1) }}%</span>
+                <span class="text-[9px] text-slate-400 mt-0.5">Entropy: {{ number_format($this->spkData['entropy']['c2_terjual'] ?? 0, 4) }}</span>
+            </div>
+            <div class="bg-slate-50/50 p-3.5 rounded-2xl border border-slate-100 flex flex-col justify-between hover:bg-slate-50 transition-colors">
+                <span class="text-[10px] font-bold text-slate-400 uppercase">C3: Perputaran (Benefit)</span>
+                <span class="text-lg font-black text-indigo-600 mt-1">{{ number_format(($this->spkData['weights']['c3_perputaran'] ?? 0) * 100, 1) }}%</span>
+                <span class="text-[9px] text-slate-400 mt-0.5">Entropy: {{ number_format($this->spkData['entropy']['c3_perputaran'] ?? 0, 4) }}</span>
+            </div>
+            <div class="bg-slate-50/50 p-3.5 rounded-2xl border border-slate-100 flex flex-col justify-between hover:bg-slate-50 transition-colors">
+                <span class="text-[10px] font-bold text-slate-400 uppercase">C4: Lead Time (Cost)</span>
+                <span class="text-lg font-black text-indigo-600 mt-1">{{ number_format(($this->spkData['weights']['c4_lead_time'] ?? 0) * 100, 1) }}%</span>
+                <span class="text-[9px] text-slate-400 mt-0.5">Entropy: {{ number_format($this->spkData['entropy']['c4_lead_time'] ?? 0, 4) }}</span>
+            </div>
+        </div>
+    </div>
+
     {{-- ── Recommendation Subtitle ── --}}
     <div class="flex items-center justify-between border-b border-slate-100 pb-3 mt-4">
         <h2 class="text-sm font-black text-slate-800 uppercase tracking-wider flex items-center gap-2">
@@ -178,11 +211,12 @@ new #[Layout('layouts.app')] class extends Component {
                         </span>
                         <div class="min-w-0">
                             <h3 class="font-extrabold text-slate-800 text-sm sm:text-base truncate hover:text-indigo-600 transition-colors">{{ $item['name'] }}</h3>
-                            <div class="flex items-center gap-1.5 mt-0.5">
+                            <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
                                 <span class="text-xs text-slate-500 font-semibold bg-slate-100 px-2 py-0.5 rounded-md">{{ $item['category'] }}</span>
                                 @if($item['sku'])
                                     <span class="text-[10px] font-mono text-slate-400 bg-slate-50 px-1.5 py-0.5 border border-slate-100 rounded-md">SKU: {{ $item['sku'] }}</span>
                                 @endif
+                                <span class="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 border border-indigo-100 rounded-md">Skor SAW: {{ number_format($item['score'], 4) }}</span>
                             </div>
                         </div>
                     </div>
@@ -205,42 +239,51 @@ new #[Layout('layouts.app')] class extends Component {
                 </div>
 
                 {{-- Middle Grid: Metrics & Statistics --}}
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-slate-50">
-                    {{-- Sisa Stok --}}
-                    <div class="bg-slate-50/50 rounded-xl p-3 text-center border border-slate-100/50 hover:bg-slate-50 transition-colors">
-                        <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Sisa Stok</p>
+                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 pt-3 border-t border-slate-50">
+                    {{-- Sisa Stok (C1) --}}
+                    <div class="bg-slate-50/50 rounded-xl p-2.5 text-center border border-slate-100/50 hover:bg-slate-50 transition-colors flex flex-col justify-between">
+                        <p class="text-[9px] text-slate-400 uppercase font-bold tracking-wider">Sisa Stok (C1)</p>
                         <p class="text-sm sm:text-base font-black text-slate-700 mt-1">
                             {{ number_format($item['c1_stok'], 0) }}
                             <span class="text-xs font-semibold text-slate-400">{{ $item['unit'] }}</span>
                         </p>
-                        <p class="text-[10px] font-bold mt-1.5 {{ $isKritis ? 'text-rose-600' : ($isPerhatian ? 'text-amber-600' : 'text-emerald-600') }}">
+                        <p class="text-[9px] font-bold mt-1 {{ $isKritis ? 'text-rose-600' : ($isPerhatian ? 'text-amber-600' : 'text-emerald-600') }}">
                             {{ $item['sisa_hari'] == 999 ? '⏳ > 30 hari' : '⏳ ~' . $item['sisa_hari'] . ' hari' }}
                         </p>
                     </div>
 
-                    {{-- Terjual --}}
-                    <div class="bg-slate-50/50 rounded-xl p-3 text-center border border-slate-100/50 hover:bg-slate-50 transition-colors">
-                        <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Terjual (30hr)</p>
+                    {{-- Terjual (C2) --}}
+                    <div class="bg-slate-50/50 rounded-xl p-2.5 text-center border border-slate-100/50 hover:bg-slate-50 transition-colors flex flex-col justify-between">
+                        <p class="text-[9px] text-slate-400 uppercase font-bold tracking-wider">Terjual (C2)</p>
                         <p class="text-sm sm:text-base font-black text-slate-700 mt-1">
                             {{ number_format($item['c2_terjual'], 0) }}
                             <span class="text-xs font-semibold text-slate-400">{{ $item['unit'] }}</span>
                         </p>
-                        <p class="text-[9px] font-bold text-slate-400 mt-1.5">Penjualan Terakhir</p>
+                        <p class="text-[9px] font-bold text-slate-400 mt-1">Laju: {{ $item['daily_rate'] > 0 ? number_format($item['daily_rate'], 1) : '0' }}/hr</p>
                     </div>
 
-                    {{-- Laju Penjualan Rata-Rata --}}
-                    <div class="bg-slate-50/50 rounded-xl p-3 text-center border border-slate-100/50 hover:bg-slate-50 transition-colors">
-                        <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Laju Harian</p>
+                    {{-- Perputaran Stok (C3) --}}
+                    <div class="bg-slate-50/50 rounded-xl p-2.5 text-center border border-slate-100/50 hover:bg-slate-50 transition-colors flex flex-col justify-between">
+                        <p class="text-[9px] text-slate-400 uppercase font-bold tracking-wider">Perputaran (C3)</p>
                         <p class="text-sm sm:text-base font-black text-slate-700 mt-1">
-                            {{ $item['daily_rate'] > 0 ? number_format($item['daily_rate'], 1) : '0' }}
-                            <span class="text-xs font-semibold text-slate-400">{{ $item['unit'] }}/hari</span>
+                            {{ number_format($item['c3_perputaran'], 2) }}
                         </p>
-                        <p class="text-[9px] font-bold text-slate-400 mt-1.5">Rata-rata/hari</p>
+                        <p class="text-[9px] font-bold text-slate-400 mt-1">Rasio C2/C1</p>
+                    </div>
+
+                    {{-- Lead Time Supplier (C4) --}}
+                    <div class="bg-slate-50/50 rounded-xl p-2.5 text-center border border-slate-100/50 hover:bg-slate-50 transition-colors flex flex-col justify-between">
+                        <p class="text-[9px] text-slate-400 uppercase font-bold tracking-wider">Lead Time (C4)</p>
+                        <p class="text-sm sm:text-base font-black text-slate-700 mt-1">
+                            {{ number_format($item['c4_lead_time'], 0) }}
+                            <span class="text-xs font-semibold text-slate-400">hari</span>
+                        </p>
+                        <p class="text-[9px] font-bold text-slate-400 mt-1">Waktu Kirim</p>
                     </div>
 
                     {{-- Status Priority Badge --}}
-                    <div class="flex items-center justify-center p-3">
-                        <span class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold shadow-sm {{ $badgeCls }}">
+                    <div class="flex items-center justify-center p-2.5 col-span-2 sm:col-span-1">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold shadow-sm {{ $badgeCls }}">
                             {{ $isKritis ? '🔴 Kritis' : ($isPerhatian ? '🟡 Perhatian' : '🟢 Aman') }}
                         </span>
                     </div>
@@ -266,9 +309,9 @@ new #[Layout('layouts.app')] class extends Component {
     </div>
 
     {{-- ── Footer Analytics Info ── --}}
-    <div class="flex items-center justify-center gap-1 text-[10px] text-slate-400 font-bold uppercase tracking-wider pt-4">
-        <span>Rumus Proyeksi:</span>
-        <span class="text-slate-500">(Laju Harian × Target Hari) − Sisa Stok</span>
+    <div class="flex flex-col items-center justify-center gap-1 text-[10px] text-slate-400 font-bold uppercase tracking-wider pt-4 text-center">
+        <div>Rumus Proyeksi Beli: <span class="text-slate-500">(Laju Harian × Target Hari) − Sisa Stok</span></div>
+        <div class="mt-1">Normalisasi SAW: <span class="text-slate-500">C1, C4 (Cost: min/x), C2-C3 (Benefit: x/max)</span></div>
     </div>
 
     @endif

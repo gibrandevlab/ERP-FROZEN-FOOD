@@ -15,7 +15,7 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function hapus(int $id): void
     {
-        Gate::authorize('delete-locations');
+        Gate::authorize('delete-lokasi');
         $loc = Location::findOrFail($id);
         if ($loc->stocks()->exists() || \App\Models\Ledger::where('location_id', $loc->id)->exists()) {
             session()->flash('error', 'Lokasi tidak dapat dihapus karena masih digunakan.');

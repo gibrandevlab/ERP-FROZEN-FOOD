@@ -15,7 +15,7 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function mount(): void
     {
-        $this->authorize('view-products');
+        $this->authorize('view-stok');
     }
 
     public function getMovementsProperty()

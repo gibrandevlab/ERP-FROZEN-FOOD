@@ -25,7 +25,10 @@ new #[Layout('layouts.app')] class extends Component {
     public string $editSupAddress = '';
     public string $editSupDesc    = '';
 
-    public function mount(): void {}
+    public function mount(): void
+    {
+        $this->authorize('view-supplier');
+    }
 
     public function getSuppliersProperty()
     {
@@ -37,7 +40,7 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function hapus(int $id): void
     {
-        Gate::authorize('delete-suppliers');
+        Gate::authorize('delete-supplier');
         $s = Supplier::findOrFail($id);
         $s->delete();
         session()->flash('success', "Supplier '{$s->name}' berhasil dihapus.");
@@ -45,6 +48,7 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function saveSupplier(): void
     {
+        $this->authorize('create-supplier');
         $this->validate([
             'newSupName'    => 'required|string|max:255',
             'newSupPhone'   => 'nullable|string|max:20',
@@ -65,6 +69,7 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function openEdit(int $id): void
     {
+        $this->authorize('edit-supplier');
         $s = Supplier::findOrFail($id);
         $this->editId         = $s->id;
         $this->editSupName    = $s->name;
@@ -76,6 +81,7 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function updateSupplier(): void
     {
+        $this->authorize('edit-supplier');
         $this->validate([
             'editSupName'    => 'required|string|max:255',
             'editSupPhone'   => 'nullable|string|max:20',

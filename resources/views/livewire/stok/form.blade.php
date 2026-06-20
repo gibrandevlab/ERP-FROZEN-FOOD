@@ -52,12 +52,13 @@ new #[Layout('layouts.app')] class extends Component {
     public string  $cost               = '0';
     public string  $unit               = 'pcs';
     public bool    $is_active          = true;
+    public string  $lead_time          = '0';
     public         $image              = null;
 
     public function mount(?string $slug = null): void
     {
         if ($slug) {
-            $this->authorize('edit-products');
+            $this->authorize('edit-stok');
             $this->modeEdit = true;
             $this->product  = Product::where('slug', $slug)->firstOrFail();
             $this->fill($this->product->only(['name', 'sku', 'category_id', 'description', 'unit', 'is_active']));
@@ -65,8 +66,9 @@ new #[Layout('layouts.app')] class extends Component {
             $this->cost              = (string) $this->product->cost;
             $this->wholesale_price   = (string) ($this->product->wholesale_price ?? '');
             $this->wholesale_min_qty = (string) ($this->product->wholesale_min_qty ?? '');
+            $this->lead_time         = (string) ($this->product->lead_time ?? '0');
         } else {
-            $this->authorize('create-products');
+            $this->authorize('create-stok');
         }
     }
 
@@ -78,7 +80,7 @@ new #[Layout('layouts.app')] class extends Component {
     public function simpan(): void
     {
         // Cek ulang izin saat submit — menutup celah bypass Livewire AJAX langsung
-        $this->authorize($this->modeEdit ? 'edit-products' : 'create-products');
+        $this->authorize($this->modeEdit ? 'edit-stok' : 'create-stok');
 
         $validated = $this->validate([
             'name'        => ['required', 'string', 'max:255'],
@@ -96,6 +98,7 @@ new #[Layout('layouts.app')] class extends Component {
             'unit'               => ['required', 'string', 'max:20'],
             'is_active'          => ['boolean'],
             'image'              => ['nullable', 'image', 'max:2048'],
+            'lead_time'          => ['required', 'integer', 'min:0'],
         ]);
 
         if ($this->image) {
@@ -217,8 +220,8 @@ new #[Layout('layouts.app')] class extends Component {
                 </div>
             </div>
 
-            {{-- Satuan & Status Aktif --}}
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
+            {{-- Satuan, Lead Time & Status Aktif --}}
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
                 <div>
                     <label class="block text-sm font-semibold text-slate-700 mb-1.5">Satuan</label>
                     <select wire:model="unit"
@@ -229,7 +232,13 @@ new #[Layout('layouts.app')] class extends Component {
                     </select>
                 </div>
                 <div>
-                    <label class="flex items-center gap-3 px-4 py-2.5 border border-slate-200 rounded-xl cursor-pointer hover:border-slate-300 transition-colors">
+                    <label class="block text-sm font-semibold text-slate-700 mb-1.5">Lead Time Supplier (Hari) <span class="text-red-500">*</span></label>
+                    <input wire:model="lead_time" type="number" min="0" placeholder="Misal: 3"
+                           class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 shadow-sm transition-all" />
+                    @error('lead_time') <p class="text-red-500 text-xs mt-1.5 font-medium">{{ $message }}</p> @enderror
+                </div>
+                <div class="h-[46px] flex items-center">
+                    <label class="flex items-center gap-3 w-full px-4 py-2.5 border border-slate-200 rounded-xl cursor-pointer hover:border-slate-300 transition-colors">
                         <input wire:model="is_active" type="checkbox"
                                class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500" />
                         <span class="text-sm font-semibold text-slate-700">Produk Aktif</span>

@@ -11,7 +11,7 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function mount(string $slug): void
     {
-        $this->authorize('view-products');
+        $this->authorize('view-stok');
         $this->product = Product::with(['category', 'ledgers' => fn($q) => $q->latest()->limit(10)])->where('slug', $slug)->firstOrFail();
     }
 }; ?>
@@ -101,6 +101,12 @@ new #[Layout('layouts.app')] class extends Component {
                                 @endif
                             </dd>
                         </div>
+                        <div>
+                            <dt class="text-xs font-bold text-slate-400 mb-1">Lead Time Supplier</dt>
+                            <dd class="font-semibold text-slate-700 flex items-center gap-1">
+                                <span>📦 {{ $product->lead_time ?? 0 }} hari</span>
+                            </dd>
+                        </div>
                         <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
                             <dt class="text-xs font-bold text-slate-400 mb-1">Harga Jual</dt>
                             <dd class="text-xl font-extrabold text-emerald-600">Rp {{ number_format($product->price, 0, ',', '.') }}</dd>
@@ -121,7 +127,7 @@ new #[Layout('layouts.app')] class extends Component {
             </div>
 
             {{-- Riwayat Transaksi --}}
-            @can('view-ledger')
+            @can('view-pembukuan')
             <div class="bg-white rounded-3xl border border-slate-100 overflow-hidden shadow-sm" style="box-shadow: 0 4px 40px rgba(0,0,0,0.04);">
                 <div class="px-6 py-5 border-b border-slate-50">
                     <h2 class="text-sm font-bold text-slate-400 uppercase tracking-widest">Riwayat Transaksi Terkait</h2>

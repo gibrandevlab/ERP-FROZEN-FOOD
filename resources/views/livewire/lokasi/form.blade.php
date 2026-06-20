@@ -15,20 +15,20 @@ new #[Layout('layouts.app')] class extends Component {
     public function mount(?int $id = null): void
     {
         if ($id) {
-            $this->authorize('edit-products'); // Reusing products auth for now
+            $this->authorize('edit-lokasi'); 
             $this->modeEdit = true;
             $this->location = Location::findOrFail($id);
             $this->name = $this->location->name;
             $this->description = $this->location->description ?? '';
             $this->is_active = (bool) $this->location->is_active;
         } else {
-            $this->authorize('create-products');
+            $this->authorize('create-lokasi');
         }
     }
 
     public function simpan(): void
     {
-        $this->authorize($this->modeEdit ? 'edit-products' : 'create-products');
+        $this->authorize($this->modeEdit ? 'edit-lokasi' : 'create-lokasi');
 
         $validated = $this->validate([
             'name' => ['required', 'string', 'max:255'],

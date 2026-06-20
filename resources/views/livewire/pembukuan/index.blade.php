@@ -14,7 +14,7 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function mount(): void
     {
-        $this->authorize('view-ledger');
+        $this->authorize('view-pembukuan');
         $this->filterBulan = now()->format('Y-m');
     }
 
@@ -45,7 +45,7 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function hapus(int $id): void
     {
-        Gate::authorize('delete-ledger');
+        Gate::authorize('delete-pembukuan');
         Ledger::findOrFail($id)->delete();
         session()->flash('success', 'Transaksi berhasil dihapus.');
     }

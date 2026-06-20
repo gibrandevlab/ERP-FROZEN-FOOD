@@ -24,12 +24,15 @@ new #[Layout('layouts.app')] class extends Component {
     public string $editCustPhone  = '';
     public string $editCustType   = 'non_seller';
 
-    public function mount(): void {}
+    public function mount(): void
+    {
+        $this->authorize('view-pelanggan');
+    }
 
     public function getCustomersProperty()
     {
         return Customer::when($this->search, fn($q) => $q->where('name', 'like', "%{$this->search}%")
-                                                         ->orWhere('phone', 'like', "%{$this->search}%"))
+                                                          ->orWhere('phone', 'like', "%{$this->search}%"))
             ->when($this->filterType, fn($q) => $q->where('type', $this->filterType))
             ->orderBy('name')
             ->paginate(15);
@@ -37,7 +40,7 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function hapus(int $id): void
     {
-        Gate::authorize('delete-customers');
+        Gate::authorize('delete-pelanggan');
         $c = Customer::findOrFail($id);
         $c->delete();
         session()->flash('success', "Pelanggan '{$c->name}' berhasil dihapus.");
@@ -45,6 +48,7 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function saveCustomer()
     {
+        $this->authorize('create-pelanggan');
         $this->validate([
             'newCustName'  => 'required|string|max:255',
             'newCustPhone' => 'nullable|string|max:20',
@@ -64,6 +68,7 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function openEdit(int $id): void
     {
+        $this->authorize('edit-pelanggan');
         $c = Customer::findOrFail($id);
         $this->editId        = $c->id;
         $this->editCustName  = $c->name;
@@ -74,6 +79,7 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function updateCustomer(): void
     {
+        $this->authorize('edit-pelanggan');
         $this->validate([
             'editCustName'  => 'required|string|max:255',
             'editCustPhone' => 'nullable|string|max:20',

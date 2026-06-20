@@ -14,19 +14,19 @@ new #[Layout('layouts.app')] class extends Component {
     public function mount(?string $slug = null): void
     {
         if ($slug) {
-            $this->authorize('edit-categories');
+            $this->authorize('edit-kategori');
             $this->modeEdit    = true;
             $this->kategori    = Category::where('slug', $slug)->firstOrFail();
             $this->name        = $this->kategori->name;
             $this->description = $this->kategori->description ?? '';
         } else {
-            $this->authorize('create-categories');
+            $this->authorize('create-kategori');
         }
     }
 
     public function simpan(): void
     {
-        $this->authorize($this->modeEdit ? 'edit-categories' : 'create-categories');
+        $this->authorize($this->modeEdit ? 'edit-kategori' : 'create-kategori');
         $validated = $this->validate([
             'name'        => ['required', 'string', 'max:100'],
             'description' => ['nullable', 'string', 'max:500'],

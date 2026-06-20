@@ -23,7 +23,12 @@ class DummyDataSeeder extends Seeder
      */
     public function run(): void
     {
-        // 0. Disable foreign key constraints to safely clear tables
+        // 0. Seed permissions
+        $this->call([
+            PermissionSeeder::class,
+        ]);
+
+        // 1. Disable foreign key constraints to safely clear tables
         Schema::disableForeignKeyConstraints();
         Ledger::truncate();
         Stock::truncate();
@@ -69,6 +74,61 @@ class DummyDataSeeder extends Seeder
                     'is_admin'         => true,
                 ]
             );
+        }
+
+        // 1.1 Seed Sari (Admin) permissions now that the user exists
+        $this->call([
+            UserPermissionSeeder::class,
+        ]);
+
+        // 1b. Assign granular permissions for Budi (Staff) & Siti (Kasir)
+        $budiPermissions = [
+            'dashboard'  => ['view' => true, 'create' => false, 'edit' => false, 'delete' => false],
+            'stok'       => ['view' => true, 'create' => true,  'edit' => true,  'delete' => false],
+            'kategori'   => ['view' => true, 'create' => true,  'edit' => true,  'delete' => false],
+            'lokasi'     => ['view' => true, 'create' => true,  'edit' => true,  'delete' => false],
+            'pelanggan'  => ['view' => true, 'create' => true,  'edit' => true,  'delete' => false],
+            'supplier'   => ['view' => true, 'create' => true,  'edit' => true,  'delete' => false],
+            'pembukuan'  => ['view' => true, 'create' => true,  'edit' => true,  'delete' => false],
+            'ringkasan'  => ['view' => true, 'create' => false, 'edit' => false, 'delete' => false],
+            'spk'        => ['view' => true, 'create' => false, 'edit' => false, 'delete' => false],
+        ];
+
+        $sitiPermissions = [
+            'dashboard'  => ['view' => true, 'create' => false, 'edit' => false, 'delete' => false],
+            'stok'       => ['view' => true, 'create' => false, 'edit' => false, 'delete' => false],
+            'pelanggan'  => ['view' => true, 'create' => true,  'edit' => false, 'delete' => false],
+            'pembukuan'  => ['view' => true, 'create' => true,  'edit' => true,  'delete' => false],
+        ];
+
+        foreach ($budiPermissions as $key => $actions) {
+            $perm = \App\Models\Permission::where('key', $key)->first();
+            if ($perm) {
+                \App\Models\UserPermission::updateOrCreate(
+                    ['user_id' => $users['budi']->id, 'permission_id' => $perm->id],
+                    [
+                        'can_view'   => $actions['view'],
+                        'can_create' => $actions['create'],
+                        'can_edit'   => $actions['edit'],
+                        'can_delete' => $actions['delete'],
+                    ]
+                );
+            }
+        }
+
+        foreach ($sitiPermissions as $key => $actions) {
+            $perm = \App\Models\Permission::where('key', $key)->first();
+            if ($perm) {
+                \App\Models\UserPermission::updateOrCreate(
+                    ['user_id' => $users['siti']->id, 'permission_id' => $perm->id],
+                    [
+                        'can_view'   => $actions['view'],
+                        'can_create' => $actions['create'],
+                        'can_edit'   => $actions['edit'],
+                        'can_delete' => $actions['delete'],
+                    ]
+                );
+            }
         }
 
         $userIds = array_values(array_map(fn($u) => $u->id, $users));
@@ -183,6 +243,7 @@ class DummyDataSeeder extends Seeder
                     'wholesale_min_qty' => 10,
                     'unit' => $raw['unit'],
                     'is_active' => true,
+                    'lead_time' => rand(1, 7),
                     'updated_by' => $users['sari']->id,
                 ]);
             }

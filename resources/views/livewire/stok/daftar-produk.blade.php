@@ -29,12 +29,12 @@ state([
 
 mount(function () {
     // 🔒 Lempar HTTP 403 jika user tidak punya akses lihat produk
-    $this->authorize('view-products');
+    $this->authorize('view-stok');
 
     // Simpan cek akses ke state agar tidak query berulang di Blade
-    $this->bolehTambah = Gate::allows('create-products');
-    $this->bolehEdit   = Gate::allows('edit-products');
-    $this->bolehHapus  = Gate::allows('delete-products');
+    $this->bolehTambah = Gate::allows('create-stok');
+    $this->bolehEdit   = Gate::allows('edit-stok');
+    $this->bolehHapus  = Gate::allows('delete-stok');
 });
 
 // ─── Computed ───────────────────────────────────────────────────────────────
@@ -51,7 +51,7 @@ $products = computed(function () {
 
 $hapusProduk = function (int $id): void {
     // 🔒 Double-check di server, jangan andalkan UI saja
-    $this->authorize('delete-products');
+    $this->authorize('delete-stok');
 
     Product::findOrFail($id)->delete();
 };

@@ -26,7 +26,7 @@
     </li>
 
     {{-- Stok Produk --}}
-    @can('view-products')
+    @can('view-stok')
     <li>
         <a href="{{ route('stok.index') }}" wire:navigate
            @click="playClick(); sidebarOpen = false"
@@ -44,7 +44,7 @@
     @endcan
 
     {{-- Kategori --}}
-    @can('view-categories')
+    @can('view-kategori')
     <li>
         <a href="{{ route('kategori.index') }}" wire:navigate
            @click="playClick(); sidebarOpen = false"
@@ -62,6 +62,7 @@
     @endcan
 
     {{-- Pelanggan --}}
+    @can('view-pelanggan')
     <li>
         <a href="{{ route('pelanggan.index') }}" wire:navigate
            @click="playClick(); sidebarOpen = false"
@@ -76,8 +77,10 @@
             @endif
         </a>
     </li>
+    @endcan
 
     {{-- Supplier --}}
+    @can('view-supplier')
     <li>
         <a href="{{ route('supplier.index') }}" wire:navigate
            @click="playClick(); sidebarOpen = false"
@@ -92,8 +95,10 @@
             @endif
         </a>
     </li>
+    @endcan
 
     {{-- SPK --}}
+    @can('view-spk')
     <li>
         <a href="{{ route('spk.index') }}" wire:navigate
            @click="playClick(); sidebarOpen = false"
@@ -108,9 +113,10 @@
             @endif
         </a>
     </li>
+    @endcan
 
     {{-- ── Divider: Keuangan ────────────────────────────────────── --}}
-    @can('view-ledger')
+    @can('view-pembukuan')
     <li class="pt-5 pb-1.5 px-1">
         <span class="text-[10px] font-bold text-slate-400 dark:text-slate-600 uppercase tracking-widest">Keuangan</span>
     </li>
@@ -129,7 +135,9 @@
             @endif
         </a>
     </li>
+    @endcan
 
+    @can('view-ringkasan')
     <li>
         <a href="{{ route('pembukuan.ringkasan') }}" wire:navigate
            @click="playClick(); sidebarOpen = false"
@@ -144,7 +152,7 @@
     @endcan
 
     {{-- ── Divider: Admin ───────────────────────────────────────── --}}
-    @if(auth()->user()->is_admin)
+    @can('view-pengguna')
     <li class="pt-5 pb-1.5 px-1">
         <span class="text-[10px] font-bold text-slate-400 dark:text-slate-600 uppercase tracking-widest">Admin</span>
     </li>
@@ -163,6 +171,6 @@
             @endif
         </a>
     </li>
-    @endif
+    @endcan
 
 </ul>

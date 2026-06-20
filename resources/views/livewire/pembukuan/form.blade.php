@@ -45,7 +45,7 @@ new #[Layout('layouts.app')] class extends Component {
     public function mount(?string $slug = null): void
     {
         if ($slug) {
-            $this->authorize('edit-ledger');
+            $this->authorize('edit-pembukuan');
             $this->modeEdit = true;
             $this->ledger   = Ledger::where('slug', $slug)->firstOrFail();
             $this->fill($this->ledger->only(['type', 'title', 'description', 'reference', 'product_id', 'location_id', 'stock_movement', 'customer_id', 'supplier_id', 'payment_status']));
@@ -54,7 +54,7 @@ new #[Layout('layouts.app')] class extends Component {
             $this->date   = $this->ledger->date->format('Y-m-d');
             $this->due_date = $this->ledger->due_date ? $this->ledger->due_date->format('Y-m-d') : null;
         } else {
-            $this->authorize('create-ledger');
+            $this->authorize('create-pembukuan');
             $this->date = now()->format('Y-m-d');
             if ($this->title === 'Penjualan') {
                 $this->stock_movement = 'out';
@@ -121,7 +121,7 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function saveNewLocation()
     {
-        $this->authorize('create-ledger'); // Using same auth for simplicity
+        $this->authorize('create-pembukuan'); // Using same auth for simplicity
         $this->validate([
             'newLocName' => 'required|string|max:255',
             'newLocDesc' => 'nullable|string',
@@ -141,7 +141,7 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function saveNewCustomer()
     {
-        $this->authorize('create-ledger');
+        $this->authorize('create-pembukuan');
         $this->validate([
             'newCustName' => 'required|string|max:255',
             'newCustPhone' => 'nullable|string|max:20',
@@ -163,7 +163,7 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function saveNewProduct()
     {
-        $this->authorize('create-ledger');
+        $this->authorize('create-pembukuan');
         $this->validate([
             'newProdName' => 'required|string|max:255',
             'newProdPrice' => 'required|numeric|min:0',
@@ -200,7 +200,7 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function simpan(): void
     {
-        $this->authorize($this->modeEdit ? 'edit-ledger' : 'create-ledger');
+        $this->authorize($this->modeEdit ? 'edit-pembukuan' : 'create-pembukuan');
 
         if (!in_array($this->title, ['Penjualan', 'Pembelian stok'])) {
             $this->product_id = null;

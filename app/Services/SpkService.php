@@ -12,10 +12,10 @@ use Illuminate\Support\Facades\DB;
  * Metode: Entropy (pembobotan objektif) + SAW (Simple Additive Weighting)
  *
  * Kriteria:
- *   C1 — Total Stok Saat Ini     → Cost   (stok rendah = lebih prioritas)
- *   C2 — Volume Penjualan         → Benefit (terjual banyak = lebih prioritas)
- *   C3 — Margin Keuntungan (%)    → Benefit (margin besar = lebih berharga)
- *   C4 — Perputaran Stok          → Benefit (perputaran cepat = lebih kritis)
+ *   C1 — Sisa Stok Saat Ini       → Cost   (stok rendah = lebih prioritas)
+ *   C2 — Volume Penjualan (30hr)  → Benefit (terjual banyak = lebih prioritas)
+ *   C3 — Perputaran Stok (C2/C1)  → Benefit (perputaran cepat = lebih prioritas)
+ *   C4 — Lead Time Supplier (hari)→ Cost    (waktu tunggu singkat = lebih prioritas)
  */
 class SpkService
 {
@@ -23,8 +23,8 @@ class SpkService
     protected array $criteriaTypes = [
         'c1_stok'       => 'cost',
         'c2_terjual'    => 'benefit',
-        'c3_margin'     => 'benefit',
-        'c4_perputaran' => 'benefit',
+        'c3_perputaran' => 'benefit',
+        'c4_lead_time'  => 'cost',
     ];
 
     // Target hari stok yang ingin dicapai saat restock
@@ -117,15 +117,13 @@ class SpkService
                 }
                 $totalTerjual = (float) ($terjualQuery->sum('quantity') ?? 0);
 
-                // C3 — Margin keuntungan (%)
-                $margin = $product->cost > 0
-                    ? round((($product->price - $product->cost) / $product->cost) * 100, 4)
-                    : 0.0;
-
-                // C4 — Perputaran stok (terjual / stok, hindari div/0)
+                // C3 — Perputaran stok (terjual / stok, hindari div/0)
                 $perputaran = ($totalStok > 0 && $totalTerjual > 0)
                     ? round($totalTerjual / $totalStok, 4)
                     : 0.0;
+
+                // C4 — Lead time supplier (hari)
+                $leadTime = (int) ($product->lead_time ?? 0);
 
                 // Hitung rekomendasi beli:
                 // rata-rata harian × target hari dari user − stok saat ini
@@ -147,8 +145,8 @@ class SpkService
                     // Nilai kriteria
                     'c1_stok'         => (float) max($totalStok, 0),
                     'c2_terjual'      => $totalTerjual,
-                    'c3_margin'       => $margin,
-                    'c4_perputaran'   => $perputaran,
+                    'c3_perputaran'   => $perputaran,
+                    'c4_lead_time'    => (float) $leadTime,
                     // Rekomendasi praktis
                     'daily_rate'      => round($dailyRate, 2),
                     'target_stock'    => (int) $targetStock,
@@ -158,7 +156,7 @@ class SpkService
             })
             // Filter produk yang punya setidaknya satu data tidak nol
             ->filter(fn ($p) =>
-                $p['c1_stok'] + $p['c2_terjual'] + $p['c3_margin'] + $p['c4_perputaran'] > 0
+                $p['c1_stok'] + $p['c2_terjual'] + $p['c3_perputaran'] + $p['c4_lead_time'] > 0
             )
             ->values();
     }
@@ -178,8 +176,8 @@ class SpkService
         return $alternatives->map(fn ($a) => [
             'c1_stok'       => max($a['c1_stok'],       $epsilon),
             'c2_terjual'    => max($a['c2_terjual'],    $epsilon),
-            'c3_margin'     => max($a['c3_margin'],     $epsilon),
-            'c4_perputaran' => max($a['c4_perputaran'], $epsilon),
+            'c3_perputaran' => max($a['c3_perputaran'], $epsilon),
+            'c4_lead_time'  => max($a['c4_lead_time'],  $epsilon),
         ])->toArray();
     }
 
@@ -341,13 +339,13 @@ class SpkService
                 // Nilai mentah
                 'c1_stok'         => $alt['c1_stok'],
                 'c2_terjual'      => $alt['c2_terjual'],
-                'c3_margin'       => $alt['c3_margin'],
-                'c4_perputaran'   => $alt['c4_perputaran'],
+                'c3_perputaran'   => $alt['c3_perputaran'],
+                'c4_lead_time'    => $alt['c4_lead_time'],
                 // Nilai normalisasi (untuk keperluan akademis/debug)
                 'r_c1'            => $normRow['c1_stok']       ?? 0,
                 'r_c2'            => $normRow['c2_terjual']    ?? 0,
-                'r_c3'            => $normRow['c3_margin']     ?? 0,
-                'r_c4'            => $normRow['c4_perputaran'] ?? 0,
+                'r_c3'            => $normRow['c3_perputaran'] ?? 0,
+                'r_c4'            => $normRow['c4_lead_time']  ?? 0,
                 // Skor akhir
                 'score'           => $vi,
                 'priority'        => $priority,

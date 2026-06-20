@@ -10,7 +10,7 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function mount(): void
     {
-        $this->authorize('view-categories');
+        $this->authorize('view-kategori');
     }
 
     public function getKategoriProperty()
@@ -23,7 +23,7 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function hapus(int $id): void
     {
-        Gate::authorize('delete-categories');
+        Gate::authorize('delete-kategori');
         $k = Category::withCount('products')->findOrFail($id);
         if ($k->products_count > 0) {
             session()->flash('error', "Kategori '{$k->name}' masih punya {$k->products_count} produk. Pindahkan produknya dulu.");

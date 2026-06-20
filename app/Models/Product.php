@@ -25,6 +25,7 @@ class Product extends Model
         'unit',
         'image',
         'is_active',
+        'lead_time',
         'updated_by',
     ];
 
@@ -38,6 +39,7 @@ class Product extends Model
             'cost'              => 'decimal:2',
             'wholesale_min_qty' => 'integer',
             'is_active'         => 'boolean',
+            'lead_time'         => 'integer',
         ];
     }
 
