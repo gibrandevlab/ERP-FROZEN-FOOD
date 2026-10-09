@@ -30,6 +30,7 @@ class DummyDataSeeder extends Seeder
 
         // 1. Disable foreign key constraints to safely clear tables
         Schema::disableForeignKeyConstraints();
+        \App\Models\PurchaseRequest::truncate();
         Ledger::truncate();
         Stock::truncate();
         Product::truncate();
@@ -592,5 +593,10 @@ class DummyDataSeeder extends Seeder
                 $isFirstMonth = false;
             }
         });
+
+        // Seed Tiket Purchase Request (PR) sesuai workflow
+        $this->call([
+            PurchaseRequestSeeder::class,
+        ]);
     }
 }

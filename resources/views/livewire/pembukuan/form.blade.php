@@ -4,6 +4,7 @@ use App\Models\{Ledger, Product, Location, Supplier};
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 use Livewire\WithFileUploads;
+use Illuminate\Support\Facades\DB;
 
 new #[Layout('layouts.app')] class extends Component {
     use WithFileUploads;
@@ -56,6 +57,7 @@ new #[Layout('layouts.app')] class extends Component {
         } else {
             $this->authorize('create-pembukuan');
             $this->date = now()->format('Y-m-d');
+            $this->product_id = request()->query('produk');
             if ($this->title === 'Penjualan') {
                 $this->stock_movement = 'out';
             } elseif ($this->title === 'Pembelian stok') {
@@ -126,13 +128,13 @@ new #[Layout('layouts.app')] class extends Component {
             'newLocName' => 'required|string|max:255',
             'newLocDesc' => 'nullable|string',
         ]);
-        
+
         $loc = Location::create([
             'name' => $this->newLocName,
             'description' => $this->newLocDesc,
             'is_active' => true
         ]);
-        
+
         $this->location_id = (string) $loc->id;
         $this->newLocName = '';
         $this->newLocDesc = '';
@@ -147,13 +149,13 @@ new #[Layout('layouts.app')] class extends Component {
             'newCustPhone' => 'nullable|string|max:20',
             'newCustType' => 'required|in:seller,non_seller',
         ]);
-        
+
         $cust = \App\Models\Customer::create([
             'name' => $this->newCustName,
             'phone' => $this->newCustPhone,
             'type' => $this->newCustType,
         ]);
-        
+
         $this->customer_id = (string) $cust->id;
         $this->newCustName = '';
         $this->newCustPhone = '';
@@ -170,7 +172,7 @@ new #[Layout('layouts.app')] class extends Component {
             'newProdCost' => 'required|numeric|min:0',
             'newProdUnit' => 'required|string',
         ]);
-        
+
         $prod = Product::create([
             'name' => $this->newProdName,
             'price' => $this->newProdPrice,
@@ -178,7 +180,7 @@ new #[Layout('layouts.app')] class extends Component {
             'unit' => $this->newProdUnit,
             'is_active' => true
         ]);
-        
+
         $this->product_id = (string) $prod->id;
         $this->newProdName = '';
         $this->newProdPrice = '0';
@@ -223,7 +225,7 @@ new #[Layout('layouts.app')] class extends Component {
             $currentStock = \App\Models\Stock::where('product_id', $this->product_id)
                 ->where('location_id', $this->location_id)
                 ->value('quantity') ?? 0;
-                
+
             $originalQuantity = 0;
             if ($this->modeEdit && $this->ledger->product_id == $this->product_id && $this->ledger->location_id == $this->location_id && $this->ledger->stock_movement === 'out') {
                 $originalQuantity = $this->ledger->quantity;
@@ -266,15 +268,19 @@ new #[Layout('layouts.app')] class extends Component {
             $validated['proof_image'] = 'bukti-transaksi/' . $filename;
         }
 
-        if ($this->modeEdit) {
-            $this->ledger->update($validated);
-            session()->flash('success', 'Catatan transaksi berhasil diperbarui.');
-        } else {
-            $validated['user_id'] = auth()->id();
-            $validated['updated_by'] = auth()->id();
-            Ledger::create($validated);
-            session()->flash('success', 'Transaksi berhasil dicatat.');
-        }
+        DB::transaction(function () use ($validated) {
+            if ($this->modeEdit) {
+                $this->ledger->update($validated);
+            } else {
+                $validated['user_id'] = auth()->id();
+                $validated['updated_by'] = auth()->id();
+                Ledger::create($validated);
+            }
+        });
+
+        session()->flash('success', $this->modeEdit
+            ? 'Catatan transaksi berhasil diperbarui.'
+            : 'Transaksi berhasil dicatat.');
 
         session()->forget(['new_product_id', 'new_location_id']);
 
@@ -289,14 +295,14 @@ new #[Layout('layouts.app')] class extends Component {
             isCustomPrice: false,
             insufficientStock: false,
             availableStock: 0,
-            
+
             calcExpectedAmount() {
                 if (!$wire.product_id || !$wire.quantity || $wire.quantity <= 0) return null;
                 let p = this.products[$wire.product_id];
                 if (!p) return null;
                 return $wire.type === 'income' ? (p.price * $wire.quantity) : (p.cost * $wire.quantity);
             },
-            
+
             autoCalculate() {
                 let expected = this.calcExpectedAmount();
                 if (expected !== null) {
@@ -304,7 +310,7 @@ new #[Layout('layouts.app')] class extends Component {
                     this.isCustomPrice = false;
                 }
             },
-            
+
             checkCustomPrice() {
                 let expected = this.calcExpectedAmount();
                 if (expected !== null && expected != $wire.amount) {
@@ -319,7 +325,7 @@ new #[Layout('layouts.app')] class extends Component {
                 if ($wire.stock_movement === 'out' && $wire.product_id && $wire.location_id && $wire.quantity > 0) {
                     let key = $wire.product_id + '_' + $wire.location_id;
                     let available = parseFloat(this.stocks[key] || 0);
-                    
+
                     @if($modeEdit)
                     if ($wire.product_id == '{{ $ledger->product_id }}' && $wire.location_id == '{{ $ledger->location_id }}' && '{{ $ledger->stock_movement }}' === 'out') {
                         available += parseFloat('{{ $ledger->quantity }}');
@@ -342,7 +348,7 @@ new #[Layout('layouts.app')] class extends Component {
             $watch('$wire.amount', () => checkCustomPrice());
          "
      @open-modal.window="
-        if ($event.detail[0] === 'modal-location') showLocModal = true; 
+        if ($event.detail[0] === 'modal-location') showLocModal = true;
         if ($event.detail[0] === 'modal-product') showProdModal = true;
         if ($event.detail[0] === 'modal-customer') showCustModal = true;
      "
@@ -436,7 +442,7 @@ new #[Layout('layouts.app')] class extends Component {
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-slate-700 mb-1.5">Lokasi Stok</label>
-                            <select wire:model.live="location_id" 
+                            <select wire:model.live="location_id"
                                     class="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/30 shadow-sm">
                                 <option value="">— Pilih Lokasi —</option>
                                 <option value="new" class="font-bold text-blue-600">➕ Tambah Lokasi Baru</option>

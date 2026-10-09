@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
             PermissionSeeder::class,      // Isi daftar fitur/modul dulu
             UserSeeder::class,             // Buat user-user awal
             UserPermissionSeeder::class,   // Atur hak akses per user
+            PurchaseRequestSeeder::class,  // Seed contoh tiket PR
         ]);
     }
 }

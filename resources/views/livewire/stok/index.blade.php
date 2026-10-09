@@ -58,19 +58,23 @@ new #[Layout('layouts.app')] class extends Component {
 
 <div class="space-y-5 max-w-3xl mx-auto lg:max-w-none">
 
-    {{-- ── Header ─────────────────────────────────────────────────────────── --}}
-    <div class="flex items-center justify-between">
-        <div>
-            <h1 class="text-xl font-extrabold" style="color: #1E293B;">Stok Produk</h1>
-            <p class="text-xs text-slate-500 mt-0.5">{{ $this->products->total() }} produk ditemukan</p>
-        </div>
-            <a href="{{ route('stok.tambah') }}" wire:navigate
-               @click="playClick()"
-               class="btn-sound inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-colors shadow-sm">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                Tambah Produk
-            </a>
+{{-- ── Header ─────────────────────────────────────────────────────────── --}}
+<div class="flex items-center justify-between">
+    <div>
+        <h1 class="text-xl font-extrabold text-slate-800">Stok Produk</h1>
+        <p class="mt-0.5 text-xs text-slate-500">{{ $this->products->total() }} produk ditemukan</p>
     </div>
+
+    <a href="{{ route('stok.tambah') }}"
+       wire:navigate
+       @click="playClick()"
+       class="btn-sound inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700">
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        <span>Tambah Produk</span>
+    </a>
+</div>
 
     {{-- ── Filter Bar ──────────────────────────────────────────────────────── --}}
     <div class="flex flex-wrap gap-2">
@@ -129,7 +133,7 @@ new #[Layout('layouts.app')] class extends Component {
         </div>
         @empty
         <div class="bg-white rounded-2xl border border-slate-100 p-8 text-center shadow-sm">
-            <p class="text-slate-400 text-sm">Belum ada produk. Tambahkan yang pertama!</p>
+            <p class="text-slate-400 text-sm">Belum ada produk. Tambahkan yang pertama</p>
         </div>
         @endforelse
     </div>

@@ -26,6 +26,7 @@ class Product extends Model
         'image',
         'is_active',
         'lead_time',
+        'min_stock',
         'updated_by',
     ];
 
@@ -40,6 +41,7 @@ class Product extends Model
             'wholesale_min_qty' => 'integer',
             'is_active'         => 'boolean',
             'lead_time'         => 'integer',
+            'min_stock'         => 'integer',
         ];
     }
 
@@ -90,11 +92,27 @@ class Product extends Model
     }
 
     /**
+     * Semua pengajuan pembelian (Purchase Request) produk ini.
+     */
+    public function purchaseRequests()
+    {
+        return $this->hasMany(PurchaseRequest::class);
+    }
+
+    /**
      * Hitung total stok dari semua lokasi.
      */
     public function totalStock()
     {
         return $this->stocks()->sum('quantity');
+    }
+
+    /**
+     * Cek apakah stok produk ini di bawah batas minimum (Scanning Stok Mau Habis).
+     */
+    public function isLowStock(): bool
+    {
+        return $this->totalStock() <= ($this->min_stock ?? 10);
     }
 
     /**

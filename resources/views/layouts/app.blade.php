@@ -92,63 +92,76 @@
 
 </div>
 
-{{-- ── Bottom Navigation Bar (Mobile & Desktop Dock) ──────────────────────────────── --}}
-<nav class="fixed bottom-0 inset-x-0 z-50 sm:pb-4 pointer-events-none"
-     style="filter: drop-shadow(0 -4px 32px rgba(0,0,0,0.08));">
-    <div class="pointer-events-auto sm:max-w-md sm:mx-auto sm:rounded-2xl overflow-hidden bg-white/95 backdrop-blur-xl border-t sm:border border-slate-200/60"
-         style="box-shadow: 0 -2px 32px rgba(0,0,0,0.04);">
-        <div class="flex items-stretch h-[60px] sm:h-[65px]">
+<nav class="fixed bottom-0 inset-x-0 z-50 pointer-events-none sm:pb-4">
+    <div class="pointer-events-auto sm:max-w-md sm:mx-auto sm:rounded-2xl overflow-hidden bg-white/90 backdrop-blur-xl border-t sm:border border-slate-200/70 shadow-lg shadow-slate-900/5">
+        <div class="flex items-stretch h-[60px]">
 
-        {{-- Beranda --}}
-        <a href="{{ route('dashboard') }}" wire:navigate @click="playClick()"
-           class="flex-1 flex flex-col items-center justify-center gap-1 btn-sound transition-colors
-                  {{ request()->routeIs('dashboard') ? 'text-blue-600' : 'text-slate-500' }}">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="{{ request()->routeIs('dashboard') ? '2.25' : '1.75' }}" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-            </svg>
-            <span class="text-[10px] {{ request()->routeIs('dashboard') ? 'font-bold' : 'font-semibold' }}">Beranda</span>
-        </a>
+            {{-- Beranda --}}
+            <a href="{{ route('dashboard') }}" wire:navigate @click="playClick()"
+               class="flex-1 flex flex-col items-center justify-center gap-0.5 btn-sound transition-colors relative
+                      {{ request()->routeIs('dashboard') ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600' }}">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="{{ request()->routeIs('dashboard') ? '2.25' : '1.75' }}" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+                <span class="text-[10px] {{ request()->routeIs('dashboard') ? 'font-bold' : 'font-medium' }}">Beranda</span>
+                @if(request()->routeIs('dashboard'))
+                    <span class="absolute bottom-1 w-1 h-1 bg-blue-600 rounded-full"></span>
+                @endif
+            </a>
 
-        <a href="{{ route('stok.index') }}" wire:navigate @click="playClick()"
-           class="flex-1 flex flex-col items-center justify-center gap-1 btn-sound transition-colors
-                  {{ request()->routeIs('stok.*') ? 'text-blue-600' : 'text-slate-500' }}">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="{{ request()->routeIs('stok.*') ? '2.25' : '1.75' }}" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-            </svg>
-            <span class="text-[10px] {{ request()->routeIs('stok.*') ? 'font-bold' : 'font-semibold' }}">Stok</span>
-        </a>
+            {{-- Stok --}}
+            <a href="{{ route('stok.index') }}" wire:navigate @click="playClick()"
+               class="flex-1 flex flex-col items-center justify-center gap-0.5 btn-sound transition-colors relative
+                      {{ request()->routeIs('stok.*') ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600' }}">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="{{ request()->routeIs('stok.*') ? '2.25' : '1.75' }}" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                </svg>
+                <span class="text-[10px] {{ request()->routeIs('stok.*') ? 'font-bold' : 'font-medium' }}">Stok</span>
+                @if(request()->routeIs('stok.*'))
+                    <span class="absolute bottom-1 w-1 h-1 bg-blue-600 rounded-full"></span>
+                @endif
+            </a>
 
-        {{-- Transaksi --}}
-        <a href="{{ route('pembukuan.index') }}" wire:navigate @click="playClick()"
-           class="flex-1 flex flex-col items-center justify-center gap-1 btn-sound transition-colors
-                  {{ request()->routeIs('pembukuan.*') ? 'text-emerald-600' : 'text-slate-500' }}">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="{{ request()->routeIs('pembukuan.*') ? '2.25' : '1.75' }}" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-            </svg>
-            <span class="text-[10px] {{ request()->routeIs('pembukuan.*') ? 'font-bold' : 'font-semibold' }}">Transaksi</span>
-        </a>
+            {{-- Transaksi --}}
+            <a href="{{ route('pembukuan.index') }}" wire:navigate @click="playClick()"
+               class="flex-1 flex flex-col items-center justify-center gap-0.5 btn-sound transition-colors relative
+                      {{ request()->routeIs('pembukuan.*') ? 'text-emerald-600' : 'text-slate-400 hover:text-slate-600' }}">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="{{ request()->routeIs('pembukuan.*') ? '2.25' : '1.75' }}" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                </svg>
+                <span class="text-[10px] {{ request()->routeIs('pembukuan.*') ? 'font-bold' : 'font-medium' }}">Transaksi</span>
+                @if(request()->routeIs('pembukuan.*'))
+                    <span class="absolute bottom-1 w-1 h-1 bg-emerald-600 rounded-full"></span>
+                @endif
+            </a>
 
-        {{-- Admin (Hanya untuk admin) --}}
-        @if(auth()->user()->is_admin)
-        <a href="{{ route('admin.pengguna.index') }}" wire:navigate @click="playClick()"
-           class="flex-1 flex flex-col items-center justify-center gap-1 btn-sound transition-colors
-                  {{ request()->routeIs('admin.*') ? 'text-purple-600' : 'text-slate-500' }}">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="{{ request()->routeIs('admin.*') ? '2.25' : '1.75' }}" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
-            </svg>
-            <span class="text-[10px] {{ request()->routeIs('admin.*') ? 'font-bold' : 'font-semibold' }}">Admin</span>
-        </a>
-        @endif
+            {{-- Admin --}}
+            @if(auth()->user()->is_admin)
+            <a href="{{ route('admin.pengguna.index') }}" wire:navigate @click="playClick()"
+               class="flex-1 flex flex-col items-center justify-center gap-0.5 btn-sound transition-colors relative
+                      {{ request()->routeIs('admin.*') ? 'text-purple-600' : 'text-slate-400 hover:text-slate-600' }}">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="{{ request()->routeIs('admin.*') ? '2.25' : '1.75' }}" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                </svg>
+                <span class="text-[10px] {{ request()->routeIs('admin.*') ? 'font-bold' : 'font-medium' }}">Admin</span>
+                @if(request()->routeIs('admin.*'))
+                    <span class="absolute bottom-1 w-1 h-1 bg-purple-600 rounded-full"></span>
+                @endif
+            </a>
+            @endif
 
-        {{-- Profil --}}
-        <a href="{{ route('profile') }}" wire:navigate @click="playClick()"
-           class="flex-1 flex flex-col items-center justify-center gap-1 btn-sound transition-colors
-                  {{ request()->routeIs('profile') ? 'text-blue-600' : 'text-slate-500' }}">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="{{ request()->routeIs('profile') ? '2.25' : '1.75' }}" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-            </svg>
-            <span class="text-[10px] {{ request()->routeIs('profile') ? 'font-bold' : 'font-semibold' }}">Profil</span>
-        </a>
+            {{-- Profil --}}
+            <a href="{{ route('profile') }}" wire:navigate @click="playClick()"
+               class="flex-1 flex flex-col items-center justify-center gap-0.5 btn-sound transition-colors relative
+                      {{ request()->routeIs('profile') ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600' }}">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="{{ request()->routeIs('profile') ? '2.25' : '1.75' }}" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                </svg>
+                <span class="text-[10px] {{ request()->routeIs('profile') ? 'font-bold' : 'font-medium' }}">Profil</span>
+                @if(request()->routeIs('profile'))
+                    <span class="absolute bottom-1 w-1 h-1 bg-blue-600 rounded-full"></span>
+                @endif
+            </a>
 
         </div>
     </div>
@@ -160,10 +173,10 @@
 <script>
     document.addEventListener('alpine:init', () => {
         let audioCtx = null;
-        
+
         Alpine.data('appShell', () => ({
             sidebarOpen: false,
-            
+
             initAudio() {
                 if (!audioCtx) {
                     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -172,67 +185,67 @@
                     audioCtx.resume();
                 }
             },
-            
+
             playClick() {
                 try {
                     this.initAudio();
                     const osc = audioCtx.createOscillator();
                     const gainNode = audioCtx.createGain();
-                    
+
                     osc.type = 'sine';
                     osc.frequency.setValueAtTime(800, audioCtx.currentTime);
                     osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.05);
-                    
+
                     gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
                     gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
-                    
+
                     osc.connect(gainNode);
                     gainNode.connect(audioCtx.destination);
-                    
+
                     osc.start();
                     osc.stop(audioCtx.currentTime + 0.05);
                 } catch(e) {
                     console.log('Audio error:', e);
                 }
             },
-            
+
             playDanger() {
                 try {
                     this.initAudio();
                     const osc = audioCtx.createOscillator();
                     const gainNode = audioCtx.createGain();
-                    
+
                     osc.type = 'sawtooth';
                     osc.frequency.setValueAtTime(150, audioCtx.currentTime);
                     osc.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.15);
-                    
+
                     gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
                     gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
-                    
+
                     osc.connect(gainNode);
                     gainNode.connect(audioCtx.destination);
-                    
+
                     osc.start();
                     osc.stop(audioCtx.currentTime + 0.15);
                 } catch(e) {}
             },
-            
+
             playSuccess() {
                 try {
                     this.initAudio();
                     const osc = audioCtx.createOscillator();
                     const gainNode = audioCtx.createGain();
-                    
+
                     osc.type = 'sine';
                     osc.frequency.setValueAtTime(400, audioCtx.currentTime);
                     osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.1);
-                    
+
                     gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
                     gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
-                    
+
                     osc.connect(gainNode);
                     gainNode.connect(audioCtx.destination);
-                    
+
                     osc.start();
                     osc.stop(audioCtx.currentTime + 0.1);
                 } catch(e) {}

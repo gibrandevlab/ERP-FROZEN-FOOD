@@ -52,6 +52,7 @@ new #[Layout('layouts.app')] class extends Component {
 
         $this->redirectRoute('lokasi.index', navigate: true);
     }
+    
 }; ?>
 
 <div class="max-w-2xl">

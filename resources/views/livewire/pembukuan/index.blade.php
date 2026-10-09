@@ -4,6 +4,7 @@ use App\Models\{Ledger, Product};
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 use Livewire\WithPagination;
+use Illuminate\Support\Facades\DB;
 
 new #[Layout('layouts.app')] class extends Component {
     use WithPagination;
@@ -21,7 +22,9 @@ new #[Layout('layouts.app')] class extends Component {
     public function getLedgersProperty()
     {
         return Ledger::with(['product', 'location'])
-            ->when($this->search, fn($q) => $q->where('title', 'like', "%{$this->search}%")->orWhere('reference', 'like', "%{$this->search}%"))
+            ->when($this->search, fn($q) => $q->where(fn($searchQuery) => $searchQuery
+                ->where('title', 'like', "%{$this->search}%")
+                ->orWhere('reference', 'like', "%{$this->search}%")))
             ->when($this->filterType, fn($q) => $q->where('type', $this->filterType))
             ->when($this->filterBulan, fn($q) => $q->whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$this->filterBulan]))
             ->orderByDesc('date')->orderByDesc('id')->paginate(15);
@@ -46,7 +49,7 @@ new #[Layout('layouts.app')] class extends Component {
     public function hapus(int $id): void
     {
         Gate::authorize('delete-pembukuan');
-        Ledger::findOrFail($id)->delete();
+        DB::transaction(fn () => Ledger::findOrFail($id)->delete());
         session()->flash('success', 'Transaksi berhasil dihapus.');
     }
 
@@ -116,7 +119,7 @@ new #[Layout('layouts.app')] class extends Component {
         <div class="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm relative overflow-hidden">
             {{-- Accent border on left --}}
             <div class="absolute left-0 top-0 bottom-0 w-1.5 {{ $l->type === 'income' ? 'bg-emerald-400' : 'bg-red-400' }}"></div>
-            
+
             <div class="flex items-start justify-between gap-3 mb-3 pl-2">
                 <div class="min-w-0 flex-1">
                     <p class="font-bold text-slate-800 text-sm truncate">{{ $l->title }}</p>
@@ -145,7 +148,7 @@ new #[Layout('layouts.app')] class extends Component {
                 @else
                     <div></div>
                 @endif
-                
+
                 <div class="flex items-center gap-2">
                     <a href="{{ route('pembukuan.edit', $l->slug) }}" wire:navigate @click="playClick()"
                        class="btn-sound px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 text-xs font-bold hover:bg-blue-100 transition-colors">Edit</a>

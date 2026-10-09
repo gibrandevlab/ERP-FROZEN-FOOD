@@ -23,6 +23,13 @@ class UserSeeder extends Seeder
                 'recovery_phrase'  => 'secret-recovery-phrase-sara',
                 'is_admin'         => true,
             ],
+            [
+                'name'             => 'Budi',
+                'email'            => 'budi@gmail.com',
+                'password'         => Hash::make('password123'),
+                'recovery_phrase'  => 'secret-recovery-phrase-budi',
+                'is_admin'         => false,
+            ],
         ];
 
         foreach ($users as $data) {

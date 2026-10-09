@@ -9,7 +9,8 @@ Route::middleware(['auth'])->group(function () {
 
     // Dashboard
     Volt::route('/dashboard', 'dashboard.index')
-        ->name('dashboard');
+        ->name('dashboard')
+        ->middleware('can:view-dashboard');
 
     // ── Stok / Produk ────────────────────────────────────────────────────────
     // Middleware 'can:view-stok' memblokir akses di level route (403)

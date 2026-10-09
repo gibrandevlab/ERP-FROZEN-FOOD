@@ -87,6 +87,12 @@ class PermissionSeeder extends Seeder
                 'description' => 'Akses ke analisis SPK prioritas restock.',
             ],
             [
+                'key'         => 'purchase_request',
+                'label'       => 'Pengajuan Pembelian (PR)',
+                'category'    => 'bisnis',
+                'description' => 'Akses ke pengajuan, approval, nota pembelian, dan penerimaan stok barang.',
+            ],
+            [
                 'key'         => 'pembukuan',
                 'label'       => 'Pembukuan',
                 'category'    => 'keuangan',

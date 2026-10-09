@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class Ledger extends Model
@@ -58,22 +59,16 @@ class Ledger extends Model
             }
         });
 
-        static::created(function (Ledger $ledger) {
-            // Update stok jika ledger memiliki info produk, lokasi, dan mutasi stok
-            // Meskipun status unpaid (ngutang), stok tetap berpindah secara fisik.
-            if ($ledger->product_id && $ledger->location_id && $ledger->quantity && $ledger->stock_movement) {
-                $stock = Stock::firstOrCreate([
-                    'product_id' => $ledger->product_id,
-                    'location_id' => $ledger->location_id,
-                ]);
+        static::created(fn (Ledger $ledger) => $ledger->applyStockMovement());
 
-                if ($ledger->stock_movement === 'in') {
-                    $stock->increment('quantity', $ledger->quantity);
-                } elseif ($ledger->stock_movement === 'out') {
-                    $stock->decrement('quantity', $ledger->quantity);
-                }
-            }
+        static::updated(function (Ledger $ledger) {
+            $ledger->reverseStockMovement($ledger->getOriginal());
+            $ledger->applyStockMovement();
         });
+
+        static::deleted(fn (Ledger $ledger) => $ledger->reverseStockMovement($ledger->getAttributes()));
+
+        static::restored(fn (Ledger $ledger) => $ledger->applyStockMovement());
 
         static::updating(function (Ledger $ledger) {
             if (auth()->check()) {
@@ -130,6 +125,48 @@ class Ledger extends Model
     public function updater()
     {
         return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    protected function applyStockMovement(): void
+    {
+        $this->changeStock($this->getAttributes(), 1);
+    }
+
+    protected function reverseStockMovement(array $movement): void
+    {
+        $this->changeStock($movement, -1);
+    }
+
+    protected function changeStock(array $movement, int $multiplier): void
+    {
+        if (empty($movement['product_id']) || empty($movement['location_id']) ||
+            empty($movement['quantity']) || empty($movement['stock_movement'])) {
+            return;
+        }
+
+        DB::transaction(function () use ($movement, $multiplier) {
+            $stock = Stock::where('product_id', $movement['product_id'])
+                ->where('location_id', $movement['location_id'])
+                ->lockForUpdate()
+                ->first();
+
+            if (!$stock) {
+                $stock = Stock::create([
+                    'product_id' => $movement['product_id'],
+                    'location_id' => $movement['location_id'],
+                    'quantity' => 0,
+                ]);
+            }
+
+            $delta = (int) $movement['quantity'] *
+                ($movement['stock_movement'] === 'in' ? 1 : -1) * $multiplier;
+
+            if ($delta < 0 && $stock->quantity + $delta < 0) {
+                throw new \RuntimeException('Stok tidak mencukupi untuk mutasi ini.');
+            }
+
+            $stock->increment('quantity', $delta);
+        });
     }
 
     // ─── Scope ───────────────────────────────────────────────
