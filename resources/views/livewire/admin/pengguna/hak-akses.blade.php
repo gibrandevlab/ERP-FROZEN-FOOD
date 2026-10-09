@@ -54,118 +54,121 @@ new #[Layout('layouts.app')] class extends Component {
     }
 }; ?>
 
-<div class="space-y-6 max-w-4xl mx-auto lg:max-w-none">
+<div class="space-y-6 max-w-5xl mx-auto">
 
-    {{-- Flash Messages --}}
+    {{-- ── Flash Messages ── --}}
     @if (session('success'))
         <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)"
-             x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
-             x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
-             class="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs sm:text-sm rounded-2xl flex items-center justify-between shadow-md shadow-emerald-100/30">
-            <span class="flex items-center gap-2.5 font-bold">
-                <span class="text-emerald-500 text-base">🎉</span> 
+             class="rounded-2xl border border-emerald-200 bg-emerald-50 p-3.5 text-xs sm:text-sm text-emerald-800 shadow-sm flex items-center justify-between gap-3">
+            <span class="font-bold flex items-center gap-2">
+                <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                 {{ session('success') }}
             </span>
-            <button type="button" @click="show = false" class="text-emerald-400 hover:text-emerald-700 ml-3 text-lg leading-none font-bold">&times;</button>
+            <button type="button" @click="show = false" class="text-emerald-600 hover:text-emerald-800 font-bold p-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
         </div>
     @endif
     @if (session('error'))
         <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)"
-             x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
-             x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
-             class="p-4 bg-rose-50 border border-rose-200 text-rose-800 text-xs sm:text-sm rounded-2xl flex items-center justify-between shadow-md shadow-rose-100/30">
-            <span class="flex items-center gap-2.5 font-bold">
-                <span class="text-rose-500 text-base">⚠️</span> 
+             class="rounded-2xl border border-rose-200 bg-rose-50 p-3.5 text-xs sm:text-sm text-rose-800 shadow-sm flex items-center justify-between gap-3">
+            <span class="font-bold flex items-center gap-2">
+                <svg class="w-4 h-4 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                 {{ session('error') }}
             </span>
-            <button type="button" @click="show = false" class="text-rose-400 hover:text-rose-700 ml-3 text-lg leading-none font-bold">&times;</button>
+            <button type="button" @click="show = false" class="text-rose-600 hover:text-rose-800 font-bold p-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
         </div>
     @endif
 
     {{-- ── Header Area ── --}}
-    <div class="flex items-center gap-3.5 border-b border-slate-100 pb-4">
-        <a href="{{ route('admin.pengguna.index') }}" wire:navigate @click="playClick()"
-           class="btn-sound w-11 h-11 flex items-center justify-center rounded-2xl bg-white border border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-50 hover:border-slate-300 shadow-sm transition-all shrink-0">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-        </a>
-        <div class="min-w-0">
-            <div class="flex items-center gap-2">
-                <span class="px-2 py-0.5 text-[9px] font-black uppercase tracking-wider bg-blue-50 text-blue-600 border border-blue-100 rounded-md">Konfigurasi Hak Akses</span>
+    <div class="relative overflow-hidden rounded-3xl border border-blue-100/80 bg-gradient-to-r from-blue-50 via-white to-sky-50 p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="flex items-center gap-3.5">
+            <a href="{{ route('admin.pengguna.index') }}" wire:navigate @click="playClick()"
+               class="btn-sound w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center rounded-2xl bg-white border border-slate-200/80 text-slate-600 hover:text-blue-600 hover:border-blue-200 shadow-sm transition-all shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            </a>
+            <div>
+                <span class="inline-flex items-center px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider bg-blue-100/80 text-blue-700 rounded-lg">Konfigurasi Hak Akses</span>
+                <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 mt-1 flex items-center gap-2">
+                    <svg class="w-6 h-6 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 0121 9z"/></svg>
+                    Hak Akses Pengguna
+                </h1>
+                <p class="text-xs sm:text-sm font-medium text-slate-600 mt-0.5">
+                    Staf: <span class="font-bold text-slate-800">{{ $user->name }}</span> <span class="text-slate-400">({{ $user->email }})</span>
+                </p>
             </div>
-            <h1 class="text-2xl font-black tracking-tight text-slate-800 mt-1">🔑 Pengaturan Hak Akses</h1>
-            <p class="text-xs text-slate-500 mt-0.5">
-                Staf: <span class="font-extrabold text-slate-700">{{ $user->name }}</span> ({{ $user->email }})
-            </p>
         </div>
     </div>
 
-    {{-- ── Info Card (Gradient Blue Tint) ── --}}
-    <div class="bg-gradient-to-r from-blue-50 to-indigo-50/50 border border-blue-100 rounded-3xl p-4 sm:p-5 flex gap-4 shadow-sm">
-        <div class="w-10 h-10 rounded-2xl bg-blue-100/80 flex items-center justify-center shrink-0 text-xl shadow-inner">
-            💡
+    {{-- ── Info Card ── --}}
+    <div class="rounded-2xl bg-white border border-slate-200/80 p-4 sm:p-5 shadow-sm flex items-start gap-3.5">
+        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
         </div>
         <div>
-            <h3 class="text-xs sm:text-sm font-extrabold text-blue-900 uppercase tracking-wide">Panduan Matriks Otorisasi</h3>
-            <p class="text-xs text-blue-700/95 mt-1 leading-relaxed">
-                Tandai kotak centang sesuai dengan wewenang yang ingin Anda berikan kepada staf. Anda dapat mengeklik **nama fitur/modul** untuk mengaktifkan atau menonaktifkan seluruh hak akses di baris tersebut secara instan.
+            <h3 class="text-xs sm:text-sm font-bold text-slate-800">Panduan Matriks Otorisasi</h3>
+            <p class="text-xs font-medium text-slate-500 mt-1 leading-relaxed">
+                Tandai kotak centang sesuai dengan wewenang yang ingin Anda berikan kepada staf. Anda dapat mengeklik <span class="font-bold text-slate-700">nama fitur/modul</span> untuk mengaktifkan atau menonaktifkan seluruh hak akses pada baris tersebut secara instan.
             </p>
         </div>
     </div>
 
     {{-- ── Matrix Table Container ── --}}
-    <div class="bg-white rounded-3xl border border-slate-100 overflow-hidden shadow-lg shadow-slate-100/40"
-         style="box-shadow: 0 10px 50px rgba(0,0,0,0.02), 0 2px 8px rgba(0,0,0,0.01);">
-        
+    <div class="bg-white rounded-3xl border border-slate-200/80 overflow-hidden shadow-sm">
+
         {{-- Desktop Matrix Table --}}
-        <div class="hidden sm:block">
-            <table class="w-full text-sm">
-                <thead style="background: linear-gradient(135deg, rgba(248,250,252,0.95), rgba(241,245,249,0.95));">
-                    <tr class="border-b border-slate-100">
-                        <th class="px-6 py-4 text-left text-xs font-black text-slate-500 uppercase tracking-wider w-1/3">Fitur / Modul Aplikasi</th>
-                        <th class="px-5 py-4 text-center text-xs font-black text-slate-500 uppercase tracking-wider">Lihat (Read)</th>
-                        <th class="px-5 py-4 text-center text-xs font-black text-slate-500 uppercase tracking-wider">Tambah (Create)</th>
-                        <th class="px-5 py-4 text-center text-xs font-black text-slate-500 uppercase tracking-wider">Edit (Update)</th>
-                        <th class="px-5 py-4 text-center text-xs font-black text-slate-500 uppercase tracking-wider">Hapus (Delete)</th>
+        <div class="hidden sm:block overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">
+                        <th class="px-6 py-4 w-1/3">Fitur / Modul Aplikasi</th>
+                        <th class="px-5 py-4 text-center">Lihat (Read)</th>
+                        <th class="px-5 py-4 text-center">Tambah (Create)</th>
+                        <th class="px-5 py-4 text-center">Edit (Update)</th>
+                        <th class="px-5 py-4 text-center">Hapus (Delete)</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-50">
+                <tbody class="divide-y divide-slate-100 text-xs sm:text-sm font-medium text-slate-700">
                     @php $lastCategory = null; @endphp
                     @foreach($matrix as $key => $akses)
                         @if($akses['category'] !== $lastCategory)
                             <tr>
-                                <td colspan="5" class="px-6 py-3 bg-slate-50/70 border-y border-slate-100">
-                                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-                                        📁 {{ $akses['category'] }}
+                                <td colspan="5" class="px-6 py-3 bg-slate-50/50 border-y border-slate-100">
+                                    <span class="text-[10px] font-extrabold text-blue-600 uppercase tracking-widest flex items-center gap-1.5">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+                                        {{ $akses['category'] }}
                                     </span>
                                 </td>
                             </tr>
                             @php $lastCategory = $akses['category']; @endphp
                         @endif
-                        <tr class="hover:bg-blue-50/20 transition-colors duration-150">
+                        <tr class="hover:bg-blue-50/30 transition-colors">
                             <td class="px-6 py-4">
                                 <button type="button" wire:click="tandaiSemua('{{ $key }}')" @click="playClick()"
-                                        class="btn-sound font-extrabold text-slate-700 hover:text-blue-600 transition-colors text-left w-full flex items-center gap-2 group">
-                                    <span class="opacity-0 group-hover:opacity-100 text-[10px] text-blue-500 transition-opacity">⚡</span>
+                                        class="btn-sound font-bold text-slate-800 hover:text-blue-600 transition-colors text-left flex items-center gap-2 group">
+                                    <svg class="w-3.5 h-3.5 text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                                     <span>{{ $akses['label'] }}</span>
                                 </button>
                             </td>
-                            
-                            {{-- Checkbox Cells with Subtle Glow effects --}}
+
+                            {{-- Checkboxes --}}
                             <td class="px-5 py-4 text-center">
                                 <input wire:model="matrix.{{ $key }}.view" type="checkbox" @click="playClick()"
-                                       class="btn-sound w-5 h-5 rounded-lg text-blue-600 border-slate-300 focus:ring-blue-500/20 cursor-pointer shadow-sm transition-all" />
+                                       class="btn-sound w-5 h-5 rounded-lg text-blue-600 border-slate-300 focus:ring-2 focus:ring-blue-500/20 cursor-pointer shadow-sm transition-all" />
                             </td>
                             <td class="px-5 py-4 text-center">
                                 <input wire:model="matrix.{{ $key }}.create" type="checkbox" @click="playClick()"
-                                       class="btn-sound w-5 h-5 rounded-lg text-blue-600 border-slate-300 focus:ring-blue-500/20 cursor-pointer shadow-sm transition-all" />
+                                       class="btn-sound w-5 h-5 rounded-lg text-blue-600 border-slate-300 focus:ring-2 focus:ring-blue-500/20 cursor-pointer shadow-sm transition-all" />
                             </td>
                             <td class="px-5 py-4 text-center">
                                 <input wire:model="matrix.{{ $key }}.edit" type="checkbox" @click="playClick()"
-                                       class="btn-sound w-5 h-5 rounded-lg text-blue-600 border-slate-300 focus:ring-blue-500/20 cursor-pointer shadow-sm transition-all" />
+                                       class="btn-sound w-5 h-5 rounded-lg text-blue-600 border-slate-300 focus:ring-2 focus:ring-blue-500/20 cursor-pointer shadow-sm transition-all" />
                             </td>
                             <td class="px-5 py-4 text-center">
                                 <input wire:model="matrix.{{ $key }}.delete" type="checkbox" @click="playClick()"
-                                       class="btn-sound w-5 h-5 rounded-lg text-blue-600 border-slate-300 focus:ring-blue-500/20 cursor-pointer shadow-sm transition-all" />
+                                       class="btn-sound w-5 h-5 rounded-lg text-rose-600 border-slate-300 focus:ring-2 focus:ring-rose-500/20 cursor-pointer shadow-sm transition-all" />
                             </td>
                         </tr>
                     @endforeach
@@ -173,42 +176,45 @@ new #[Layout('layouts.app')] class extends Component {
             </table>
         </div>
 
-        {{-- Mobile Card Layout (Responsive Checkbox Grid) --}}
+        {{-- Mobile Card Layout --}}
         <div class="sm:hidden divide-y divide-slate-100">
             @php $lastCategoryMobile = null; @endphp
             @foreach($matrix as $key => $akses)
                 @if($akses['category'] !== $lastCategoryMobile)
-                    <div class="px-5 py-3.5 bg-slate-50/70 border-y border-slate-100">
-                        <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">📁 {{ $akses['category'] }}</span>
+                    <div class="px-5 py-3 bg-slate-50/70 border-y border-slate-100">
+                        <span class="text-[10px] font-extrabold text-blue-600 uppercase tracking-widest flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+                            {{ $akses['category'] }}
+                        </span>
                     </div>
                     @php $lastCategoryMobile = $akses['category']; @endphp
                 @endif
-                
-                <div class="p-5 hover:bg-blue-50/10 transition-all duration-150">
-                    <div class="flex items-center justify-between mb-4">
+
+                <div class="p-4 hover:bg-slate-50/50 transition-colors space-y-3">
+                    <div class="flex items-center justify-between">
                         <h3 class="font-extrabold text-slate-800 text-sm">{{ $akses['label'] }}</h3>
                         <button type="button" wire:click="tandaiSemua('{{ $key }}')" @click="playClick()"
-                                class="btn-sound text-[10px] text-blue-600 font-extrabold px-2.5 py-1 bg-blue-50 border border-blue-100 rounded-lg uppercase tracking-wider">
+                                class="btn-sound text-[10px] text-blue-600 font-bold px-2.5 py-1 bg-blue-50 border border-blue-100 rounded-lg uppercase tracking-wider">
                             Pilih Semua
                         </button>
                     </div>
-                    
-                    <div class="grid grid-cols-2 gap-3">
-                        <label class="flex items-center gap-3 p-2.5 rounded-xl border border-slate-100 bg-slate-50/30 cursor-pointer hover:border-blue-200 transition-colors">
-                            <input wire:model="matrix.{{ $key }}.view" type="checkbox" @click="playClick()" class="btn-sound w-5 h-5 rounded-lg text-blue-600 border-slate-300 focus:ring-blue-500/20 shadow-sm cursor-pointer" />
-                            <span class="text-xs text-slate-600 font-bold">Lihat</span>
+
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <label class="flex items-center gap-2.5 p-2.5 rounded-xl border border-slate-200/80 bg-white cursor-pointer hover:border-blue-200 transition-colors">
+                            <input wire:model="matrix.{{ $key }}.view" type="checkbox" @click="playClick()" class="btn-sound w-4 h-4 rounded-md text-blue-600 border-slate-300 focus:ring-blue-500/20 cursor-pointer" />
+                            <span class="text-xs text-slate-700 font-bold">Lihat</span>
                         </label>
-                        <label class="flex items-center gap-3 p-2.5 rounded-xl border border-slate-100 bg-slate-50/30 cursor-pointer hover:border-blue-200 transition-colors">
-                            <input wire:model="matrix.{{ $key }}.create" type="checkbox" @click="playClick()" class="btn-sound w-5 h-5 rounded-lg text-blue-600 border-slate-300 focus:ring-blue-500/20 shadow-sm cursor-pointer" />
-                            <span class="text-xs text-slate-600 font-bold">Tambah</span>
+                        <label class="flex items-center gap-2.5 p-2.5 rounded-xl border border-slate-200/80 bg-white cursor-pointer hover:border-blue-200 transition-colors">
+                            <input wire:model="matrix.{{ $key }}.create" type="checkbox" @click="playClick()" class="btn-sound w-4 h-4 rounded-md text-blue-600 border-slate-300 focus:ring-blue-500/20 cursor-pointer" />
+                            <span class="text-xs text-slate-700 font-bold">Tambah</span>
                         </label>
-                        <label class="flex items-center gap-3 p-2.5 rounded-xl border border-slate-100 bg-slate-50/30 cursor-pointer hover:border-blue-200 transition-colors">
-                            <input wire:model="matrix.{{ $key }}.edit" type="checkbox" @click="playClick()" class="btn-sound w-5 h-5 rounded-lg text-blue-600 border-slate-300 focus:ring-blue-500/20 shadow-sm cursor-pointer" />
-                            <span class="text-xs text-slate-600 font-bold">Edit</span>
+                        <label class="flex items-center gap-2.5 p-2.5 rounded-xl border border-slate-200/80 bg-white cursor-pointer hover:border-blue-200 transition-colors">
+                            <input wire:model="matrix.{{ $key }}.edit" type="checkbox" @click="playClick()" class="btn-sound w-4 h-4 rounded-md text-blue-600 border-slate-300 focus:ring-blue-500/20 cursor-pointer" />
+                            <span class="text-xs text-slate-700 font-bold">Edit</span>
                         </label>
-                        <label class="flex items-center gap-3 p-2.5 rounded-xl border border-slate-100 bg-slate-50/30 cursor-pointer hover:border-red-200 transition-colors">
-                            <input wire:model="matrix.{{ $key }}.delete" type="checkbox" @click="playClick()" class="btn-sound w-5 h-5 rounded-lg text-rose-500 border-slate-300 focus:ring-rose-500/20 shadow-sm cursor-pointer" />
-                            <span class="text-xs text-slate-600 font-bold">Hapus</span>
+                        <label class="flex items-center gap-2.5 p-2.5 rounded-xl border border-slate-200/80 bg-white cursor-pointer hover:border-rose-200 transition-colors">
+                            <input wire:model="matrix.{{ $key }}.delete" type="checkbox" @click="playClick()" class="btn-sound w-4 h-4 rounded-md text-rose-600 border-slate-300 focus:ring-rose-500/20 cursor-pointer" />
+                            <span class="text-xs text-slate-700 font-bold">Hapus</span>
                         </label>
                     </div>
                 </div>
@@ -216,16 +222,16 @@ new #[Layout('layouts.app')] class extends Component {
         </div>
 
         {{-- Action Footer --}}
-        <div class="px-6 py-5 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4 bg-gradient-to-r from-slate-50 to-slate-100/50">
-            <p class="text-xs text-slate-500 font-medium text-center sm:text-left">
-                ⚠️ Pengaturan hak akses staf akan langsung diterapkan setelah Anda menyimpan perubahan.
+        <div class="p-5 border-t border-slate-200/80 flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-50/50">
+            <p class="text-xs text-slate-500 font-medium text-center sm:text-left flex items-center gap-1.5">
+                <svg class="w-4 h-4 text-amber-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                Pengaturan hak akses staf akan langsung diterapkan setelah Anda menyimpan perubahan.
             </p>
             <button wire:click="simpan" @click="playSuccess()"
-                    class="btn-sound w-full sm:w-auto px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-wider text-white shadow-lg shadow-blue-200/50 hover:opacity-95 hover:shadow-xl transition-all"
-                    style="background: linear-gradient(135deg, #1D4ED8, #4F46E5);">
-                💾 Simpan Hak Akses
+                    class="btn-sound w-full sm:w-auto px-6 py-3 rounded-2xl text-xs font-bold uppercase tracking-wider text-white bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+                <span>Simpan Hak Akses</span>
             </button>
         </div>
     </div>
 </div>
-

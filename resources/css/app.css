@@ -1,3 +1,53 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+	nav[role="navigation"][aria-label="Pagination Navigation"] {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		flex-wrap: wrap;
+		gap: 0.75rem;
+	}
+
+	nav[role="navigation"][aria-label="Pagination Navigation"] [aria-current="page"] > span {
+		background-color: #2563eb !important;
+		color: #ffffff !important;
+		border-color: #2563eb !important;
+		border-radius: 0.875rem !important;
+		font-weight: 800 !important;
+		box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2) !important;
+	}
+
+	nav[role="navigation"][aria-label="Pagination Navigation"] a,
+	nav[role="navigation"][aria-label="Pagination Navigation"] button,
+	nav[role="navigation"][aria-label="Pagination Navigation"] [aria-disabled="true"] > span {
+		border: 1px solid #e2e8f0 !important;
+		border-radius: 0.875rem !important;
+		padding: 0.5rem 0.85rem !important;
+		background-color: #ffffff !important;
+		color: #475569 !important;
+		font-size: 0.75rem !important;
+		font-weight: 700 !important;
+		transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1) !important;
+	}
+
+	nav[role="navigation"][aria-label="Pagination Navigation"] a:hover,
+	nav[role="navigation"][aria-label="Pagination Navigation"] button:hover:not(:disabled) {
+		border-color: #bfdbfe !important;
+		background-color: #eff6ff !important;
+		color: #2563eb !important;
+	}
+
+	nav[role="navigation"][aria-label="Pagination Navigation"] p {
+		color: #64748b !important;
+		font-size: 0.75rem !important;
+		font-weight: 600 !important;
+	}
+
+	nav[role="navigation"][aria-label="Pagination Navigation"] svg {
+		width: 1rem !important;
+		height: 1rem !important;
+	}
+}

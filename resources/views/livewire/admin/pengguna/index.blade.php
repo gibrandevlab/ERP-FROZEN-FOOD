@@ -1,309 +1,292 @@
 <?php
 
-use App\Models\User;
+use App\Models\{User, Permission, UserPermission};
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 
 new #[Layout('layouts.app')] class extends Component {
 
-    public bool   $showForm = false;
-    public string $name     = '';
-    public string $email    = '';
-    public string $password = '';
-    public bool   $is_admin = false;
+    public ?User $user = null;
+    public array $matrix = [];
+    public array $users = [];
+    public bool $showUserList = false;
 
-    public function mount(): void
+    public function mount(?int $id = null): void
     {
         abort_unless(auth()->user()->is_admin, 403, 'Halaman ini khusus admin.');
-    }
 
-    public function getPenggunaProperty()
-    {
-        return User::latest()->get();
-    }
+        if ($id === null) {
+            $this->showUserList = true;
+            $this->users = User::latest()
+                ->get(['id', 'name', 'email', 'is_admin'])
+                ->toArray();
 
-    public function simpanUser(): void
-    {
-        $this->validate([
-            'name'     => ['required', 'string', 'max:255'],
-            'email'    => ['required', 'email', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:8'],
-            'is_admin' => ['boolean'],
-        ]);
-
-        $user = User::create([
-            'name'     => $this->name,
-            'email'    => $this->email,
-            'password' => $this->password,
-            'is_admin' => $this->is_admin,
-        ]);
-
-        if (! $user->is_admin) {
-            session()->flash('success', "Pengguna '{$user->name}' berhasil ditambahkan. Silakan atur hak aksesnya di bawah ini.");
-            $this->redirectRoute('admin.pengguna.hak-akses', ['id' => $user->id], navigate: true);
             return;
         }
 
-        $nama = $this->name;
-        $this->reset(['name', 'email', 'password', 'is_admin', 'showForm']);
-        session()->flash('success', "Admin '{$nama}' berhasil ditambahkan.");
+        $this->user    = User::findOrFail($id);
+        $permissions   = Permission::orderBy('category')->orderBy('label')->get();
+        $userPerms     = UserPermission::where('user_id', $this->user->id)->get()->keyBy('permission_id');
+
+        foreach ($permissions as $perm) {
+            $existing = $userPerms->get($perm->id);
+            $this->matrix[$perm->key] = [
+                'label'    => $perm->label,
+                'category' => $perm->category,
+                'view'     => (bool) ($existing?->can_view   ?? false),
+                'create'   => (bool) ($existing?->can_create ?? false),
+                'edit'     => (bool) ($existing?->can_edit   ?? false),
+                'delete'   => (bool) ($existing?->can_delete ?? false),
+            ];
+        }
     }
 
-    public function hapusUser(int $id): void
+    public function tandaiSemua(string $key): void
     {
-        if ($id === auth()->id()) {
-            session()->flash('error', 'Tidak bisa menghapus akun sendiri.');
-            return;
-        }
+        abort_unless(auth()->user()->is_admin, 403);
+        $semua = ! ($this->matrix[$key]['view'] && $this->matrix[$key]['create'] && $this->matrix[$key]['edit'] && $this->matrix[$key]['delete']);
+        $this->matrix[$key] = array_merge($this->matrix[$key], [
+            'view' => $semua, 'create' => $semua, 'edit' => $semua, 'delete' => $semua,
+        ]);
+    }
 
-        $user = User::findOrFail($id);
-        $nama = $user->name;
-        $user->delete();
-        session()->flash('success', "Pengguna '{$nama}' berhasil dihapus.");
+    public function simpan(): void
+    {
+        abort_unless(auth()->user()->is_admin, 403);
+        foreach ($this->matrix as $key => $akses) {
+            $perm = Permission::where('key', $key)->first();
+            if (! $perm) continue;
+            UserPermission::updateOrCreate(
+                ['user_id' => $this->user->id, 'permission_id' => $perm->id],
+                ['can_view' => $akses['view'], 'can_create' => $akses['create'], 'can_edit' => $akses['edit'], 'can_delete' => $akses['delete']]
+            );
+        }
+        session()->flash('success', "Hak akses untuk {$this->user->name} berhasil disimpan.");
     }
 }; ?>
 
-<div class="space-y-6 max-w-4xl mx-auto lg:max-w-none">
+<div class="space-y-6 max-w-5xl mx-auto">
 
-    {{-- Flash Messages (Styled Toast style alerts) --}}
+    @if ($showUserList)
+        <section class="space-y-5">
+            @if (session('success'))
+                <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">{{ session('success') }}</div>
+            @endif
+            @if (session('error'))
+                <div class="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800">{{ session('error') }}</div>
+            @endif
+
+            <header class="flex flex-col justify-between gap-3 border-b border-slate-200 pb-5 sm:flex-row sm:items-center">
+                <div>
+                    <h1 class="text-2xl font-extrabold text-slate-900">Manajemen Pengguna</h1>
+                    <p class="mt-1 text-sm text-slate-500">Pilih staf untuk mengatur hak aksesnya.</p>
+                </div>
+                <span class="text-sm font-semibold text-slate-500">{{ count($users) }} pengguna</span>
+            </header>
+
+            <div class="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                @forelse ($users as $listedUser)
+                    <div class="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div class="min-w-0">
+                            <p class="truncate text-sm font-bold text-slate-800">{{ $listedUser['name'] }}</p>
+                            <p class="truncate text-xs text-slate-500">{{ $listedUser['email'] }}</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="rounded-full px-2.5 py-1 text-xs font-bold {{ $listedUser['is_admin'] ? 'bg-blue-50 text-blue-700' : 'bg-slate-100 text-slate-600' }}">
+                                {{ $listedUser['is_admin'] ? 'Admin' : 'Staf' }}
+                            </span>
+                            @unless ($listedUser['is_admin'])
+                                <a href="{{ route('admin.pengguna.hak-akses', ['id' => $listedUser['id']]) }}" wire:navigate
+                                   class="rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-slate-700 hover:border-blue-300 hover:text-blue-700">
+                                    Atur Akses
+                                </a>
+                            @endunless
+                        </div>
+                    </div>
+                @empty
+                    <p class="px-5 py-8 text-center text-sm text-slate-500">Belum ada pengguna.</p>
+                @endforelse
+            </div>
+        </section>
+    @else
+
+    {{-- ── Flash Messages ── --}}
     @if (session('success'))
         <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)"
-             x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
-             x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
-             class="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs sm:text-sm rounded-2xl flex items-center justify-between shadow-md shadow-emerald-100/30">
-            <span class="flex items-center gap-2.5 font-bold">
-                <span class="text-emerald-500 text-base">🎉</span> 
+             class="rounded-2xl border border-emerald-200 bg-emerald-50 p-3.5 text-xs sm:text-sm text-emerald-800 shadow-sm flex items-center justify-between gap-3">
+            <span class="font-bold flex items-center gap-2">
+                <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                 {{ session('success') }}
             </span>
-            <button type="button" @click="show = false" class="text-emerald-400 hover:text-emerald-700 ml-3 text-lg leading-none font-bold">&times;</button>
+            <button type="button" @click="show = false" class="text-emerald-600 hover:text-emerald-800 font-bold p-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
         </div>
     @endif
     @if (session('error'))
         <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)"
-             x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
-             x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
-             class="p-4 bg-rose-50 border border-rose-200 text-rose-800 text-xs sm:text-sm rounded-2xl flex items-center justify-between shadow-md shadow-rose-100/30">
-            <span class="flex items-center gap-2.5 font-bold">
-                <span class="text-rose-500 text-base">⚠️</span> 
+             class="rounded-2xl border border-rose-200 bg-rose-50 p-3.5 text-xs sm:text-sm text-rose-800 shadow-sm flex items-center justify-between gap-3">
+            <span class="font-bold flex items-center gap-2">
+                <svg class="w-4 h-4 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                 {{ session('error') }}
             </span>
-            <button type="button" @click="show = false" class="text-rose-400 hover:text-rose-700 ml-3 text-lg leading-none font-bold">&times;</button>
+            <button type="button" @click="show = false" class="text-rose-600 hover:text-rose-800 font-bold p-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
         </div>
     @endif
 
     {{-- ── Header Area ── --}}
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
-        <div>
-            <h1 class="text-2xl font-black tracking-tight text-slate-800">👥 Manajemen Pengguna</h1>
-            <p class="text-xs text-slate-500 mt-1">Kelola staf operasional dan konfigurasi hak akses sistem.</p>
+    <div class="relative overflow-hidden rounded-3xl border border-blue-100/80 bg-gradient-to-r from-blue-50 via-white to-sky-50 p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="flex items-center gap-3.5">
+            <a href="{{ route('admin.pengguna.index') }}" wire:navigate @click="playClick()"
+               class="btn-sound w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center rounded-2xl bg-white border border-slate-200/80 text-slate-600 hover:text-blue-600 hover:border-blue-200 shadow-sm transition-all shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            </a>
+            <div>
+                <span class="inline-flex items-center px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider bg-blue-100/80 text-blue-700 rounded-lg">Konfigurasi Hak Akses</span>
+                <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 mt-1 flex items-center gap-2">
+                    <svg class="w-6 h-6 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 0121 9z"/></svg>
+                    Hak Akses Pengguna
+                </h1>
+                <p class="text-xs sm:text-sm font-medium text-slate-600 mt-0.5">
+                    Staf: <span class="font-bold text-slate-800">{{ $user->name }}</span> <span class="text-slate-400">({{ $user->email }})</span>
+                </p>
+            </div>
         </div>
-        
-        {{-- Premium Toggle Button --}}
-        <button wire:click="$toggle('showForm')"
-                @click="playClick()"
-                class="btn-sound flex items-center justify-center gap-2 px-5 py-3 rounded-2xl text-xs sm:text-sm font-extrabold transition-all duration-300 shadow-md self-start sm:self-center
-                       {{ $showForm
-                           ? 'bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200 hover:text-slate-800 shadow-none'
-                           : 'text-white bg-gradient-to-r from-blue-600 to-indigo-600 shadow-blue-200/50 hover:opacity-90 hover:shadow-lg' }}">
-            <span class="text-base leading-none">{{ $showForm ? '✕' : '➕' }}</span>
-            <span>{{ $showForm ? 'Tutup Form' : 'Tambah Pengguna' }}</span>
-        </button>
     </div>
 
-    {{-- ── Form Tambah User (Premium Styled Modal Card) ── --}}
-    @if($showForm)
-    <div x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform -translate-y-4" x-transition:enter-end="opacity-100 transform translate-y-0"
-         class="bg-white rounded-3xl border border-slate-100 overflow-hidden shadow-xl"
-         style="box-shadow: 0 10px 50px rgba(0,0,0,0.04), 0 2px 8px rgba(0,0,0,0.02);">
-        
-        {{-- Form Header --}}
-        <div class="p-5 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-slate-100 flex items-center justify-between">
-            <h2 class="text-sm font-black text-slate-700 flex items-center gap-2">
-                <span class="w-6 h-6 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xs shadow-md font-bold">+</span>
-                TAMBAH PENGGUNA BARU
-            </h2>
-            <button wire:click="$set('showForm', false)" class="text-slate-400 hover:text-slate-600 text-sm font-bold">✕</button>
+    {{-- ── Info Card ── --}}
+    <div class="rounded-2xl bg-white border border-slate-200/80 p-4 sm:p-5 shadow-sm flex items-start gap-3.5">
+        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
         </div>
-        
-        {{-- Form Content --}}
-        <div class="p-6">
-            <form wire:submit="simpanUser" class="space-y-5">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase tracking-wider">Nama Lengkap</label>
-                        <input wire:model="name" type="text" placeholder="Masukkan nama staf..."
-                               class="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm" />
-                        @error('name') <p class="text-rose-500 text-xs mt-1.5 font-bold">{{ $message }}</p> @enderror
+        <div>
+            <h3 class="text-xs sm:text-sm font-bold text-slate-800">Panduan Matriks Otorisasi</h3>
+            <p class="text-xs font-medium text-slate-500 mt-1 leading-relaxed">
+                Tandai kotak centang sesuai dengan wewenang yang ingin Anda berikan kepada staf. Anda dapat mengeklik <span class="font-bold text-slate-700">nama fitur/modul</span> untuk mengaktifkan atau menonaktifkan seluruh hak akses pada baris tersebut secara instan.
+            </p>
+        </div>
+    </div>
+
+    {{-- ── Matrix Table Container ── --}}
+    <div class="bg-white rounded-3xl border border-slate-200/80 overflow-hidden shadow-sm">
+
+        {{-- Desktop Matrix Table --}}
+        <div class="hidden sm:block overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">
+                        <th class="px-6 py-4 w-1/3">Fitur / Modul Aplikasi</th>
+                        <th class="px-5 py-4 text-center">Lihat (Read)</th>
+                        <th class="px-5 py-4 text-center">Tambah (Create)</th>
+                        <th class="px-5 py-4 text-center">Edit (Update)</th>
+                        <th class="px-5 py-4 text-center">Hapus (Delete)</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-xs sm:text-sm font-medium text-slate-700">
+                    @php $lastCategory = null; @endphp
+                    @foreach($matrix as $key => $akses)
+                        @if($akses['category'] !== $lastCategory)
+                            <tr>
+                                <td colspan="5" class="px-6 py-3 bg-slate-50/50 border-y border-slate-100">
+                                    <span class="text-[10px] font-extrabold text-blue-600 uppercase tracking-widest flex items-center gap-1.5">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+                                        {{ $akses['category'] }}
+                                    </span>
+                                </td>
+                            </tr>
+                            @php $lastCategory = $akses['category']; @endphp
+                        @endif
+                        <tr class="hover:bg-blue-50/30 transition-colors">
+                            <td class="px-6 py-4">
+                                <button type="button" wire:click="tandaiSemua('{{ $key }}')" @click="playClick()"
+                                        class="btn-sound font-bold text-slate-800 hover:text-blue-600 transition-colors text-left flex items-center gap-2 group">
+                                    <svg class="w-3.5 h-3.5 text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                    <span>{{ $akses['label'] }}</span>
+                                </button>
+                            </td>
+
+                            {{-- Checkboxes --}}
+                            <td class="px-5 py-4 text-center">
+                                <input wire:model="matrix.{{ $key }}.view" type="checkbox" @click="playClick()"
+                                       class="btn-sound w-5 h-5 rounded-lg text-blue-600 border-slate-300 focus:ring-2 focus:ring-blue-500/20 cursor-pointer shadow-sm transition-all" />
+                            </td>
+                            <td class="px-5 py-4 text-center">
+                                <input wire:model="matrix.{{ $key }}.create" type="checkbox" @click="playClick()"
+                                       class="btn-sound w-5 h-5 rounded-lg text-blue-600 border-slate-300 focus:ring-2 focus:ring-blue-500/20 cursor-pointer shadow-sm transition-all" />
+                            </td>
+                            <td class="px-5 py-4 text-center">
+                                <input wire:model="matrix.{{ $key }}.edit" type="checkbox" @click="playClick()"
+                                       class="btn-sound w-5 h-5 rounded-lg text-blue-600 border-slate-300 focus:ring-2 focus:ring-blue-500/20 cursor-pointer shadow-sm transition-all" />
+                            </td>
+                            <td class="px-5 py-4 text-center">
+                                <input wire:model="matrix.{{ $key }}.delete" type="checkbox" @click="playClick()"
+                                       class="btn-sound w-5 h-5 rounded-lg text-rose-600 border-slate-300 focus:ring-2 focus:ring-rose-500/20 cursor-pointer shadow-sm transition-all" />
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+
+        {{-- Mobile Card Layout --}}
+        <div class="sm:hidden divide-y divide-slate-100">
+            @php $lastCategoryMobile = null; @endphp
+            @foreach($matrix as $key => $akses)
+                @if($akses['category'] !== $lastCategoryMobile)
+                    <div class="px-5 py-3 bg-slate-50/70 border-y border-slate-100">
+                        <span class="text-[10px] font-extrabold text-blue-600 uppercase tracking-widest flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+                            {{ $akses['category'] }}
+                        </span>
                     </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase tracking-wider">Alamat Email</label>
-                        <input wire:model="email" type="email" placeholder="contoh@domain.com"
-                               class="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm" />
-                        @error('email') <p class="text-rose-500 text-xs mt-1.5 font-bold">{{ $message }}</p> @enderror
+                    @php $lastCategoryMobile = $akses['category']; @endphp
+                @endif
+
+                <div class="p-4 hover:bg-slate-50/50 transition-colors space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-extrabold text-slate-800 text-sm">{{ $akses['label'] }}</h3>
+                        <button type="button" wire:click="tandaiSemua('{{ $key }}')" @click="playClick()"
+                                class="btn-sound text-[10px] text-blue-600 font-bold px-2.5 py-1 bg-blue-50 border border-blue-100 rounded-lg uppercase tracking-wider">
+                            Pilih Semua
+                        </button>
                     </div>
-                    <div class="sm:col-span-2">
-                        <label class="block text-[10px] font-bold text-slate-500 mb-1.5 uppercase tracking-wider">Kata Sandi (Password)</label>
-                        <input wire:model="password" type="password" placeholder="Minimal 8 karakter unik..."
-                               class="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm" />
-                        @error('password') <p class="text-rose-500 text-xs mt-1.5 font-bold">{{ $message }}</p> @enderror
+
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <label class="flex items-center gap-2.5 p-2.5 rounded-xl border border-slate-200/80 bg-white cursor-pointer hover:border-blue-200 transition-colors">
+                            <input wire:model="matrix.{{ $key }}.view" type="checkbox" @click="playClick()" class="btn-sound w-4 h-4 rounded-md text-blue-600 border-slate-300 focus:ring-blue-500/20 cursor-pointer" />
+                            <span class="text-xs text-slate-700 font-bold">Lihat</span>
+                        </label>
+                        <label class="flex items-center gap-2.5 p-2.5 rounded-xl border border-slate-200/80 bg-white cursor-pointer hover:border-blue-200 transition-colors">
+                            <input wire:model="matrix.{{ $key }}.create" type="checkbox" @click="playClick()" class="btn-sound w-4 h-4 rounded-md text-blue-600 border-slate-300 focus:ring-blue-500/20 cursor-pointer" />
+                            <span class="text-xs text-slate-700 font-bold">Tambah</span>
+                        </label>
+                        <label class="flex items-center gap-2.5 p-2.5 rounded-xl border border-slate-200/80 bg-white cursor-pointer hover:border-blue-200 transition-colors">
+                            <input wire:model="matrix.{{ $key }}.edit" type="checkbox" @click="playClick()" class="btn-sound w-4 h-4 rounded-md text-blue-600 border-slate-300 focus:ring-blue-500/20 cursor-pointer" />
+                            <span class="text-xs text-slate-700 font-bold">Edit</span>
+                        </label>
+                        <label class="flex items-center gap-2.5 p-2.5 rounded-xl border border-slate-200/80 bg-white cursor-pointer hover:border-rose-200 transition-colors">
+                            <input wire:model="matrix.{{ $key }}.delete" type="checkbox" @click="playClick()" class="btn-sound w-4 h-4 rounded-md text-rose-600 border-slate-300 focus:ring-rose-500/20 cursor-pointer" />
+                            <span class="text-xs text-slate-700 font-bold">Hapus</span>
+                        </label>
                     </div>
                 </div>
+            @endforeach
+        </div>
 
-                {{-- Admin Switch Container --}}
-                <label class="flex items-start gap-4 p-4 rounded-2xl bg-slate-50/50 border border-slate-200 hover:border-indigo-300 transition-colors duration-300 cursor-pointer mt-2">
-                    <input wire:model="is_admin" id="is_admin_new" type="checkbox"
-                           class="w-5 h-5 rounded-lg text-indigo-600 border-slate-300 focus:ring-indigo-500/20 mt-0.5 flex-shrink-0 shadow-sm cursor-pointer" />
-                    <div>
-                        <p class="text-sm font-extrabold text-slate-700 flex items-center gap-1.5">
-                            ⚡ Jadikan Akun Admin
-                        </p>
-                        <p class="text-xs text-slate-500 mt-1 leading-relaxed">
-                            Admin memiliki hak akses penuh ke seluruh modul sistem (Keuangan, SPK, Stok, Kategori, Pelanggan, dan Supplier) tanpa batas.
-                        </p>
-                    </div>
-                </label>
-
-                {{-- Action Buttons --}}
-                <div class="flex items-center justify-end gap-3 pt-5 border-t border-slate-100 mt-3">
-                    <button type="button" wire:click="$set('showForm', false)"
-                            @click="playClick()"
-                            class="btn-sound px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-800 transition-colors uppercase tracking-wider">
-                        Batal
-                    </button>
-                    <button type="submit"
-                            @click="playSuccess()"
-                            class="btn-sound flex items-center gap-2 px-6 py-3 text-white rounded-2xl text-xs font-black uppercase tracking-wider shadow-lg shadow-blue-200/50 hover:opacity-95 hover:shadow-xl transition-all"
-                            style="background: linear-gradient(135deg, #1D4ED8, #4F46E5);">
-                        <span>💾</span>
-                        <span>Simpan & Atur Hak Akses</span>
-                    </button>
-                </div>
-            </form>
+        {{-- Action Footer --}}
+        <div class="p-5 border-t border-slate-200/80 flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-50/50">
+            <p class="text-xs text-slate-500 font-medium text-center sm:text-left flex items-center gap-1.5">
+                <svg class="w-4 h-4 text-amber-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                Pengaturan hak akses staf akan langsung diterapkan setelah Anda menyimpan perubahan.
+            </p>
+            <button wire:click="simpan" @click="playSuccess()"
+                    class="btn-sound w-full sm:w-auto px-6 py-3 rounded-2xl text-xs font-bold uppercase tracking-wider text-white bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+                <span>Simpan Hak Akses</span>
+            </button>
         </div>
     </div>
     @endif
-
-    {{-- ── Mobile Layout: Card List (Responsive) ── --}}
-    <div class="space-y-4 sm:hidden">
-        @foreach($this->pengguna as $u)
-        <div class="bg-white rounded-2xl border p-5 shadow-sm relative overflow-hidden transition-all duration-300
-                    {{ $u->id === auth()->id() ? 'border-blue-200 bg-blue-50/10' : 'border-slate-100' }}">
-            
-            {{-- Top Row --}}
-            <div class="flex items-center gap-3.5 mb-4">
-                {{-- Initial Circle with Gradient --}}
-                <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-500 via-blue-500 to-indigo-600 flex items-center justify-center text-white font-black text-sm flex-shrink-0 shadow-md">
-                    {{ strtoupper(substr($u->name, 0, 1)) }}
-                </div>
-                <div class="min-w-0 flex-1">
-                    <h3 class="font-extrabold text-slate-800 text-sm sm:text-base flex items-center gap-1.5 flex-wrap">
-                        {{ $u->name }}
-                        @if($u->id === auth()->id())
-                            <span class="text-[9px] font-black uppercase tracking-wider text-blue-600 bg-blue-100 border border-blue-200 px-2 py-0.5 rounded-full">kamu</span>
-                        @endif
-                    </h3>
-                    <p class="text-xs text-slate-500 font-medium truncate mt-0.5">{{ $u->email }}</p>
-                </div>
-                
-                {{-- Badge Status --}}
-                <span class="flex-shrink-0 inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider
-                             {{ $u->is_admin
-                                 ? 'bg-purple-100 text-purple-700 border border-purple-200'
-                                 : 'bg-slate-100 text-slate-600 border border-slate-200' }}">
-                    {{ $u->is_admin ? '⚡ Admin' : '👤 Staf' }}
-                </span>
-            </div>
-            
-            {{-- Bottom Buttons --}}
-            <div class="flex items-center gap-2 pt-3 border-t border-slate-50">
-                @unless($u->is_admin)
-                <a href="{{ route('admin.pengguna.hak-akses', $u->id) }}" wire:navigate
-                   @click="playClick()"
-                   class="btn-sound flex-1 text-center px-3.5 py-2.5 rounded-xl bg-blue-50 text-blue-700 text-xs font-bold border border-blue-100 hover:bg-blue-100 transition-all flex items-center justify-center gap-1.5">
-                    <span>🔑</span>
-                    <span>Hak Akses</span>
-                </a>
-                @endunless
-                
-                @if($u->id !== auth()->id())
-                <button wire:click="hapusUser({{ $u->id }})"
-                        wire:confirm="Hapus pengguna '{{ $u->name }}'? Seluruh data dan hak aksesnya juga akan terhapus."
-                        @click="playDanger()"
-                        class="btn-sound flex-1 text-center px-3.5 py-2.5 rounded-xl bg-rose-50 text-rose-600 text-xs font-bold border border-rose-100 hover:bg-rose-100 transition-all flex items-center justify-center gap-1.5">
-                    <span>🗑</span>
-                    <span>Hapus</span>
-                </button>
-                @endif
-            </div>
-        </div>
-        @endforeach
-    </div>
-
-    {{-- ── Desktop Layout: Premium Table ── --}}
-    <div class="hidden sm:block bg-white rounded-3xl border border-slate-100 overflow-hidden shadow-lg shadow-slate-100/40">
-        <table class="w-full text-sm">
-            <thead style="background: linear-gradient(135deg, rgba(248,250,252,0.95), rgba(241,245,249,0.95));">
-                <tr class="border-b border-slate-100">
-                    <th class="px-6 py-4 text-left text-xs font-black text-slate-500 uppercase tracking-wider">Detail Akun Pengguna</th>
-                    <th class="px-6 py-4 text-center text-xs font-black text-slate-500 uppercase tracking-wider">Level Hak Akses</th>
-                    <th class="px-6 py-4 text-right text-xs font-black text-slate-500 uppercase tracking-wider">Manajemen Akses & Aksi</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-50">
-                @foreach($this->pengguna as $u)
-                <tr class="hover:bg-blue-50/10 transition-colors duration-200 {{ $u->id === auth()->id() ? 'bg-blue-50/5' : '' }}">
-                    <td class="px-6 py-4">
-                        <div class="flex items-center gap-4">
-                            {{-- Circular avatar with premium gradient --}}
-                            <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-500 via-blue-500 to-indigo-600 flex items-center justify-center text-white font-black text-sm flex-shrink-0 shadow-md">
-                                {{ strtoupper(substr($u->name, 0, 1)) }}
-                            </div>
-                            <div>
-                                <h3 class="font-extrabold text-slate-800 text-sm sm:text-base flex items-center gap-1.5">
-                                    {{ $u->name }}
-                                    @if($u->id === auth()->id())
-                                        <span class="text-[9px] font-black uppercase tracking-wider text-blue-600 bg-blue-100 border border-blue-200 px-1.5 py-0.5 rounded-full">kamu</span>
-                                    @endif
-                                </h3>
-                                <p class="text-xs text-slate-400 font-semibold mt-0.5">{{ $u->email }}</p>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 text-center">
-                        <span class="inline-flex items-center px-3.5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider
-                                     {{ $u->is_admin
-                                         ? 'bg-purple-50 text-purple-700 border border-purple-100'
-                                         : 'bg-slate-100 text-slate-500 border border-slate-200' }}">
-                            {{ $u->is_admin ? '⚡ Admin' : '👤 Staf' }}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                        <div class="flex items-center justify-end gap-2.5">
-                            @unless($u->is_admin)
-                            <a href="{{ route('admin.pengguna.hak-akses', $u->id) }}" wire:navigate
-                               @click="playClick()"
-                               class="btn-sound inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-50 text-blue-700 text-xs font-bold border border-blue-100/60 hover:bg-blue-100 transition-all shadow-sm">
-                                <span>🔑</span>
-                                <span>Atur Hak Akses</span>
-                            </a>
-                            @endunless
-                            
-                            @if($u->id !== auth()->id())
-                            <button wire:click="hapusUser({{ $u->id }})"
-                                    wire:confirm="Hapus pengguna '{{ $u->name }}'? Seluruh data dan hak aksesnya juga akan terhapus."
-                                    @click="playDanger()"
-                                    class="btn-sound inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-rose-50 text-rose-600 text-xs font-bold border border-rose-100/60 hover:bg-rose-100 transition-all shadow-sm">
-                                <span>🗑</span>
-                                <span>Hapus</span>
-                            </button>
-                            @endif
-                        </div>
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
-
 </div>
-

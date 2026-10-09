@@ -65,29 +65,31 @@ new class extends Component
 <section>
     <form wire:submit="updateProfileInformation" class="space-y-4">
         <div>
-            <label for="name" class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wide">Nama Lengkap</label>
+            <label for="name" class="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider">Nama Lengkap <span class="text-rose-500">*</span></label>
             <input wire:model="name" id="name" type="text"
-                   class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all shadow-sm" required autofocus />
-            @error('name') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                   class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-xs sm:text-sm font-medium text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm" required autofocus />
+            @error('name') <p class="text-rose-500 text-xs mt-1 font-semibold">{{ $message }}</p> @enderror
         </div>
 
         <div>
-            <label for="email" class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wide">Alamat Email</label>
+            <label for="email" class="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider">Alamat Email <span class="text-rose-500">*</span></label>
             <input wire:model="email" id="email" type="email"
-                   class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all shadow-sm" required />
-            @error('email') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                   class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-xs sm:text-sm font-medium text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm" required />
+            @error('email') <p class="text-rose-500 text-xs mt-1 font-semibold">{{ $message }}</p> @enderror
 
             @if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! auth()->user()->hasVerifiedEmail())
-                <div class="mt-3 bg-orange-50 border border-orange-100 p-3 rounded-xl">
-                    <p class="text-xs text-orange-800">
-                        Email Anda belum diverifikasi.
-                        <button wire:click.prevent="sendVerification" class="font-bold underline hover:text-orange-900 focus:outline-none">
-                            Klik di sini untuk mengirim ulang email verifikasi.
+                <div class="mt-3 bg-amber-50 border border-amber-200 p-3.5 rounded-2xl space-y-2">
+                    <p class="text-xs text-amber-800 font-medium flex items-center gap-1.5">
+                        <svg class="w-4 h-4 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        <span>Email Anda belum diverifikasi.</span>
+                        <button wire:click.prevent="sendVerification" class="font-bold underline text-amber-900 hover:text-amber-950 focus:outline-none ml-1">
+                            Kirim ulang email verifikasi
                         </button>
                     </p>
 
                     @if (session('status') === 'verification-link-sent')
-                        <p class="mt-2 font-bold text-xs text-emerald-600">
+                        <p class="font-extrabold text-xs text-emerald-600 flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                             Tautan verifikasi baru telah dikirim ke alamat email Anda.
                         </p>
                     @endif
@@ -96,13 +98,15 @@ new class extends Component
         </div>
 
         <div class="flex items-center gap-4 pt-2">
-            <button type="submit"
-                    class="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl text-sm font-semibold shadow-lg shadow-blue-200/50 hover:opacity-90 transition-all">
-                Simpan Profil
+            <button type="submit" @click="playSuccess()"
+                    class="btn-sound inline-flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-2xl text-xs font-bold uppercase tracking-wider shadow-md shadow-blue-600/20 hover:bg-blue-700 transition-all">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+                <span>Simpan Profil</span>
             </button>
 
-            <x-action-message class="text-sm text-emerald-600 font-semibold" on="profile-updated">
-                Berhasil disimpan.
+            <x-action-message class="text-xs text-emerald-600 font-extrabold flex items-center gap-1" on="profile-updated">
+                <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                <span>Berhasil disimpan.</span>
             </x-action-message>
         </div>
     </form>

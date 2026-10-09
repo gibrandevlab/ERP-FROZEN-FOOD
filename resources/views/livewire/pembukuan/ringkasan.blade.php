@@ -63,70 +63,77 @@ new #[Layout('layouts.app')] class extends Component {
     }
 }; ?>
 
-<div class="space-y-5 max-w-4xl mx-auto lg:max-w-none">
+<div class="space-y-6 max-w-5xl mx-auto">
 
-    {{-- Header --}}
-    <div class="flex items-center justify-between mb-2">
-        <div class="flex items-center gap-3">
+    {{-- ── Banner Header ── --}}
+    <div class="relative overflow-hidden rounded-3xl border border-blue-100/80 bg-gradient-to-r from-blue-50 via-white to-sky-50 p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="flex items-center gap-3.5">
             <a href="{{ route('pembukuan.index') }}" wire:navigate @click="playClick()"
-               class="btn-sound w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-slate-700 hover:bg-slate-50 shadow-sm transition-all shrink-0">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+               class="btn-sound w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center rounded-2xl bg-white border border-slate-200/80 text-slate-600 hover:text-blue-600 hover:border-blue-200 shadow-sm transition-all shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
             </a>
             <div>
-                <h1 class="text-xl font-extrabold" style="color: #1E293B;">Ringkasan Pembukuan</h1>
-                <p class="text-xs text-slate-500 mt-0.5">Laporan arus kas bulanan</p>
+                <span class="inline-flex items-center px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider bg-blue-100/80 text-blue-700 rounded-lg">Laporan Tahunan</span>
+                <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 mt-1 flex items-center gap-2">
+                    <svg class="w-6 h-6 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                    Ringkasan Pembukuan
+                </h1>
+                <p class="text-xs sm:text-sm font-medium text-slate-600 mt-0.5">Rekapitulasi arus kas masuk, keluar, dan kalkulasi laba rugi bulanan.</p>
             </div>
         </div>
+
         <select wire:model.live="tahun" @change="playClick()"
-                class="px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 shadow-sm transition-all cursor-pointer">
+                class="px-4 py-2.5 bg-white border border-slate-200/80 rounded-2xl text-xs sm:text-sm font-bold text-slate-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 shadow-sm transition-all cursor-pointer self-start sm:self-auto shrink-0">
             @for($y = now()->year; $y >= now()->year - 5; $y--)
                 <option value="{{ $y }}">Tahun {{ $y }}</option>
             @endfor
         </select>
     </div>
 
-    {{-- Total Tahunan --}}
+    {{-- ── Total Tahunan KPI ── --}}
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
-            <p class="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-2">Total Pemasukan</p>
-            <p class="text-2xl font-extrabold text-emerald-600">Rp {{ $totalIncome }}</p>
+        <div class="bg-white rounded-3xl border border-slate-200/80 p-5 shadow-sm">
+            <span class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Total Pemasukan</span>
+            <p class="text-2xl sm:text-3xl font-extrabold text-emerald-600">Rp {{ $totalIncome }}</p>
         </div>
-        <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
-            <p class="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-2">Total Pengeluaran</p>
-            <p class="text-2xl font-extrabold text-red-500">Rp {{ $totalExpense }}</p>
+
+        <div class="bg-white rounded-3xl border border-slate-200/80 p-5 shadow-sm">
+            <span class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Total Pengeluaran</span>
+            <p class="text-2xl sm:text-3xl font-extrabold text-rose-600">Rp {{ $totalExpense }}</p>
         </div>
-        <div class="bg-white rounded-2xl border p-5 shadow-sm {{ $labaPositif ? 'border-blue-100 bg-blue-50/30' : 'border-red-100 bg-red-50/30' }}">
-            <p class="text-xs uppercase tracking-wider font-semibold mb-2 {{ $labaPositif ? 'text-blue-500' : 'text-red-500' }}">Laba Kotor</p>
-            <p class="text-2xl font-extrabold {{ $labaPositif ? 'text-blue-600' : 'text-red-600' }}">
+
+        <div class="bg-white rounded-3xl border p-5 shadow-sm {{ $labaPositif ? 'border-blue-200/80 bg-gradient-to-br from-blue-50/50 to-white' : 'border-rose-200/80 bg-gradient-to-br from-rose-50/50 to-white' }}">
+            <span class="block text-xs font-bold uppercase tracking-wider mb-1 {{ $labaPositif ? 'text-blue-600' : 'text-rose-600' }}">Laba Kotor / Bersih</span>
+            <p class="text-2xl sm:text-3xl font-extrabold {{ $labaPositif ? 'text-blue-600' : 'text-rose-600' }}">
                 {{ $labaPositif ? '' : '-' }}Rp {{ $totalLaba }}
             </p>
         </div>
     </div>
 
-    {{-- Tabel Per Bulan --}}
-    <div class="bg-white rounded-2xl border border-slate-100 overflow-hidden" style="box-shadow: 0 4px 40px rgba(0,0,0,0.05), 0 1px 8px rgba(0,0,0,0.04);">
-        <table class="w-full text-sm">
-            <thead style="background: linear-gradient(135deg, rgba(248,250,252,0.95), rgba(241,245,249,0.95));">
-                <tr class="border-b border-slate-100">
-                    <th class="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Bulan</th>
-                    <th class="px-5 py-3.5 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Pemasukan</th>
-                    <th class="px-5 py-3.5 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Pengeluaran</th>
-                    <th class="px-5 py-3.5 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Laba Bersih</th>
+    {{-- ── Tabel Per Bulan ── --}}
+    <div class="bg-white rounded-3xl border border-slate-200/80 overflow-hidden shadow-sm">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">
+                    <th class="px-6 py-4">Bulan</th>
+                    <th class="px-6 py-4 text-right">Pemasukan</th>
+                    <th class="px-6 py-4 text-right">Pengeluaran</th>
+                    <th class="px-6 py-4 text-right">Laba Bersih</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-slate-50">
+            <tbody class="divide-y divide-slate-100 text-xs sm:text-sm font-medium text-slate-700">
                 @foreach($dataPerBulan as $row)
                 <tr class="{{ $row['income'] == 0 && $row['expense'] == 0 ? 'bg-slate-50/30 text-slate-400' : 'hover:bg-blue-50/30 transition-colors text-slate-800' }}">
-                    <td class="px-5 py-4 font-semibold">
+                    <td class="px-6 py-4 font-extrabold">
                         {{ $row['bulan'] }}
                     </td>
-                    <td class="px-5 py-4 text-right font-medium {{ $row['income'] > 0 ? 'text-emerald-600' : '' }}">
+                    <td class="px-6 py-4 text-right font-bold {{ $row['income'] > 0 ? 'text-emerald-600' : 'text-slate-400' }}">
                         {{ $row['income'] > 0 ? 'Rp '.number_format($row['income'], 0, ',', '.') : '—' }}
                     </td>
-                    <td class="px-5 py-4 text-right font-medium {{ $row['expense'] > 0 ? 'text-red-500' : '' }}">
+                    <td class="px-6 py-4 text-right font-bold {{ $row['expense'] > 0 ? 'text-rose-600' : 'text-slate-400' }}">
                         {{ $row['expense'] > 0 ? 'Rp '.number_format($row['expense'], 0, ',', '.') : '—' }}
                     </td>
-                    <td class="px-5 py-4 text-right font-bold {{ $row['laba'] > 0 ? 'text-blue-600' : ($row['laba'] < 0 ? 'text-red-600' : '') }}">
+                    <td class="px-6 py-4 text-right font-extrabold {{ $row['laba'] > 0 ? 'text-blue-600' : ($row['laba'] < 0 ? 'text-rose-600' : 'text-slate-400') }}">
                         @if($row['income'] == 0 && $row['expense'] == 0) —
                         @elseif($row['laba'] >= 0) Rp {{ number_format($row['laba'], 0, ',', '.') }}
                         @else -Rp {{ number_format(abs($row['laba']), 0, ',', '.') }}
