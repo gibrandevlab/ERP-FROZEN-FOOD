@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Supplier extends Model
@@ -30,6 +29,16 @@ class Supplier extends Model
         return $this->hasMany(Ledger::class);
     }
 
+    public function purchaseRequests()
+    {
+        return $this->hasMany(PurchaseRequest::class);
+    }
+
+    public function purchaseLedgers()
+    {
+        return $this->hasMany(Ledger::class)->where('type', 'expense');
+    }
+
     /**
      * Produk yang disuplai oleh supplier ini (melalui transaksi pembukuan/ledger).
      */
@@ -44,5 +53,24 @@ class Supplier extends Model
             'product_id'   // Local key on ledgers table
         )->distinct();
     }
-}
 
+    public function totalTransactions(): int
+    {
+        return (int) $this->ledgers()->where('type', 'expense')->count();
+    }
+
+    public function totalItemsSupplied(): int
+    {
+        return (int) $this->ledgers()->where('type', 'expense')->sum('quantity');
+    }
+
+    public function totalPurchases(): float
+    {
+        return (float) $this->ledgers()->where('type', 'expense')->sum('amount');
+    }
+
+    public function unpaidPayables(): float
+    {
+        return (float) $this->ledgers()->where('type', 'expense')->where('payment_status', 'unpaid')->sum('amount');
+    }
+}

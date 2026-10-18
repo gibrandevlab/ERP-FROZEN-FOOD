@@ -357,6 +357,40 @@ new #[Layout('layouts.app')] class extends Component {
                     </div>
                 </a>
 
+                {{-- 7b. Forecast Restock --}}
+                @can('view-forecast')
+                <a href="{{ route('forecast.index') }}" wire:navigate @click="playClick()"
+                   class="btn-sound group flex flex-col justify-between p-4 sm:p-5 bg-white rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md hover:border-cyan-300 transition-all">
+                    <div class="flex items-center justify-between w-full mb-4">
+                        <div class="w-10 h-10 bg-cyan-50 rounded-xl flex items-center justify-center text-cyan-600 group-hover:bg-cyan-600 group-hover:text-white transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 17l6-6 4 4 8-8M21 7v6h-6"/></svg>
+                        </div>
+                        <svg class="w-4 h-4 text-slate-300 group-hover:text-cyan-500 group-hover:translate-x-0.5 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </div>
+                    <div>
+                        <p class="text-sm font-bold text-slate-800 group-hover:text-cyan-600 transition-colors">Forecast Restock</p>
+                        <p class="text-[11px] text-slate-400 mt-0.5 line-clamp-1">SES, ROP &amp; draft PR</p>
+                    </div>
+                </a>
+                @endcan
+
+                {{-- 7c. Persetujuan Pembelian --}}
+                @can('view-purchase_approval')
+                <a href="{{ route('purchase-approval.index') }}" wire:navigate @click="playClick()"
+                   class="btn-sound group flex flex-col justify-between p-4 sm:p-5 bg-white rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md hover:border-emerald-300 transition-all">
+                    <div class="flex items-center justify-between w-full mb-4">
+                        <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                        </div>
+                        <svg class="w-4 h-4 text-slate-300 group-hover:text-emerald-500 group-hover:translate-x-0.5 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </div>
+                    <div>
+                        <p class="text-sm font-bold text-slate-800 group-hover:text-emerald-600 transition-colors">Persetujuan PR</p>
+                        <p class="text-[11px] text-slate-400 mt-0.5 line-clamp-1">Approve / reject pengajuan</p>
+                    </div>
+                </a>
+                @endcan
+
                 {{-- 8. Pelanggan --}}
                 <a href="{{ route('pelanggan.index') }}" wire:navigate @click="playClick()"
                    class="btn-sound group flex flex-col justify-between p-4 sm:p-5 bg-white rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md hover:border-orange-300 transition-all">

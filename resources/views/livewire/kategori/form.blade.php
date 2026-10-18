@@ -28,7 +28,7 @@ new #[Layout('layouts.app')] class extends Component {
     {
         $this->authorize($this->modeEdit ? 'edit-kategori' : 'create-kategori');
         $validated = $this->validate([
-            'name'        => ['required', 'string', 'max:100'],
+            'name'        => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:500'],
         ]);
 
@@ -36,6 +36,7 @@ new #[Layout('layouts.app')] class extends Component {
             $this->kategori->update($validated);
             session()->flash('success', 'Kategori berhasil diperbarui.');
         } else {
+            $validated['user_id'] = auth()->id();
             Category::create($validated);
             session()->flash('success', 'Kategori baru berhasil ditambahkan.');
         }

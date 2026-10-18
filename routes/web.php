@@ -57,14 +57,35 @@ Route::middleware(['auth'])->group(function () {
         Volt::route('/', 'supplier.index')->name('index');
     });
 
+    // ── Purchase Request ───────────────────────────────────────────────────
+    Route::prefix('purchase-request')->name('purchase-request.')->middleware('can:view-purchase_request')->group(function () {
+        Volt::route('/', 'purchase-request.index')->name('index');
+    });
+
+    // ── Persetujuan Pembelian (RBAC terpisah dari pembuatan PR) ───────────
+    Route::prefix('purchase-approval')->name('purchase-approval.')->middleware('can:view-purchase_approval')->group(function () {
+        Volt::route('/', 'purchase-approval.index')->name('index');
+    });
+
+    // ── Forecast Restock ───────────────────────────────────────────────────
+    Volt::route('/forecast', 'forecast.index')->name('forecast.index')->middleware('can:view-forecast');
+
     // ── SPK (Sistem Pendukung Keputusan) ──────────────────────────────────
     Volt::route('/spk', 'spk.index')->name('spk.index')->middleware('can:view-spk');
 
     // ── Admin Panel ────────────────────────────────────────────────────────
     Route::prefix('admin')->name('admin.')->middleware('can:view-pengguna')->group(function () {
         Volt::route('/pengguna', 'admin.pengguna.index')->name('pengguna.index');
+        Volt::route('/pengguna/tambah', 'admin.pengguna.form')->name('pengguna.tambah')->middleware('can:create-pengguna');
+        Volt::route('/pengguna/{id}/edit', 'admin.pengguna.form')->name('pengguna.edit')->middleware('can:edit-pengguna');
         Volt::route('/pengguna/{id}/hak-akses', 'admin.pengguna.hak-akses')->name('pengguna.hak-akses');
+
+        // Token Usage Management
+        Volt::route('/token-usage', 'admin.token-usage.index')->name('token-usage.index');
     });
+
+    // ── AI Assistant & Chat Session ────────────────────────────────────────
+    Volt::route('/chat/{conversation?}', 'chat.index')->name('chat.index');
 
     // Profile
     Route::view('profile', 'profile')->name('profile');

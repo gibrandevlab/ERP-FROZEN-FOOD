@@ -20,6 +20,20 @@
         </a>
     </li>
 
+    {{-- ── Asisten AI (DeepSeek Context & Memory) ─────────────────── --}}
+    <li>
+        <a href="{{ route('chat.index') }}" wire:navigate
+           @click="playClick(); sidebarOpen = false"
+           class="btn-sound flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150
+                  {{ request()->routeIs('chat.*')
+                      ? 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/15 text-blue-600 dark:text-blue-400 shadow-sm border border-blue-100/60 dark:border-blue-800/40'
+                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5 hover:text-slate-800 dark:hover:text-white' }}">
+            <span class="text-base leading-none w-5 text-center">✨</span>
+            <span>Asisten AI</span>
+            <span class="ml-auto inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-blue-100 text-blue-700">DeepSeek</span>
+        </a>
+    </li>
+
     {{-- ── Divider: Bisnis ──────────────────────────────────────── --}}
     <li class="pt-5 pb-1.5 px-1">
         <span class="text-[10px] font-bold text-slate-400 dark:text-slate-600 uppercase tracking-widest">Bisnis</span>
@@ -55,6 +69,24 @@
             <span class="text-base leading-none w-5 text-center">🏷️</span>
             <span>Kategori</span>
             @if(request()->routeIs('kategori.*'))
+                <span class="ml-auto w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+            @endif
+        </a>
+    </li>
+    @endcan
+
+    {{-- Lokasi Stok --}}
+    @can('view-lokasi')
+    <li>
+        <a href="{{ route('lokasi.index') }}" wire:navigate
+           @click="playClick(); sidebarOpen = false"
+           class="btn-sound flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150
+                  {{ request()->routeIs('lokasi.*')
+                      ? 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/15 text-blue-600 dark:text-blue-400 shadow-sm border border-blue-100/60 dark:border-blue-800/40'
+                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5 hover:text-slate-800 dark:hover:text-white' }}">
+            <span class="text-base leading-none w-5 text-center">📍</span>
+            <span>Lokasi Stok</span>
+            @if(request()->routeIs('lokasi.*'))
                 <span class="ml-auto w-1.5 h-1.5 rounded-full bg-blue-500"></span>
             @endif
         </a>
@@ -97,6 +129,42 @@
     </li>
     @endcan
 
+    {{-- Purchase Request --}}
+    @can('view-purchase_request')
+    <li>
+        <a href="{{ route('purchase-request.index') }}" wire:navigate
+           @click="playClick(); sidebarOpen = false"
+           class="btn-sound flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150
+                  {{ request()->routeIs('purchase-request.*')
+                      ? 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/15 text-blue-600 dark:text-blue-400 shadow-sm border border-blue-100/60 dark:border-blue-800/40'
+                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5 hover:text-slate-800 dark:hover:text-white' }}">
+            <span class="text-base leading-none w-5 text-center">🧾</span>
+            <span>Permintaan Pembelian</span>
+            @if(request()->routeIs('purchase-request.*'))
+                <span class="ml-auto w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+            @endif
+        </a>
+    </li>
+    @endcan
+
+    {{-- Persetujuan Pembelian --}}
+    @can('view-purchase_approval')
+    <li>
+        <a href="{{ route('purchase-approval.index') }}" wire:navigate
+           @click="playClick(); sidebarOpen = false"
+           class="btn-sound flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150
+                  {{ request()->routeIs('purchase-approval.*')
+                      ? 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/15 text-blue-600 dark:text-blue-400 shadow-sm border border-blue-100/60 dark:border-blue-800/40'
+                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5 hover:text-slate-800 dark:hover:text-white' }}">
+            <span class="text-base leading-none w-5 text-center">✅</span>
+            <span>Persetujuan PR</span>
+            @if(request()->routeIs('purchase-approval.*'))
+                <span class="ml-auto w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+            @endif
+        </a>
+    </li>
+    @endcan
+
     {{-- SPK --}}
     @can('view-spk')
     <li>
@@ -109,6 +177,24 @@
             <span class="text-base leading-none w-5 text-center">🧠</span>
             <span>SPK Restock</span>
             @if(request()->routeIs('spk.*'))
+                <span class="ml-auto w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+            @endif
+        </a>
+    </li>
+    @endcan
+
+    {{-- Forecast Restock --}}
+    @can('view-forecast')
+    <li>
+        <a href="{{ route('forecast.index') }}" wire:navigate
+           @click="playClick(); sidebarOpen = false"
+           class="btn-sound flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150
+                  {{ request()->routeIs('forecast.*')
+                      ? 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/15 text-blue-600 dark:text-blue-400 shadow-sm border border-blue-100/60 dark:border-blue-800/40'
+                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5 hover:text-slate-800 dark:hover:text-white' }}">
+            <span class="text-base leading-none w-5 text-center">📈</span>
+            <span>Forecast Restock</span>
+            @if(request()->routeIs('forecast.*'))
                 <span class="ml-auto w-1.5 h-1.5 rounded-full bg-blue-500"></span>
             @endif
         </a>

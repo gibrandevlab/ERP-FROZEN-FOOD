@@ -142,6 +142,8 @@ class AllTableSeeder extends Seeder
             ['supplier', 'Supplier', 'master', 'Kelola data supplier'],
             ['spk', 'SPK', 'analisis', 'Sistem pendukung keputusan pemilihan supplier'],
             ['purchase_request', 'Permintaan Pembelian', 'inventori', 'Ajukan dan proses permintaan pembelian'],
+            ['purchase_approval', 'Persetujuan Pembelian', 'inventori', 'Tinjau, setujui, atau tolak permintaan pembelian'],
+            ['forecast', 'Forecast Restock', 'analisis', 'Prakiraan permintaan, reorder point, dan draft restock otomatis'],
             ['pembukuan', 'Pembukuan', 'transaksi', 'Catat pemasukan dan pengeluaran'],
             ['ringkasan', 'Ringkasan', 'umum', 'Lihat ringkasan dan laporan'],
             ['pengguna', 'Pengguna', 'admin', 'Kelola pengguna dan hak akses'],
@@ -287,10 +289,12 @@ class AllTableSeeder extends Seeder
             ],
             'gudang' => [
                 'dashboard' => 'v', 'stok' => 'vce', 'lokasi' => 'v', 'purchase_request' => 'vce',
+                'forecast' => 'v',
             ],
             'purchasing' => [
                 'dashboard' => 'v', 'stok' => 'v', 'supplier' => 'vce', 'pembukuan' => 'v',
                 'purchase_request' => 'vced', 'ringkasan' => 'v',
+                'purchase_approval' => 've', 'forecast' => 'v',
             ],
         ];
         $userPermissions = [];

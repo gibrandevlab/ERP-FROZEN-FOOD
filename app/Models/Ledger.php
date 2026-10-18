@@ -155,6 +155,7 @@ class Ledger extends Model
                     'product_id' => $movement['product_id'],
                     'location_id' => $movement['location_id'],
                     'quantity' => 0,
+                    'user_id' => auth()->id(),
                 ]);
             }
 

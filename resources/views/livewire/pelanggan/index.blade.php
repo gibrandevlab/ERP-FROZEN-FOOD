@@ -52,13 +52,14 @@ new #[Layout('layouts.app')] class extends Component {
         $this->authorize('create-pelanggan');
         $this->validate([
             'newCustName'  => 'required|string|max:255',
-            'newCustPhone' => 'nullable|string|max:20',
+            'newCustPhone' => 'nullable|string|max:255',
             'newCustType'  => 'required|in:seller,non_seller',
         ]);
         Customer::create([
             'name'  => $this->newCustName,
             'phone' => $this->newCustPhone,
             'type'  => $this->newCustType,
+            'user_id' => auth()->id(),
         ]);
         $this->reset(['newCustName', 'newCustPhone']);
         $this->newCustType = 'non_seller';
@@ -83,7 +84,7 @@ new #[Layout('layouts.app')] class extends Component {
         $this->authorize('edit-pelanggan');
         $this->validate([
             'editCustName'  => 'required|string|max:255',
-            'editCustPhone' => 'nullable|string|max:20',
+            'editCustPhone' => 'nullable|string|max:255',
             'editCustType'  => 'required|in:seller,non_seller',
         ]);
         Customer::findOrFail($this->editId)->update([

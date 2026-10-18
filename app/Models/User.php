@@ -51,6 +51,51 @@ class User extends Authenticatable
         return $this->hasMany(UserPermission::class);
     }
 
+    /**
+     * Semua sesi percakapan chat milik user ini.
+     */
+    public function conversations()
+    {
+        return $this->hasMany(Conversation::class);
+    }
+
+    /**
+     * Kuota token AI untuk user ini (bisa null jika belum diset = unlimited).
+     */
+    public function tokenLimit()
+    {
+        return $this->hasOne(TokenLimit::class);
+    }
+
+    /**
+     * Cek apakah user boleh mengirim pesan ke AI (kuota & enable status).
+     * Admin selalu boleh (tidak dibatasi).
+     */
+    public function canUseChatAI(): bool
+    {
+        if ($this->is_admin) return true;
+        $limit = $this->tokenLimit;
+        if (! $limit) return true; // belum ada record = unlimited
+        return $limit->canSendMessage();
+    }
+
+    /**
+     * Pesan error kuota (untuk ditampilkan ke user).
+     */
+    public function chatQuotaErrorMessage(): string
+    {
+        $limit = $this->tokenLimit;
+        if (! $limit || ! $this->tokenLimit) return '';
+        if (! $limit->is_enabled) return 'Akses AI Anda telah dinonaktifkan oleh administrator.';
+        if ($limit->daily_token_limit > 0 && $limit->todayUsage() >= $limit->daily_token_limit) {
+            return "Kuota harian Anda ({$limit->daily_token_limit} token) telah habis. Coba lagi besok.";
+        }
+        if ($limit->monthly_token_limit > 0 && $limit->monthUsage() >= $limit->monthly_token_limit) {
+            return "Kuota bulanan Anda ({$limit->monthly_token_limit} token) telah habis.";
+        }
+        return '';
+    }
+
     // ─── Helper Methods ──────────────────────────────────────
 
     /**

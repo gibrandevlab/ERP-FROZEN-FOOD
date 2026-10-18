@@ -81,7 +81,18 @@ new #[Layout('layouts.app')] class extends Component {
                     <h1 class="text-2xl font-extrabold text-slate-900">Manajemen Pengguna</h1>
                     <p class="mt-1 text-sm text-slate-500">Pilih staf untuk mengatur hak aksesnya.</p>
                 </div>
-                <span class="text-sm font-semibold text-slate-500">{{ count($users) }} pengguna</span>
+                <div class="flex items-center gap-3">
+                    <span class="text-sm font-semibold text-slate-500">{{ count($users) }} pengguna</span>
+                    {{-- Link ke halaman Token Management --}}
+                    <a href="{{ route('admin.token-usage.index') }}" wire:navigate
+                       class="inline-flex items-center gap-1.5 rounded-lg bg-purple-50 border border-purple-200 px-3 py-2 text-sm font-bold text-purple-700 hover:bg-purple-100 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                        Token AI
+                    </a>
+                    @can('create-pengguna')
+                        <a href="{{ route('admin.pengguna.tambah') }}" wire:navigate class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-700">Tambah Pengguna</a>
+                    @endcan
+                </div>
             </header>
 
             <div class="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
@@ -95,6 +106,9 @@ new #[Layout('layouts.app')] class extends Component {
                             <span class="rounded-full px-2.5 py-1 text-xs font-bold {{ $listedUser['is_admin'] ? 'bg-blue-50 text-blue-700' : 'bg-slate-100 text-slate-600' }}">
                                 {{ $listedUser['is_admin'] ? 'Admin' : 'Staf' }}
                             </span>
+                            @can('edit-pengguna')
+                                <a href="{{ route('admin.pengguna.edit', ['id' => $listedUser['id']]) }}" wire:navigate class="rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-slate-700 hover:border-blue-300 hover:text-blue-700">Edit</a>
+                            @endcan
                             @unless ($listedUser['is_admin'])
                                 <a href="{{ route('admin.pengguna.hak-akses', ['id' => $listedUser['id']]) }}" wire:navigate
                                    class="rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-slate-700 hover:border-blue-300 hover:text-blue-700">

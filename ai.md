@@ -22,7 +22,7 @@ Permission key yang dipakai aplikasi:
 - `ringkasan`
 - `pengguna`
 
-Jangan mengganti key permission tanpa menyelaraskan `PermissionSeeder`, assignment di `user_permissions`, Gate, dan pemanggil Gate di aplikasi. Nama tabel bisnis (`products`, `stocks`, dll.) tidak selalu sama dengan permission key.
+Jangan mengganti key permission tanpa menyelaraskan definisi permission di `AllTableSeeder`, assignment di `user_permissions`, Gate, dan pemanggil Gate di aplikasi. Nama tabel bisnis (`products`, `stocks`, dll.) tidak selalu sama dengan permission key.
 
 ## Tabel bisnis
 
@@ -161,6 +161,16 @@ Tipe kolom di bawah mengikuti schema database saat diperiksa. `BIGINT UNSIGNED` 
 - `ledger_id` BIGINT UNSIGNED, nullable, FK ke `ledgers.id`
 - `created_at`, `updated_at`, `deleted_at` (soft delete)
 - `completed` berarti barang sudah diterima; PR yang belum selesai tidak memiliki ledger penerimaan.
+
+## Form dan alur aplikasi
+
+- Form produk mengelola `min_stock` bersama harga, harga grosir, satuan, lead time, status aktif, kategori, dan foto. Slug dibuat oleh model; `user_id` dan `updated_by` berasal dari user yang sedang login.
+- Form kategori dan lokasi membuat `user_id` dari user yang sedang login. ID, slug, timestamp, dan kolom audit bukan input manual.
+- Status supplier (`is_active`) dapat diubah dari form supplier; supplier nonaktif tidak muncul pada pilihan transaksi atau permintaan pembelian.
+- Purchase Request dibuat sebagai `pending`; dapat berubah ke `approved` atau `rejected`, lalu `purchased`, dan berakhir `completed` saat diterima. Penolakan wajib memiliki alasan.
+- Konfirmasi penerimaan Purchase Request membuat satu ledger pengeluaran berstatus lunas dan mutasi stok masuk dalam transaksi database yang sama. `ledger_id` menjadi penanda bahwa penerimaan sudah diproses; jangan membuat ledger penerimaan kedua untuk PR yang sama.
+- Pembuatan/penyuntingan pengguna tersedia di panel admin. Password dan recovery phrase harus dikirim ke model agar cast `hashed` melakukan hashing; `is_admin` tidak diubah melalui form staf.
+- Aksi modal cepat tetap harus memeriksa permission modul tujuan (`create-stok`, `create-lokasi`, `create-pelanggan`, atau `create-kategori`), tidak cukup hanya memiliki permission halaman pemanggil.
 
 ## Peta relasi
 

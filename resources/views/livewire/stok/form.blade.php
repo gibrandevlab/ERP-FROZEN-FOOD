@@ -16,6 +16,7 @@ new #[Layout('layouts.app')] class extends Component {
     public string  $sku         = '';
     public ?string $category_id = null;
     public string  $description = '';
+    public string  $min_stock   = '10';
 
     public string $newCatName = '';
     public string $newCatDesc = '';
@@ -30,6 +31,7 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function saveNewCategory()
     {
+        $this->authorize('create-kategori');
         $this->validate([
             'newCatName' => 'required|string|max:255',
             'newCatDesc' => 'nullable|string',
@@ -38,7 +40,7 @@ new #[Layout('layouts.app')] class extends Component {
         $cat = Category::create([
             'name' => $this->newCatName,
             'description' => $this->newCatDesc,
-            'is_active' => true
+            'user_id' => auth()->id(),
         ]);
 
         $this->category_id = (string) $cat->id;
@@ -68,6 +70,7 @@ new #[Layout('layouts.app')] class extends Component {
             $this->wholesale_price   = (string) ($this->product->wholesale_price ?? '');
             $this->wholesale_min_qty = (string) ($this->product->wholesale_min_qty ?? '');
             $this->lead_time         = (string) ($this->product->lead_time ?? '0');
+            $this->min_stock         = (string) ($this->product->min_stock ?? '10');
         } else {
             $this->authorize('create-stok');
         }
@@ -84,21 +87,22 @@ new #[Layout('layouts.app')] class extends Component {
 
         $validated = $this->validate([
             'name'        => ['required', 'string', 'max:255'],
-            'sku'         => ['nullable', 'string', 'max:50',
+            'sku'         => ['nullable', 'string', 'max:255',
                               $this->modeEdit
                                   ? Rule::unique('products', 'sku')->ignore($this->product->id)
                                   : Rule::unique('products', 'sku'),
                              ],
             'category_id' => ['nullable', 'exists:categories,id'],
             'description' => ['nullable', 'string'],
-            'price'              => ['required', 'numeric', 'min:0'],
-            'wholesale_price'    => ['nullable', 'numeric', 'min:0'],
-            'wholesale_min_qty'  => ['nullable', 'integer', 'min:1'],
-            'cost'               => ['required', 'numeric', 'min:0'],
-            'unit'               => ['required', 'string', 'max:20'],
+            'price'              => ['required', 'numeric', 'min:0', 'max:999999999999.99'],
+            'wholesale_price'    => ['nullable', 'numeric', 'min:0', 'max:999999999999.99'],
+            'wholesale_min_qty'  => ['nullable', 'integer', 'min:1', 'max:2147483647'],
+            'cost'               => ['required', 'numeric', 'min:0', 'max:999999999999.99'],
+            'min_stock'          => ['required', 'integer', 'min:0'],
+            'unit'               => ['required', 'string', 'max:255'],
             'is_active'          => ['boolean'],
             'image'              => ['nullable', 'image', 'max:2048'],
-            'lead_time'          => ['required', 'integer', 'min:0'],
+            'lead_time'          => ['required', 'integer', 'min:0', 'max:2147483647'],
         ]);
 
         if ($this->image) {
@@ -111,6 +115,8 @@ new #[Layout('layouts.app')] class extends Component {
             imagewebp($imageObj, $path . '/' . $filename, 80);
             imagedestroy($imageObj);
             $validated['image'] = 'products/' . $filename;
+        } elseif ($this->modeEdit) {
+            unset($validated['image']);
         }
 
         if ($this->modeEdit) {
@@ -179,7 +185,9 @@ new #[Layout('layouts.app')] class extends Component {
                 <select wire:model.live="category_id"
                         class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-xs sm:text-sm font-medium text-slate-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm">
                     <option value="">— Tanpa Kategori —</option>
-                    <option value="new" class="font-bold text-blue-600">+ Tambah Kategori Baru...</option>
+                    @can('create-kategori')
+                        <option value="new" class="font-bold text-blue-600">+ Tambah Kategori Baru...</option>
+                    @endcan
                     @foreach($this->kategoriList as $k)
                         <option value="{{ $k->id }}">{{ $k->name }}</option>
                     @endforeach
@@ -200,6 +208,13 @@ new #[Layout('layouts.app')] class extends Component {
                            class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-xs sm:text-sm font-extrabold text-slate-900 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm" />
                     @error('cost') <p class="text-rose-500 text-xs mt-1 font-semibold">{{ $message }}</p> @enderror
                 </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider">Batas Minimum Stok <span class="text-rose-500">*</span></label>
+                <input wire:model="min_stock" type="number" min="0" step="1"
+                       class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-xs sm:text-sm font-medium text-slate-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm" />
+                @error('min_stock') <p class="text-rose-500 text-xs mt-1 font-semibold">{{ $message }}</p> @enderror
             </div>
 
             {{-- Harga Grosir & Min. Beli --}}

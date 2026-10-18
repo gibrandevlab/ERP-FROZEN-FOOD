@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\{Ledger, Product, Location, Supplier};
+use App\Models\{Category, Ledger, Product, Location, Supplier};
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 use Livewire\WithFileUploads;
@@ -33,11 +33,21 @@ new #[Layout('layouts.app')] class extends Component {
     // --- Modal State ---
     public string $newLocName = '';
     public string $newLocDesc = '';
+    public bool $newLocActive = true;
 
     public string $newProdName = '';
+    public string $newProdSku = '';
+    public string $newProdCategoryId = '';
+    public string $newProdDescription = '';
     public string $newProdPrice = '0';
     public string $newProdCost = '0';
     public string $newProdUnit = 'pcs';
+    public string $newProdMinStock = '10';
+    public string $newProdWholesalePrice = '';
+    public string $newProdWholesaleMinQty = '';
+    public string $newProdLeadTime = '0';
+    public bool $newProdActive = true;
+    public $newProdImage = null;
 
     public string $newCustName = '';
     public string $newCustPhone = '';
@@ -69,6 +79,11 @@ new #[Layout('layouts.app')] class extends Component {
     public function getProductListProperty()
     {
         return Product::where('is_active', true)->orderBy('name')->get();
+    }
+
+    public function getCategoryListProperty()
+    {
+        return Category::orderBy('name')->get();
     }
 
     public function getCustomerListProperty()
@@ -123,30 +138,33 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function saveNewLocation()
     {
-        $this->authorize('create-pembukuan');
+        $this->authorize('create-lokasi');
         $this->validate([
             'newLocName' => 'required|string|max:255',
             'newLocDesc' => 'nullable|string',
+            'newLocActive' => 'required|boolean',
         ]);
 
         $loc = Location::create([
             'name' => $this->newLocName,
             'description' => $this->newLocDesc,
-            'is_active' => true
+            'is_active' => $this->newLocActive,
+            'user_id' => auth()->id(),
         ]);
 
         $this->location_id = (string) $loc->id;
         $this->newLocName = '';
         $this->newLocDesc = '';
+        $this->newLocActive = true;
         $this->dispatch('close-modal');
     }
 
     public function saveNewCustomer()
     {
-        $this->authorize('create-pembukuan');
+        $this->authorize('create-pelanggan');
         $this->validate([
             'newCustName' => 'required|string|max:255',
-            'newCustPhone' => 'nullable|string|max:20',
+            'newCustPhone' => 'nullable|string|max:255',
             'newCustType' => 'required|in:seller,non_seller',
         ]);
 
@@ -154,6 +172,7 @@ new #[Layout('layouts.app')] class extends Component {
             'name' => $this->newCustName,
             'phone' => $this->newCustPhone,
             'type' => $this->newCustType,
+            'user_id' => auth()->id(),
         ]);
 
         $this->customer_id = (string) $cust->id;
@@ -165,26 +184,55 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function saveNewProduct()
     {
-        $this->authorize('create-pembukuan');
+        $this->authorize('create-stok');
         $this->validate([
             'newProdName' => 'required|string|max:255',
-            'newProdPrice' => 'required|numeric|min:0',
-            'newProdCost' => 'required|numeric|min:0',
-            'newProdUnit' => 'required|string',
+            'newProdSku' => 'nullable|string|max:255|unique:products,sku',
+            'newProdCategoryId' => 'nullable|exists:categories,id',
+            'newProdDescription' => 'nullable|string',
+            'newProdPrice' => 'required|numeric|min:0|max:999999999999.99',
+            'newProdCost' => 'required|numeric|min:0|max:999999999999.99',
+            'newProdUnit' => 'required|string|max:255',
+            'newProdMinStock' => 'required|integer|min:0|max:2147483647',
+            'newProdWholesalePrice' => 'nullable|numeric|min:0|max:999999999999.99',
+            'newProdWholesaleMinQty' => 'nullable|integer|min:1|max:2147483647',
+            'newProdLeadTime' => 'required|integer|min:0|max:2147483647',
+            'newProdActive' => 'required|boolean',
+            'newProdImage' => 'nullable|image|max:2048',
         ]);
 
+        $imagePath = $this->newProdImage?->store('products', 'public');
         $prod = Product::create([
+            'category_id' => $this->newProdCategoryId ?: null,
             'name' => $this->newProdName,
+            'sku' => $this->newProdSku ?: null,
+            'description' => $this->newProdDescription ?: null,
             'price' => $this->newProdPrice,
+            'wholesale_price' => $this->newProdWholesalePrice ?: null,
+            'wholesale_min_qty' => $this->newProdWholesaleMinQty ?: null,
             'cost' => $this->newProdCost,
+            'min_stock' => $this->newProdMinStock,
             'unit' => $this->newProdUnit,
-            'is_active' => true
+            'image' => $imagePath,
+            'is_active' => $this->newProdActive,
+            'lead_time' => $this->newProdLeadTime,
+            'user_id' => auth()->id(),
+            'updated_by' => auth()->id(),
         ]);
 
         $this->product_id = (string) $prod->id;
         $this->newProdName = '';
+        $this->newProdSku = '';
+        $this->newProdCategoryId = '';
+        $this->newProdDescription = '';
         $this->newProdPrice = '0';
         $this->newProdCost = '0';
+        $this->newProdMinStock = '10';
+        $this->newProdWholesalePrice = '';
+        $this->newProdWholesaleMinQty = '';
+        $this->newProdLeadTime = '0';
+        $this->newProdActive = true;
+        $this->newProdImage = null;
         $this->dispatch('close-modal');
         $this->dispatch('product-added', id: $prod->id, price: $prod->price, cost: $prod->cost);
     }
@@ -240,17 +288,17 @@ new #[Layout('layouts.app')] class extends Component {
         $validated = $this->validate([
             'type'           => ['required', 'in:income,expense'],
             'title'          => ['required', 'string', 'max:255'],
-            'amount'         => ['required', 'numeric', 'min:0'],
+            'amount'         => ['required', 'numeric', 'min:0', 'max:999999999999.99'],
             'payment_status' => ['required', 'in:paid,unpaid'],
             'due_date'       => ['nullable', 'date'],
             'date'           => ['required', 'date'],
             'description'    => ['nullable', 'string'],
-            'reference'      => ['nullable', 'string', 'max:100'],
+            'reference'      => ['nullable', 'string', 'max:255'],
             'product_id'     => ['nullable', 'exists:products,id'],
             'location_id'    => ['nullable', 'exists:locations,id'],
             'customer_id'    => ['nullable', 'exists:customers,id'],
             'supplier_id'    => ['nullable', 'exists:suppliers,id'],
-            'quantity'       => ['nullable', 'numeric', 'min:1'],
+            'quantity'       => ['nullable', 'integer', 'min:1', 'max:2147483647'],
             'stock_movement' => ['nullable', 'in:in,out'],
             'proof_image'    => ['nullable', 'image', 'max:2048'],
         ]);
@@ -265,6 +313,8 @@ new #[Layout('layouts.app')] class extends Component {
             imagewebp($image, $path . '/' . $filename, 80);
             imagedestroy($image);
             $validated['proof_image'] = 'bukti-transaksi/' . $filename;
+        } elseif ($this->modeEdit) {
+            unset($validated['proof_image']);
         }
 
         DB::transaction(function () use ($validated) {
@@ -442,7 +492,9 @@ new #[Layout('layouts.app')] class extends Component {
                             <select wire:model.live="product_id"
                                     class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-xs sm:text-sm font-medium text-slate-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm">
                                 <option value="">— Pilih Produk —</option>
-                                <option value="new" class="font-bold text-blue-600">+ Tambah Produk Baru...</option>
+                                @can('create-stok')
+                                    <option value="new" class="font-bold text-blue-600">+ Tambah Produk Baru...</option>
+                                @endcan
                                 @foreach($this->productList as $p)
                                     <option value="{{ $p->id }}">{{ $p->name }}</option>
                                 @endforeach
@@ -453,7 +505,9 @@ new #[Layout('layouts.app')] class extends Component {
                             <select wire:model.live="location_id"
                                     class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-xs sm:text-sm font-medium text-slate-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm">
                                 <option value="">— Pilih Lokasi —</option>
-                                <option value="new" class="font-bold text-blue-600">+ Tambah Lokasi Baru...</option>
+                                @can('create-lokasi')
+                                    <option value="new" class="font-bold text-blue-600">+ Tambah Lokasi Baru...</option>
+                                @endcan
                                 @foreach($this->locationList as $loc)
                                     <option value="{{ $loc->id }}">{{ $loc->name }}</option>
                                 @endforeach
@@ -489,7 +543,9 @@ new #[Layout('layouts.app')] class extends Component {
                             <select wire:model.live="customer_id"
                                     class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-xs sm:text-sm font-medium text-slate-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm">
                                 <option value="">— Pelanggan Umum —</option>
-                                <option value="new" class="font-bold text-blue-600">+ Tambah Pelanggan Baru...</option>
+                                @can('create-pelanggan')
+                                    <option value="new" class="font-bold text-blue-600">+ Tambah Pelanggan Baru...</option>
+                                @endcan
                                 @foreach($this->customerList as $cust)
                                     <option value="{{ $cust->id }}">{{ $cust->name }} ({{ $cust->type == 'seller' ? 'Seller' : 'Non Seller' }})</option>
                                 @endforeach
@@ -618,7 +674,7 @@ new #[Layout('layouts.app')] class extends Component {
 
     {{-- Modal Tambah Lokasi --}}
     <div x-show="showLocModal" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm px-4">
-        <div x-show="showLocModal" @click.outside="showLocModal = false" class="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-xl p-6 border border-slate-200/80"
+        <div x-show="showLocModal" @click.outside="showLocModal = false" class="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xl"
              x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
              x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95">
             <h3 class="text-base font-extrabold text-slate-900 mb-4 flex items-center gap-2">
@@ -635,6 +691,10 @@ new #[Layout('layouts.app')] class extends Component {
                     <label class="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider">Deskripsi <span class="text-slate-400 font-normal">(opsional)</span></label>
                     <textarea wire:model="newLocDesc" rows="2" class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-xs sm:text-sm font-medium text-slate-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 shadow-sm resize-none"></textarea>
                 </div>
+                <label class="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                    <input wire:model="newLocActive" type="checkbox" class="rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
+                    Lokasi aktif
+                </label>
                 <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
                     <button type="button" @click="showLocModal = false" class="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-800 uppercase tracking-wider">Batal</button>
                     <button type="button" wire:click="saveNewLocation" class="px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-white bg-blue-600 hover:bg-blue-700 rounded-2xl shadow-md shadow-blue-600/20 transition-all">Simpan Lokasi</button>
@@ -645,7 +705,7 @@ new #[Layout('layouts.app')] class extends Component {
 
     {{-- Modal Tambah Produk --}}
     <div x-show="showProdModal" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm px-4">
-        <div x-show="showProdModal" @click.outside="showProdModal = false" class="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-xl p-6 border border-slate-200/80"
+        <div x-show="showProdModal" @click.outside="showProdModal = false" class="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xl"
              x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
              x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95">
             <h3 class="text-base font-extrabold text-slate-900 mb-4 flex items-center gap-2">
@@ -661,12 +721,19 @@ new #[Layout('layouts.app')] class extends Component {
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider">Harga Jual</label>
-                        <input wire:model="newProdPrice" type="number" step="100" class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-xs sm:text-sm font-medium text-slate-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 shadow-sm">
+                        <input wire:model="newProdPrice" type="number" min="0" step="0.01" class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-xs sm:text-sm font-medium text-slate-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 shadow-sm">
+                        @error('newProdPrice') <p class="text-rose-500 text-xs mt-1 font-semibold">{{ $message }}</p> @enderror
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider">Harga Modal</label>
-                        <input wire:model="newProdCost" type="number" step="100" class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-xs sm:text-sm font-medium text-slate-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 shadow-sm">
+                        <input wire:model="newProdCost" type="number" min="0" step="0.01" class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-xs sm:text-sm font-medium text-slate-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 shadow-sm">
+                        @error('newProdCost') <p class="text-rose-500 text-xs mt-1 font-semibold">{{ $message }}</p> @enderror
                     </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider">Batas Minimum Stok</label>
+                    <input wire:model="newProdMinStock" type="number" min="0" step="1" class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-xs sm:text-sm font-medium text-slate-800 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 shadow-sm">
+                    @error('newProdMinStock') <p class="text-rose-500 text-xs mt-1 font-semibold">{{ $message }}</p> @enderror
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider">Satuan</label>
@@ -675,6 +742,56 @@ new #[Layout('layouts.app')] class extends Component {
                         <option value="pack">pack</option>
                         <option value="kg">kg</option>
                     </select>
+                </div>
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider">SKU (opsional)</label>
+                        <input wire:model="newProdSku" type="text" maxlength="255" class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-xs sm:text-sm font-medium text-slate-800 shadow-sm">
+                        @error('newProdSku') <p class="text-rose-500 text-xs mt-1 font-semibold">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider">Kategori</label>
+                        <select wire:model="newProdCategoryId" class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-xs sm:text-sm font-medium text-slate-800 shadow-sm">
+                            <option value="">Tanpa kategori</option>
+                            @foreach ($this->categoryList as $category)
+                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                            @endforeach
+                        </select>
+                        @error('newProdCategoryId') <p class="text-rose-500 text-xs mt-1 font-semibold">{{ $message }}</p> @enderror
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider">Harga Grosir</label>
+                        <input wire:model="newProdWholesalePrice" type="number" min="0" step="0.01" class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-xs sm:text-sm font-medium text-slate-800 shadow-sm">
+                        @error('newProdWholesalePrice') <p class="text-rose-500 text-xs mt-1 font-semibold">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider">Min. Beli Grosir</label>
+                        <input wire:model="newProdWholesaleMinQty" type="number" min="1" step="1" class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-xs sm:text-sm font-medium text-slate-800 shadow-sm">
+                        @error('newProdWholesaleMinQty') <p class="text-rose-500 text-xs mt-1 font-semibold">{{ $message }}</p> @enderror
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider">Lead Time (hari)</label>
+                        <input wire:model="newProdLeadTime" type="number" min="0" step="1" class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-xs sm:text-sm font-medium text-slate-800 shadow-sm">
+                        @error('newProdLeadTime') <p class="text-rose-500 text-xs mt-1 font-semibold">{{ $message }}</p> @enderror
+                    </div>
+                    <label class="flex items-center gap-2 self-end pb-3 text-sm font-semibold text-slate-700">
+                        <input wire:model="newProdActive" type="checkbox" class="rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
+                        Produk aktif
+                    </label>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider">Deskripsi</label>
+                    <textarea wire:model="newProdDescription" rows="2" class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-xs sm:text-sm font-medium text-slate-800 shadow-sm"></textarea>
+                    @error('newProdDescription') <p class="text-rose-500 text-xs mt-1 font-semibold">{{ $message }}</p> @enderror
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider">Foto Produk (maks. 2 MB)</label>
+                    <input wire:model="newProdImage" type="file" accept="image/*" class="block w-full text-sm text-slate-500">
+                    @error('newProdImage') <p class="text-rose-500 text-xs mt-1 font-semibold">{{ $message }}</p> @enderror
                 </div>
                 <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
                     <button type="button" @click="showProdModal = false" class="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-800 uppercase tracking-wider">Batal</button>

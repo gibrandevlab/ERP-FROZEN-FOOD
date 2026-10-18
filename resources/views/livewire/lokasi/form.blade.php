@@ -15,7 +15,7 @@ new #[Layout('layouts.app')] class extends Component {
     public function mount(?int $id = null): void
     {
         if ($id) {
-            $this->authorize('edit-lokasi'); 
+            $this->authorize('edit-lokasi');
             $this->modeEdit = true;
             $this->location = Location::findOrFail($id);
             $this->name = $this->location->name;
@@ -40,6 +40,7 @@ new #[Layout('layouts.app')] class extends Component {
             $this->location->update($validated);
             session()->flash('success', "Lokasi '{$this->name}' berhasil diperbarui.");
         } else {
+            $validated['user_id'] = auth()->id();
             $loc = Location::create($validated);
             session()->flash('success', "Lokasi '{$this->name}' berhasil ditambahkan.");
 
@@ -52,7 +53,7 @@ new #[Layout('layouts.app')] class extends Component {
 
         $this->redirectRoute('lokasi.index', navigate: true);
     }
-    
+
 }; ?>
 
 <div class="max-w-2xl">

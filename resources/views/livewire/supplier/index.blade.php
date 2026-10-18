@@ -17,6 +17,7 @@ new #[Layout('layouts.app')] class extends Component {
     public string $newSupPhone = '';
     public string $newSupAddress = '';
     public string $newSupDesc    = '';
+    public bool $newSupActive = true;
 
     // ── Modal: Edit ───────────────────────────────
     public bool   $showEditModal  = false;
@@ -25,6 +26,7 @@ new #[Layout('layouts.app')] class extends Component {
     public string $editSupPhone   = '';
     public string $editSupAddress = '';
     public string $editSupDesc    = '';
+    public bool $editSupActive = true;
 
     public function mount(): void
     {
@@ -52,17 +54,19 @@ new #[Layout('layouts.app')] class extends Component {
         $this->authorize('create-supplier');
         $this->validate([
             'newSupName'    => 'required|string|max:255',
-            'newSupPhone'   => 'nullable|string|max:20',
+            'newSupPhone'   => 'nullable|string|max:255',
             'newSupAddress' => 'nullable|string',
             'newSupDesc'    => 'nullable|string',
+            'newSupActive'  => 'required|boolean',
         ]);
         Supplier::create([
             'name'        => $this->newSupName,
             'phone'       => $this->newSupPhone,
             'address'     => $this->newSupAddress,
             'description' => $this->newSupDesc,
+            'is_active'   => $this->newSupActive,
         ]);
-        $this->reset(['newSupName', 'newSupPhone', 'newSupAddress', 'newSupDesc']);
+        $this->reset(['newSupName', 'newSupPhone', 'newSupAddress', 'newSupDesc', 'newSupActive']);
         $this->showModal = false;
         $this->resetPage();
         session()->flash('success', 'Supplier berhasil ditambahkan.');
@@ -77,6 +81,7 @@ new #[Layout('layouts.app')] class extends Component {
         $this->editSupPhone   = $s->phone ?? '';
         $this->editSupAddress = $s->address ?? '';
         $this->editSupDesc    = $s->description ?? '';
+        $this->editSupActive  = (bool) $s->is_active;
         $this->showEditModal  = true;
     }
 
@@ -85,15 +90,17 @@ new #[Layout('layouts.app')] class extends Component {
         $this->authorize('edit-supplier');
         $this->validate([
             'editSupName'    => 'required|string|max:255',
-            'editSupPhone'   => 'nullable|string|max:20',
+            'editSupPhone'   => 'nullable|string|max:255',
             'editSupAddress' => 'nullable|string',
             'editSupDesc'    => 'nullable|string',
+            'editSupActive'  => 'required|boolean',
         ]);
         Supplier::findOrFail($this->editId)->update([
             'name'        => $this->editSupName,
             'phone'       => $this->editSupPhone ?: null,
             'address'     => $this->editSupAddress ?: null,
             'description' => $this->editSupDesc ?: null,
+            'is_active'   => $this->editSupActive,
         ]);
         $this->showEditModal = false;
         session()->flash('success', 'Data supplier berhasil diperbarui.');
@@ -268,6 +275,11 @@ new #[Layout('layouts.app')] class extends Component {
                     <textarea wire:model="newSupDesc" rows="2" placeholder="Misal: Distributor resmi merk Fiesta & Champ" class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-xs sm:text-sm font-medium text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all shadow-sm"></textarea>
                 </div>
 
+                <label class="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                    <input wire:model="newSupActive" type="checkbox" class="rounded border-slate-300 text-sky-600 focus:ring-sky-500" />
+                    Supplier aktif
+                </label>
+
                 <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
                     <button type="button" wire:click="$set('showModal', false)" @click="playClick()" class="btn-sound px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-800 uppercase tracking-wider">Batal</button>
                     <button type="button" wire:click="saveSupplier" @click="playSuccess()" class="btn-sound px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-white bg-sky-600 hover:bg-sky-700 rounded-2xl shadow-md shadow-sky-600/20 transition-all">Simpan Supplier</button>
@@ -311,6 +323,11 @@ new #[Layout('layouts.app')] class extends Component {
                     <label class="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider">Deskripsi / Barang Bawaan <span class="text-slate-400 font-normal lowercase">(opsional)</span></label>
                     <textarea wire:model="editSupDesc" rows="2" class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-xs sm:text-sm font-medium text-slate-800 focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all shadow-sm"></textarea>
                 </div>
+
+                <label class="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                    <input wire:model="editSupActive" type="checkbox" class="rounded border-slate-300 text-sky-600 focus:ring-sky-500" />
+                    Supplier aktif
+                </label>
 
                 <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
                     <button type="button" wire:click="$set('showEditModal', false)" @click="playClick()" class="btn-sound px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-800 uppercase tracking-wider">Batal</button>
