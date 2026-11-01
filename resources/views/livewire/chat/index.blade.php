@@ -316,7 +316,7 @@ new #[Layout('layouts.app')] class extends Component {
     }
 }; ?>
 
-<div class="h-full w-full flex overflow-hidden bg-slate-50 relative" x-data="{
+<div class="h-full w-full flex overflow-hidden bg-[#f5f6f3] relative" x-data="{
     sidebarOpen: @entangle('sidebarOpen'),
     isMobile: window.innerWidth < 768,
     init() {
@@ -351,24 +351,24 @@ new #[Layout('layouts.app')] class extends Component {
         x-transition:leave="transition-opacity ease-linear duration-200"
         x-transition:leave-start="opacity-100"
         x-transition:leave-end="opacity-0"
-        class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 md:hidden"
+        class="fixed inset-0 bg-[#17343d]/60 backdrop-blur-sm z-40 md:hidden"
     ></div>
 
     {{-- SIDEBAR: Riwayat Percakapan (Gemini / ChatGPT Style) --}}
     <aside
-        class="h-full flex flex-col border-r border-slate-200/80 bg-white transition-all duration-300 ease-in-out shrink-0 select-none z-50 md:static fixed inset-y-0 left-0"
-        :class="sidebarOpen ? 'w-72 md:w-80 shadow-2xl md:shadow-none translate-x-0' : 'w-0 -translate-x-full md:translate-x-0 md:w-0 border-r-0 opacity-0 overflow-hidden'"
+        class="h-full flex flex-col border-r border-[#dce1de]/80 bg-white transition-all duration-300 ease-in-out shrink-0 select-none z-50 md:static fixed inset-y-0 left-0"
+        :class="sidebarOpen ? 'w-72 md:w-80 shadow-none md:shadow-none translate-x-0' : 'w-0 -translate-x-full md:translate-x-0 md:w-0 border-r-0 opacity-0 overflow-hidden'"
     >
         {{-- Top Bar: Back to Dashboard & New Chat --}}
-        <div class="p-3.5 border-b border-slate-200/70 bg-slate-50/80 space-y-3 shrink-0">
+        <div class="p-3.5 border-b border-[#dce1de]/70 bg-[#f5f6f3]/80 space-y-3 shrink-0">
             <div class="flex items-center justify-between gap-2">
                 <a
                     href="{{ route('dashboard') }}"
                     wire:navigate
-                    class="flex items-center gap-2 text-slate-700 hover:text-blue-600 font-bold text-xs group py-1.5 px-2.5 rounded-xl hover:bg-slate-200/60 transition-all"
+                    class="flex items-center gap-2 text-[#344950] hover:text-[#315b50] font-bold text-xs group py-1.5 px-2.5 rounded-lg hover:bg-[#e6eae7]/60 transition-all"
                     title="Kembali ke Dashboard Utama"
                 >
-                    <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-100 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all">
+                    <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-[#e8efeb] text-[#315b50] group-hover:bg-[#244e49] group-hover:text-white transition-all">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
                     </span>
                     <span>Beranda ERP</span>
@@ -378,7 +378,7 @@ new #[Layout('layouts.app')] class extends Component {
                     @click="sidebarOpen = false"
                     type="button"
                     title="Tutup Sidebar"
-                    class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors"
+                    class="p-1.5 rounded-lg text-[#71817f] hover:text-[#344950] hover:bg-[#e6eae7]/60 transition-colors"
                 >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/></svg>
                 </button>
@@ -389,7 +389,7 @@ new #[Layout('layouts.app')] class extends Component {
                 wire:click="newConversation"
                 @click="if(isMobile) sidebarOpen = false"
                 type="button"
-                class="btn-sound w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs shadow-md shadow-blue-500/20 transition-all duration-150 active:scale-95"
+                class="btn-sound w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg bg-gradient-to-r from-[#244e49] to-[#244e49] hover:from-[#17343d] hover:to-[#17343d] text-white font-bold text-xs shadow-none  transition-all duration-150 active:scale-95"
             >
                 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                 <span>Percakapan Baru</span>
@@ -397,22 +397,22 @@ new #[Layout('layouts.app')] class extends Component {
         </div>
 
         {{-- Sidebar Content: Grouped Conversation History --}}
-        <div class="flex-1 overflow-y-auto p-3 space-y-5 scrollbar-thin scrollbar-thumb-slate-200">
+        <div class="flex-1 overflow-y-auto p-3 space-y-5 scrollbar-thin scrollbar-thumb-[#dce1de]">
             @php $grouped = $this->groupedConversations; @endphp
 
             @if($grouped->isEmpty())
                 <div class="py-12 px-4 text-center">
-                    <div class="w-12 h-12 mx-auto mb-3 rounded-2xl bg-blue-50 text-blue-500 flex items-center justify-center shadow-inner">
+                    <div class="w-12 h-12 mx-auto mb-3 rounded-lg bg-[#f5f6f3] text-[#527c70] flex items-center justify-center shadow-none">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
                     </div>
-                    <p class="text-xs font-bold text-slate-700">Belum ada riwayat</p>
-                    <p class="text-[11px] text-slate-400 mt-1">Mulai percakapan pertama Anda dengan AI Assistant.</p>
+                    <p class="text-xs font-bold text-[#344950]">Belum ada riwayat</p>
+                    <p class="text-[11px] text-[#71817f] mt-1">Mulai percakapan pertama Anda dengan AI Assistant.</p>
                 </div>
             @else
                 @foreach(['Hari Ini', 'Kemarin', '7 Hari Terakhir', '30 Hari Terakhir', 'Lebih Lama'] as $groupName)
                     @if(isset($grouped[$groupName]) && $grouped[$groupName]->isNotEmpty())
                         <div class="space-y-1.5">
-                            <div class="px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
+                            <div class="px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wider text-[#71817f]">
                                 {{ $groupName }}
                             </div>
 
@@ -420,7 +420,7 @@ new #[Layout('layouts.app')] class extends Component {
                                 @foreach($grouped[$groupName] as $conv)
                                     <div
                                         wire:key="conv-item-{{ $conv->id }}"
-                                        class="group relative flex items-center justify-between rounded-xl px-2.5 py-2 text-xs font-medium transition-all duration-150 {{ $activeConversationId === $conv->id ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20 font-bold' : 'text-slate-700 hover:bg-slate-100' }}"
+                                        class="group relative flex items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium transition-all duration-150 {{ $activeConversationId === $conv->id ? 'bg-[#244e49] text-white shadow-none  font-bold' : 'text-[#344950] hover:bg-[#eef2ee]' }}"
                                     >
                                         {{-- Inline Rename Form --}}
                                         @if($editingConversationId === $conv->id)
@@ -429,13 +429,13 @@ new #[Layout('layouts.app')] class extends Component {
                                                     type="text"
                                                     wire:model="editingTitle"
                                                     wire:keydown.escape="cancelRename"
-                                                    class="w-full text-xs px-2 py-1 rounded-lg border border-blue-400 bg-white text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                                    class="w-full text-xs px-2 py-1 rounded-lg border border-[#b7d4ce] bg-white text-[#344950] focus:outline-none focus:ring-1 focus:ring-[#527c70]"
                                                     autofocus
                                                 />
-                                                <button type="submit" class="p-1 rounded bg-emerald-500 text-white hover:bg-emerald-600" title="Simpan">
+                                                <button type="submit" class="p-1 rounded bg-[#527c70] text-white hover:bg-[#2f6b5c]" title="Simpan">
                                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                                                 </button>
-                                                <button type="button" wire:click="cancelRename" class="p-1 rounded bg-slate-300 text-slate-700 hover:bg-slate-400" title="Batal">
+                                                <button type="button" wire:click="cancelRename" class="p-1 rounded bg-[#dce1de] text-[#344950] hover:bg-[#a9beb5]" title="Batal">
                                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
                                                 </button>
                                             </form>
@@ -447,7 +447,7 @@ new #[Layout('layouts.app')] class extends Component {
                                                 type="button"
                                                 class="flex-1 flex items-center gap-2.5 min-w-0 text-left pr-2 truncate"
                                             >
-                                                <svg class="w-4 h-4 shrink-0 {{ $activeConversationId === $conv->id ? 'text-white' : 'text-slate-400 group-hover:text-slate-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+                                                <svg class="w-4 h-4 shrink-0 {{ $activeConversationId === $conv->id ? 'text-white' : 'text-[#71817f] group-hover:text-[#52646a]' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
                                                 <span class="truncate">{{ $conv->title }}</span>
                                             </button>
 
@@ -457,7 +457,7 @@ new #[Layout('layouts.app')] class extends Component {
                                                     wire:click.stop="startRename('{{ $conv->id }}')"
                                                     type="button"
                                                     title="Ganti Nama"
-                                                    class="p-1 rounded-md {{ $activeConversationId === $conv->id ? 'hover:bg-blue-700 text-blue-100 hover:text-white' : 'hover:bg-slate-200 text-slate-400 hover:text-slate-700' }}"
+                                                    class="p-1 rounded-md {{ $activeConversationId === $conv->id ? 'hover:bg-[#17343d] text-[#e8efeb] hover:text-white' : 'hover:bg-[#e6eae7] text-[#71817f] hover:text-[#344950]' }}"
                                                 >
                                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
                                                 </button>
@@ -465,7 +465,7 @@ new #[Layout('layouts.app')] class extends Component {
                                                     wire:click.stop="confirmDelete('{{ $conv->id }}')"
                                                     type="button"
                                                     title="Hapus Percakapan"
-                                                    class="p-1 rounded-md {{ $activeConversationId === $conv->id ? 'hover:bg-blue-700 text-red-200 hover:text-red-100' : 'hover:bg-red-50 text-slate-400 hover:text-red-600' }}"
+                                                    class="p-1 rounded-md {{ $activeConversationId === $conv->id ? 'hover:bg-[#17343d] text-[#ead6d4] hover:text-[#f7eceb]' : 'hover:bg-[#f7eceb] text-[#71817f] hover:text-[#9c5252]' }}"
                                                 >
                                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                                 </button>
@@ -481,19 +481,19 @@ new #[Layout('layouts.app')] class extends Component {
         </div>
 
         {{-- Sidebar Footer: Memory & Token Status --}}
-        <div class="p-3 border-t border-slate-200/70 bg-slate-50/50 text-[11px] text-slate-500 shrink-0 space-y-2">
+        <div class="p-3 border-t border-[#dce1de]/70 bg-[#f5f6f3]/50 text-[11px] text-[#64747a] shrink-0 space-y-2">
 
             {{-- Baris Pertama: Status + Toggle Token Stats (Admin) --}}
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-1.5 font-semibold">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span class="w-2 h-2 rounded-full bg-[#527c70] animate-pulse"></span>
                     <span>Sliding Window Active</span>
                 </div>
                 <div class="flex items-center gap-2">
                     @if(auth()->user()->is_admin && $this->activeConversationId)
                         <button
                             wire:click="$toggle('showTokenStats')"
-                            class="text-purple-600 hover:text-purple-800 font-bold hover:underline flex items-center gap-1"
+                            class="text-[#315b50] hover:text-[#315b50] font-bold hover:underline flex items-center gap-1"
                             title="Lihat Token Usage Sesi Ini"
                         >
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
@@ -502,7 +502,7 @@ new #[Layout('layouts.app')] class extends Component {
                     @endif
                     <button
                         wire:click="$set('showPayloadModal', true)"
-                        class="text-blue-600 hover:text-blue-800 font-bold hover:underline"
+                        class="text-[#315b50] hover:text-[#17343d] font-bold hover:underline"
                     >
                         Payload
                     </button>
@@ -513,37 +513,37 @@ new #[Layout('layouts.app')] class extends Component {
             @if(auth()->user()->is_admin && $this->showTokenStats && $this->activeConversationId)
                 @php $ts = $this->tokenStats; @endphp
                 @if(!empty($ts))
-                    <div class="rounded-xl bg-white border border-purple-100 p-2.5 space-y-2 shadow-sm">
-                        <p class="font-extrabold text-[10px] text-purple-700 uppercase tracking-wider">📊 Token Usage — Sesi Ini</p>
+                    <div class="rounded-lg bg-white border border-[#b7d4ce] p-2.5 space-y-2 shadow-none">
+                        <p class="font-extrabold text-[10px] text-[#315b50] uppercase tracking-wider">📊 Token Usage — Sesi Ini</p>
 
                         {{-- Total --}}
                         <div class="grid grid-cols-2 gap-x-3 gap-y-1 text-[10px]">
                             <div class="flex justify-between">
-                                <span class="text-slate-500">Total Token</span>
-                                <span class="font-bold text-slate-800">{{ number_format($ts['totalTokens']) }}</span>
+                                <span class="text-[#64747a]">Total Token</span>
+                                <span class="font-bold text-[#344950]">{{ number_format($ts['totalTokens']) }}</span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-slate-500">Prompt</span>
-                                <span class="font-semibold text-slate-700">{{ number_format($ts['totalPrompt']) }}</span>
+                                <span class="text-[#64747a]">Prompt</span>
+                                <span class="font-semibold text-[#344950]">{{ number_format($ts['totalPrompt']) }}</span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-slate-500">Output</span>
-                                <span class="font-semibold text-slate-700">{{ number_format($ts['totalCompletion']) }}</span>
+                                <span class="text-[#64747a]">Output</span>
+                                <span class="font-semibold text-[#344950]">{{ number_format($ts['totalCompletion']) }}</span>
                             </div>
                         </div>
 
                         {{-- Cache Hit Bar --}}
                         <div class="space-y-1">
                             <div class="flex justify-between text-[10px]">
-                                <span class="text-slate-500">Cache Hit</span>
-                                <span class="font-bold {{ $ts['hitRatio'] >= 60 ? 'text-emerald-600' : ($ts['hitRatio'] >= 30 ? 'text-amber-600' : 'text-red-500') }}">
+                                <span class="text-[#64747a]">Cache Hit</span>
+                                <span class="font-bold {{ $ts['hitRatio'] >= 60 ? 'text-[#2f6b5c]' : ($ts['hitRatio'] >= 30 ? 'text-[#5e4820]' : 'text-[#9c5252]') }}">
                                     {{ $ts['hitRatio'] }}%
                                     ({{ number_format($ts['cacheHit']) }} tk)
                                 </span>
                             </div>
-                            <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                            <div class="w-full bg-[#eef2ee] rounded-full h-1.5 overflow-hidden">
                                 <div
-                                    class="h-1.5 rounded-full {{ $ts['hitRatio'] >= 60 ? 'bg-emerald-500' : ($ts['hitRatio'] >= 30 ? 'bg-amber-400' : 'bg-red-400') }}"
+                                    class="h-1.5 rounded-full {{ $ts['hitRatio'] >= 60 ? 'bg-[#527c70]' : ($ts['hitRatio'] >= 30 ? 'bg-[#ddcba7]' : 'bg-[#9c5252]') }}"
                                     style="width: {{ $ts['hitRatio'] }}%"
                                 ></div>
                             </div>
@@ -552,17 +552,17 @@ new #[Layout('layouts.app')] class extends Component {
                         {{-- Cost --}}
                         <div class="grid grid-cols-2 gap-x-3 text-[10px]">
                             <div class="flex justify-between">
-                                <span class="text-slate-500">Biaya Est.</span>
-                                <span class="font-bold text-slate-800">\${{ number_format($ts['costUsd'], 5) }}</span>
+                                <span class="text-[#64747a]">Biaya Est.</span>
+                                <span class="font-bold text-[#344950]">\${{ number_format($ts['costUsd'], 5) }}</span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-slate-500">Hemat</span>
-                                <span class="font-bold text-emerald-600">+\${{ number_format($ts['savedUsd'], 5) }}</span>
+                                <span class="text-[#64747a]">Hemat</span>
+                                <span class="font-bold text-[#2f6b5c]">+\${{ number_format($ts['savedUsd'], 5) }}</span>
                             </div>
                         </div>
                     </div>
                 @else
-                    <p class="text-center text-[10px] text-slate-400 italic py-1">Belum ada data token untuk sesi ini.</p>
+                    <p class="text-center text-[10px] text-[#71817f] italic py-1">Belum ada data token untuk sesi ini.</p>
                 @endif
             @endif
         </div>
@@ -572,32 +572,32 @@ new #[Layout('layouts.app')] class extends Component {
     <main class="flex-1 flex flex-col h-full bg-white relative min-w-0 overflow-hidden">
 
         {{-- Top Navbar Chat --}}
-        <header class="h-14 sm:h-16 px-4 sm:px-6 border-b border-slate-200/80 flex items-center justify-between gap-3 bg-white/95 backdrop-blur z-10 shrink-0">
+        <header class="h-14 sm:h-16 px-4 sm:px-6 border-b border-[#dce1de]/80 flex items-center justify-between gap-3 bg-white/95 backdrop-blur z-10 shrink-0">
             <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
                 {{-- Open Sidebar Toggle --}}
                 <button
                     @click="sidebarOpen = !sidebarOpen"
                     type="button"
-                    class="p-2 -ml-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors"
+                    class="p-2 -ml-2 rounded-lg text-[#64747a] hover:text-[#344950] hover:bg-[#eef2ee] transition-colors"
                     title="Toggle Riwayat Percakapan"
                 >
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                 </button>
 
-                <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-blue-500/20 font-extrabold text-xs sm:text-sm">
+                <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-gradient-to-tr from-[#244e49] to-[#244e49] text-white flex items-center justify-center shrink-0 shadow-none  font-extrabold text-xs sm:text-sm">
                     AI
                 </div>
 
                 <div class="min-w-0">
                     <div class="flex items-center gap-2">
-                        <h2 class="font-extrabold text-slate-900 text-xs sm:text-sm md:text-base truncate max-w-[200px] sm:max-w-xs md:max-w-md">
+                        <h2 class="font-extrabold text-[#172c35] text-xs sm:text-sm md:text-base truncate max-w-[200px] sm:max-w-xs md:max-w-md">
                             {{ $this->activeConversation ? $this->activeConversation->title : 'Percakapan Baru' }}
                         </h2>
-                        <span class="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-50 text-blue-700 border border-blue-200/60">
+                        <span class="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#f5f6f3] text-[#17343d] border border-[#dce1de]/60">
                             DeepSeek-V3
                         </span>
                     </div>
-                    <p class="text-[10px] sm:text-[11px] text-slate-400 truncate hidden xs:block">
+                    <p class="text-[10px] sm:text-[11px] text-[#71817f] truncate hidden xs:block">
                         Maks. {{ config('deepseek.max_context_messages', 10) }} pesan terakhir &bull; Context Caching Ready
                     </p>
                 </div>
@@ -609,10 +609,10 @@ new #[Layout('layouts.app')] class extends Component {
                 <a
                     href="{{ route('dashboard') }}"
                     wire:navigate
-                    class="flex items-center gap-1.5 py-1.5 px-2.5 sm:px-3 rounded-xl bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-600 text-xs font-bold transition-all border border-slate-200/80"
+                    class="flex items-center gap-1.5 py-1.5 px-2.5 sm:px-3 rounded-lg bg-[#eef2ee] hover:bg-[#f5f6f3] text-[#344950] hover:text-[#315b50] text-xs font-bold transition-all border border-[#dce1de]/80"
                     title="Kembali ke Dashboard Utama"
                 >
-                    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10.5L12 3l9 7.5M5.5 9v11h13V9M9 20v-6h6v6"/></svg>
+                    <svg class="w-4 h-4 text-[#315b50]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10.5L12 3l9 7.5M5.5 9v11h13V9M9 20v-6h6v6"/></svg>
                     <span class="hidden sm:inline">Dashboard</span>
                 </a>
 
@@ -620,7 +620,7 @@ new #[Layout('layouts.app')] class extends Component {
                 <a
                     href="{{ route('dashboard') }}"
                     wire:navigate
-                    class="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                    class="p-2 rounded-lg text-[#71817f] hover:text-[#344950] hover:bg-[#eef2ee] transition-colors"
                     title="Minimize ke Floating Widget"
                 >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
@@ -630,10 +630,10 @@ new #[Layout('layouts.app')] class extends Component {
                 <button
                     wire:click="$set('showPayloadModal', true)"
                     type="button"
-                    class="hidden lg:flex items-center gap-1.5 py-1.5 px-3 rounded-xl border border-slate-200 text-slate-600 hover:text-blue-600 hover:bg-blue-50/50 text-xs font-semibold transition-all"
+                    class="hidden lg:flex items-center gap-1.5 py-1.5 px-3 rounded-lg border border-[#dce1de] text-[#52646a] hover:text-[#315b50] hover:bg-[#f5f6f3]/50 text-xs font-semibold transition-all"
                     title="Lihat Payload Sliding Window"
                 >
-                    <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+                    <svg class="w-4 h-4 text-[#527c70]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
                     <span>Payload JSON</span>
                 </button>
 
@@ -641,7 +641,7 @@ new #[Layout('layouts.app')] class extends Component {
                     <button
                         wire:click="confirmDelete('{{ $this->activeConversationId }}')"
                         type="button"
-                        class="p-2 rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                        class="p-2 rounded-lg text-[#71817f] hover:text-[#9c5252] hover:bg-[#f7eceb] transition-colors"
                         title="Hapus Sesi Percakapan"
                     >
                         <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
@@ -658,15 +658,15 @@ new #[Layout('layouts.app')] class extends Component {
                 @if(! $activeConv || $activeConv->messages->isEmpty())
                     {{-- Empty State / Welcome Screen --}}
                     <div class="py-12 sm:py-16 text-center space-y-6">
-                        <div class="w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-3xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-500 text-white flex items-center justify-center shadow-xl shadow-blue-500/20 animate-bounce">
+                        <div class="w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-lg bg-gradient-to-tr from-[#244e49] via-[#244e49] to-[#315b50] text-white flex items-center justify-center shadow-none  animate-bounce">
                             <svg class="w-8 h-8 sm:w-10 sm:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                         </div>
 
                         <div class="space-y-2">
-                            <h3 class="text-xl sm:text-2xl font-black text-slate-800">
-                                Asisten Cerdas ERP Frozen Food
+                            <h3 class="text-xl sm:text-2xl font-black text-[#344950]">
+                                Asisten Cerdas KULKAS
                             </h3>
-                            <p class="text-xs sm:text-sm text-slate-500 max-w-md mx-auto">
+                            <p class="text-xs sm:text-sm text-[#64747a] max-w-md mx-auto">
                                 Tanyakan apa saja seputar inventaris gudang, analisis kas pembukuan, pengadaan stok supplier, atau rekomendasi SPK Restock.
                             </p>
                         </div>
@@ -676,48 +676,48 @@ new #[Layout('layouts.app')] class extends Component {
                             <button
                                 wire:click="sendSuggestedPrompt('Bagaimana cara membuat seeder Laravel yang aman?')"
                                 type="button"
-                                class="btn-sound p-3.5 rounded-2xl border border-slate-200/90 bg-slate-50/70 hover:bg-blue-50/70 hover:border-blue-300 transition-all text-xs font-semibold text-slate-700 hover:text-blue-700 group shadow-sm flex items-start gap-2.5"
+                                class="btn-sound p-3.5 rounded-lg border border-[#dce1de]/90 bg-[#f5f6f3]/70 hover:bg-[#f5f6f3]/70 hover:border-[#b7d4ce] transition-all text-xs font-semibold text-[#344950] hover:text-[#17343d] group shadow-none flex items-start gap-2.5"
                             >
                                 <span class="text-base leading-none">💡</span>
                                 <div>
-                                    <div class="font-bold text-slate-900 group-hover:text-blue-700">Seeder Laravel Aman</div>
-                                    <div class="text-[11px] text-slate-500 font-normal">Contoh implementasi idempotent seeder</div>
+                                    <div class="font-bold text-[#172c35] group-hover:text-[#17343d]">Seeder Laravel Aman</div>
+                                    <div class="text-[11px] text-[#64747a] font-normal">Contoh implementasi idempotent seeder</div>
                                 </div>
                             </button>
 
                             <button
                                 wire:click="sendSuggestedPrompt('Tolong analisis produk stok menipis dan berikan rekomendasi restock')"
                                 type="button"
-                                class="btn-sound p-3.5 rounded-2xl border border-slate-200/90 bg-slate-50/70 hover:bg-blue-50/70 hover:border-blue-300 transition-all text-xs font-semibold text-slate-700 hover:text-blue-700 group shadow-sm flex items-start gap-2.5"
+                                class="btn-sound p-3.5 rounded-lg border border-[#dce1de]/90 bg-[#f5f6f3]/70 hover:bg-[#f5f6f3]/70 hover:border-[#b7d4ce] transition-all text-xs font-semibold text-[#344950] hover:text-[#17343d] group shadow-none flex items-start gap-2.5"
                             >
                                 <span class="text-base leading-none">📦</span>
                                 <div>
-                                    <div class="font-bold text-slate-900 group-hover:text-blue-700">Analisis Stok Kritis</div>
-                                    <div class="text-[11px] text-slate-500 font-normal">Cek produk mendekati safety stock</div>
+                                    <div class="font-bold text-[#172c35] group-hover:text-[#17343d]">Analisis Stok Kritis</div>
+                                    <div class="text-[11px] text-[#64747a] font-normal">Cek produk mendekati safety stock</div>
                                 </div>
                             </button>
 
                             <button
                                 wire:click="sendSuggestedPrompt('Jelaskan bagaimana perhitungan margin keuntungan dan omzet')"
                                 type="button"
-                                class="btn-sound p-3.5 rounded-2xl border border-slate-200/90 bg-slate-50/70 hover:bg-blue-50/70 hover:border-blue-300 transition-all text-xs font-semibold text-slate-700 hover:text-blue-700 group shadow-sm flex items-start gap-2.5"
+                                class="btn-sound p-3.5 rounded-lg border border-[#dce1de]/90 bg-[#f5f6f3]/70 hover:bg-[#f5f6f3]/70 hover:border-[#b7d4ce] transition-all text-xs font-semibold text-[#344950] hover:text-[#17343d] group shadow-none flex items-start gap-2.5"
                             >
                                 <span class="text-base leading-none">📊</span>
                                 <div>
-                                    <div class="font-bold text-slate-900 group-hover:text-blue-700">Margin & Arus Kas</div>
-                                    <div class="text-[11px] text-slate-500 font-normal">Formula laba kotor & ringkasan kas</div>
+                                    <div class="font-bold text-[#172c35] group-hover:text-[#17343d]">Margin & Arus Kas</div>
+                                    <div class="text-[11px] text-[#64747a] font-normal">Formula laba kotor & ringkasan kas</div>
                                 </div>
                             </button>
 
                             <button
                                 wire:click="sendSuggestedPrompt('Bagaimana alur Purchase Request dan integrasi ke Supplier?')"
                                 type="button"
-                                class="btn-sound p-3.5 rounded-2xl border border-slate-200/90 bg-slate-50/70 hover:bg-blue-50/70 hover:border-blue-300 transition-all text-xs font-semibold text-slate-700 hover:text-blue-700 group shadow-sm flex items-start gap-2.5"
+                                class="btn-sound p-3.5 rounded-lg border border-[#dce1de]/90 bg-[#f5f6f3]/70 hover:bg-[#f5f6f3]/70 hover:border-[#b7d4ce] transition-all text-xs font-semibold text-[#344950] hover:text-[#17343d] group shadow-none flex items-start gap-2.5"
                             >
                                 <span class="text-base leading-none">🧾</span>
                                 <div>
-                                    <div class="font-bold text-slate-900 group-hover:text-blue-700">Alur Purchase Request</div>
-                                    <div class="text-[11px] text-slate-500 font-normal">Drafting, approval, dan penerimaan stok</div>
+                                    <div class="font-bold text-[#172c35] group-hover:text-[#17343d]">Alur Purchase Request</div>
+                                    <div class="text-[11px] text-[#64747a] font-normal">Drafting, approval, dan penerimaan stok</div>
                                 </div>
                             </button>
                         </div>
@@ -731,23 +731,23 @@ new #[Layout('layouts.app')] class extends Component {
                                 <button
                                     @click="open = !open"
                                     type="button"
-                                    class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-blue-50/90 hover:bg-blue-100 text-blue-700 border border-blue-200/80 transition-all shadow-xs group cursor-pointer"
+                                    class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-[#f5f6f3]/90 hover:bg-[#e8efeb] text-[#17343d] border border-[#dce1de]/80 transition-all shadow-xs group cursor-pointer"
                                     :title="open ? 'Sembunyikan langkah proses berpikir' : 'Buka detail proses berpikir AI'"
                                 >
                                     <span class="flex h-2 w-2 relative">
-                                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                                        <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
+                                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#527c70] opacity-75"></span>
+                                        <span class="relative inline-flex rounded-full h-2 w-2 bg-[#244e49]"></span>
                                     </span>
                                     <span class="font-bold">Proses Berpikir & Akses Database</span>
-                                    <span class="text-[10px] text-blue-600 bg-white/90 px-1.5 py-0.5 rounded-full font-mono font-bold border border-blue-200/60">{{ count($group['items']) }} aksi</span>
-                                    <span class="text-[10px] text-blue-600 font-bold ml-1 flex items-center gap-1">
+                                    <span class="text-[10px] text-[#315b50] bg-white/90 px-1.5 py-0.5 rounded-full font-mono font-bold border border-[#dce1de]/60">{{ count($group['items']) }} aksi</span>
+                                    <span class="text-[10px] text-[#315b50] font-bold ml-1 flex items-center gap-1">
                                         <span x-text="open ? 'Sembunyikan' : 'Lihat Proses'"></span>
-                                        <svg :class="open ? 'rotate-180' : ''" class="w-3 h-3 text-blue-600 transition-transform duration-200 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                                        <svg :class="open ? 'rotate-180' : ''" class="w-3 h-3 text-[#315b50] transition-transform duration-200 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
                                     </span>
                                 </button>
 
                                 {{-- Detail Langkah Proses yang bisa di-hide & di-unhide --}}
-                                <div x-show="open" x-transition.duration.200ms class="mt-2.5 space-y-2 pl-3 border-l-2 border-blue-200 ml-3">
+                                <div x-show="open" x-transition.duration.200ms class="mt-2.5 space-y-2 pl-3 border-l-2 border-[#dce1de] ml-3">
                                     @foreach($group['items'] as $item)
                                         @if($item->role === 'assistant' && $item->tool_calls_json)
                                             @php
@@ -759,26 +759,26 @@ new #[Layout('layouts.app')] class extends Component {
                                                     $desc = $args['description'] ?? 'Membaca data inventaris & pembukuan ERP...';
                                                     $sql = $args['sql'] ?? null;
                                                 @endphp
-                                                <div class="inline-flex flex-col gap-1 text-[11px] text-blue-700 bg-blue-50/90 border border-blue-200/80 rounded-xl px-3 py-2 shadow-xs max-w-xl">
+                                                <div class="inline-flex flex-col gap-1 text-[11px] text-[#17343d] bg-[#f5f6f3]/90 border border-[#dce1de]/80 rounded-lg px-3 py-2 shadow-xs max-w-xl">
                                                     <div class="flex items-center gap-2 font-semibold">
                                                         <span>🌐</span>
                                                         <span>{{ $desc }}</span>
                                                     </div>
                                                     @if($sql)
-                                                        <div class="mt-1 font-mono text-[10px] text-slate-700 bg-white/90 p-2 rounded-lg border border-blue-100 overflow-x-auto whitespace-pre-wrap">
+                                                        <div class="mt-1 font-mono text-[10px] text-[#344950] bg-white/90 p-2 rounded-lg border border-[#dce1de] overflow-x-auto whitespace-pre-wrap">
                                                             {{ $sql }}
                                                         </div>
                                                     @endif
                                                 </div>
                                             @endforeach
                                         @elseif($item->role === 'tool')
-                                            <details class="text-[11px] text-slate-600 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 transition-all cursor-pointer max-w-xl group shadow-xs">
+                                            <details class="text-[11px] text-[#52646a] bg-white hover:bg-[#f5f6f3] border border-[#dce1de] rounded-lg px-3.5 py-2 transition-all cursor-pointer max-w-xl group shadow-xs">
                                                 <summary class="font-medium flex items-center gap-2 list-none select-none">
                                                     <span class="text-xs">📦</span>
-                                                    <span class="font-bold text-slate-700">Hasil Kueri Database ERP (Read-Only)</span>
-                                                    <span class="text-[10px] text-slate-400 group-open:rotate-90 transition-transform">▸</span>
+                                                    <span class="font-bold text-[#344950]">Hasil Kueri Database ERP (Read-Only)</span>
+                                                    <span class="text-[10px] text-[#71817f] group-open:rotate-90 transition-transform">▸</span>
                                                 </summary>
-                                                <pre class="mt-2 text-[10px] bg-slate-900 text-emerald-400 p-2.5 rounded-lg overflow-x-auto whitespace-pre-wrap font-mono max-h-48 scrollbar-thin">{{ $item->content }}</pre>
+                                                <pre class="mt-2 text-[10px] bg-[#17343d] text-[#527c70] p-2.5 rounded-lg overflow-x-auto whitespace-pre-wrap font-mono max-h-48 scrollbar-thin">{{ $item->content }}</pre>
                                             </details>
                                         @endif
                                     @endforeach
@@ -790,13 +790,13 @@ new #[Layout('layouts.app')] class extends Component {
                             <div wire:key="msg-{{ $msg->id }}" class="flex {{ $msg->isUser() ? 'justify-end' : 'justify-start' }} gap-3 w-full">
 
                                 @if(! $msg->isUser())
-                                    <div class="w-8 h-8 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shrink-0 shadow-sm font-extrabold text-xs mt-0.5">
+                                    <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-[#244e49] to-[#244e49] text-white flex items-center justify-center shrink-0 shadow-none font-extrabold text-xs mt-0.5">
                                         AI
                                     </div>
                                 @endif
 
                                 <div class="space-y-1 {{ $msg->isUser() ? 'max-w-[85%] sm:max-w-[75%]' : 'flex-1 max-w-[95%] sm:max-w-[88%]' }}">
-                                    <div class="rounded-3xl px-4 py-3 sm:px-5 sm:py-3.5 text-xs sm:text-sm leading-relaxed shadow-sm {{ $msg->isUser() ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-tr-sm' : 'bg-slate-100/90 text-slate-800 border border-slate-200/70 rounded-tl-sm' }}">
+                                    <div class="rounded-lg px-4 py-3 sm:px-5 sm:py-3.5 text-xs sm:text-sm leading-relaxed shadow-none {{ $msg->isUser() ? 'bg-gradient-to-r from-[#244e49] to-[#244e49] text-white rounded-tr-sm' : 'bg-[#eef2ee]/90 text-[#344950] border border-[#dce1de]/70 rounded-tl-sm' }}">
                                         @if($msg->isUser())
                                             <div class="text-white whitespace-pre-wrap font-sans text-xs sm:text-sm">
                                                 {{ $msg->content }}
@@ -835,7 +835,7 @@ new #[Layout('layouts.app')] class extends Component {
                                                     <span x-ref="rawStream" class="hidden" wire:stream="stream-msg-{{ $msg->id }}">{{ $msg->content }}</span>
                                                     {{-- Output render Markdown dinamis --}}
                                                     <div x-ref="streamOutput" class="markdown-content"></div>
-                                                    <span class="inline-block w-1.5 h-3.5 bg-blue-600 animate-pulse ml-0.5 align-middle rounded-xs"></span>
+                                                    <span class="inline-block w-1.5 h-3.5 bg-[#244e49] animate-pulse ml-0.5 align-middle rounded-xs"></span>
                                                 </div>
                                             @else
                                                 {{-- Pesan selesai / riwayat: render langsung dengan Str::markdown() Laravel (aman, super cepat, clean) --}}
@@ -845,7 +845,7 @@ new #[Layout('layouts.app')] class extends Component {
                                             @endif
                                         @endif
                                     </div>
-                                    <div class="text-[10px] text-slate-400 px-1 {{ $msg->isUser() ? 'text-right' : 'text-left' }}">
+                                    <div class="text-[10px] text-[#71817f] px-1 {{ $msg->isUser() ? 'text-right' : 'text-left' }}">
                                         {{ $msg->created_at->format('H:i') }}
                                     </div>
 
@@ -853,17 +853,17 @@ new #[Layout('layouts.app')] class extends Component {
                                     @if(!$msg->isUser() && $msg->role === 'assistant' && auth()->user()->is_admin && $msg->tokenUsage)
                                         @php $tu = $msg->tokenUsage; @endphp
                                         <div class="flex items-center gap-1.5 px-1 mt-0.5 flex-wrap">
-                                            <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 border border-slate-200 px-1.5 py-0.5 text-[9px] font-semibold text-slate-500" title="Total token: prompt + output">
-                                                <svg class="w-2.5 h-2.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                                            <span class="inline-flex items-center gap-1 rounded-full bg-[#eef2ee] border border-[#dce1de] px-1.5 py-0.5 text-[9px] font-semibold text-[#64747a]" title="Total token: prompt + output">
+                                                <svg class="w-2.5 h-2.5 text-[#71817f]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
                                                 {{ number_format($tu->total_tokens) }} tk
                                             </span>
                                             @if($tu->cache_hit_tokens > 0)
                                                 @php $ratio = $tu->prompt_tokens > 0 ? round(($tu->cache_hit_tokens / $tu->prompt_tokens) * 100) : 0; @endphp
-                                                <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 text-[9px] font-semibold text-emerald-600" title="Cache hit tokens: token prompt yang di-cache DeepSeek (lebih murah)">
+                                                <span class="inline-flex items-center gap-1 rounded-full bg-[#e8efeb] border border-[#b7d4ce] px-1.5 py-0.5 text-[9px] font-semibold text-[#2f6b5c]" title="Cache hit tokens: token prompt yang di-cache DeepSeek (lebih murah)">
                                                     ⚡ {{ $ratio }}% cache
                                                 </span>
                                             @elseif($tu->cache_miss_tokens > 0)
-                                                <span class="inline-flex items-center gap-1 rounded-full bg-amber-50 border border-amber-200 px-1.5 py-0.5 text-[9px] font-semibold text-amber-600" title="Cache miss: prefix belum di-cache">
+                                                <span class="inline-flex items-center gap-1 rounded-full bg-[#f7f1e4] border border-[#ddcba7] px-1.5 py-0.5 text-[9px] font-semibold text-[#5e4820]" title="Cache miss: prefix belum di-cache">
                                                     ⚠ no cache
                                                 </span>
                                             @endif
@@ -872,7 +872,7 @@ new #[Layout('layouts.app')] class extends Component {
                                 </div>
 
                                 @if($msg->isUser())
-                                    <div class="w-8 h-8 rounded-2xl bg-slate-800 text-white flex items-center justify-center shrink-0 shadow-sm font-bold text-xs uppercase mt-0.5">
+                                    <div class="w-8 h-8 rounded-lg bg-[#1d3d45] text-white flex items-center justify-center shrink-0 shadow-none font-bold text-xs uppercase mt-0.5">
                                         {{ substr(auth()->user()->name ?? 'U', 0, 1) }}
                                     </div>
                                 @endif
@@ -883,25 +883,25 @@ new #[Layout('layouts.app')] class extends Component {
 
                 {{-- Indikator AI Sedang Menyiapkan Respons --}}
                 <div wire:loading wire:target="sendMessage, sendSuggestedPrompt" class="flex justify-start gap-3 w-full" x-show="!$wire.streamingMessageId">
-                    <div class="w-8 h-8 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shrink-0 shadow-sm font-extrabold text-xs animate-pulse">
+                    <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-[#244e49] to-[#244e49] text-white flex items-center justify-center shrink-0 shadow-none font-extrabold text-xs animate-pulse">
                         AI
                     </div>
-                    <div class="rounded-3xl rounded-tl-sm px-5 py-3.5 bg-slate-100 border border-slate-200/70 flex items-center gap-2 shadow-sm">
-                        <span class="w-2 h-2 rounded-full bg-blue-600 animate-bounce"></span>
-                        <span class="w-2 h-2 rounded-full bg-blue-600 animate-bounce [animation-delay:0.2s]"></span>
-                        <span class="w-2 h-2 rounded-full bg-blue-600 animate-bounce [animation-delay:0.4s]"></span>
-                        <span class="text-xs font-semibold text-slate-500 ml-1">AI sedang menganalisis context...</span>
+                    <div class="rounded-lg rounded-tl-sm px-5 py-3.5 bg-[#eef2ee] border border-[#dce1de]/70 flex items-center gap-2 shadow-none">
+                        <span class="w-2 h-2 rounded-full bg-[#244e49] animate-bounce"></span>
+                        <span class="w-2 h-2 rounded-full bg-[#244e49] animate-bounce [animation-delay:0.2s]"></span>
+                        <span class="w-2 h-2 rounded-full bg-[#244e49] animate-bounce [animation-delay:0.4s]"></span>
+                        <span class="text-xs font-semibold text-[#64747a] ml-1">AI sedang menganalisis context...</span>
                     </div>
                 </div>
             </div>
         </div>
 
         {{-- Chat Input Bar (Sticky at Bottom) --}}
-        <div class="p-3 sm:p-4 border-t border-slate-200/80 bg-white/95 backdrop-blur shrink-0">
+        <div class="p-3 sm:p-4 border-t border-[#dce1de]/80 bg-white/95 backdrop-blur shrink-0">
             <div class="max-w-3xl lg:max-w-4xl mx-auto w-full">
                 <form
                     wire:submit.prevent="sendMessage"
-                    class="relative flex items-end gap-2 bg-slate-50 border border-slate-300/80 rounded-2xl p-1.5 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all shadow-inner"
+                    class="relative flex items-end gap-2 bg-[#f5f6f3] border border-[#cbd3d0]/80 rounded-lg p-1.5 focus-within:border-[#527c70] focus-within:ring-2 focus-within:ring-[#527c70]/20 transition-all shadow-none"
                     x-data="{
                         init() {
                             this.$nextTick(() => this.$refs.input?.focus());
@@ -922,21 +922,21 @@ new #[Layout('layouts.app')] class extends Component {
                         :disabled="$wire.streamingMessageId !== null"
                         rows="1"
                         placeholder="Tulis pesan atau pertanyaan Anda di sini... (Enter untuk kirim, Shift+Enter untuk baris baru)"
-                        class="w-full resize-none border-0 bg-transparent px-3 py-2 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-0 max-h-32 min-h-[40px] disabled:opacity-60"
+                        class="w-full resize-none border-0 bg-transparent px-3 py-2 text-xs sm:text-sm text-[#344950] placeholder-[#9aa6a3] focus:outline-none focus:ring-0 max-h-32 min-h-[40px] disabled:opacity-60"
                     ></textarea>
 
                     <button
                         type="submit"
                         wire:loading.attr="disabled"
                         :disabled="$wire.streamingMessageId !== null"
-                        class="btn-sound h-10 w-10 sm:h-11 sm:w-11 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white flex items-center justify-center shrink-0 shadow-md shadow-blue-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        class="btn-sound h-10 w-10 sm:h-11 sm:w-11 rounded-lg bg-gradient-to-r from-[#244e49] to-[#244e49] hover:from-[#17343d] hover:to-[#17343d] text-white flex items-center justify-center shrink-0 shadow-none  transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         title="Kirim Pesan"
                     >
                         <svg class="w-4 h-4 sm:w-5 sm:h-5 transform rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
                     </button>
                 </form>
 
-                <div class="flex items-center justify-between text-[10px] text-slate-400 px-2 mt-1.5">
+                <div class="flex items-center justify-between text-[10px] text-[#71817f] px-2 mt-1.5">
                     <span>DeepSeek Context Memory &bull; Sliding Window Active</span>
                     <span class="hidden sm:inline">Tekan Enter ↵ untuk kirim</span>
                 </div>
@@ -946,15 +946,15 @@ new #[Layout('layouts.app')] class extends Component {
 
     {{-- MODAL: Konfirmasi Hapus Percakapan --}}
     @if($showDeleteModal)
-        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-fadeIn">
-            <div class="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl border border-slate-100 space-y-4">
-                <div class="flex items-center gap-3 text-red-600">
-                    <div class="p-3 rounded-2xl bg-red-50">
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#17343d]/50 backdrop-blur-sm animate-fadeIn">
+            <div class="w-full max-w-md rounded-lg bg-white p-6 shadow-none border border-[#e6eae7] space-y-4">
+                <div class="flex items-center gap-3 text-[#9c5252]">
+                    <div class="p-3 rounded-lg bg-[#f7eceb]">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                     </div>
                     <div>
-                        <h4 class="text-base font-extrabold text-slate-900">Hapus Percakapan?</h4>
-                        <p class="text-xs text-slate-500">Tindakan ini akan menghapus seluruh riwayat pesan secara permanen.</p>
+                        <h4 class="text-base font-extrabold text-[#172c35]">Hapus Percakapan?</h4>
+                        <p class="text-xs text-[#64747a]">Tindakan ini akan menghapus seluruh riwayat pesan secara permanen.</p>
                     </div>
                 </div>
 
@@ -962,14 +962,14 @@ new #[Layout('layouts.app')] class extends Component {
                     <button
                         wire:click="$set('showDeleteModal', false)"
                         type="button"
-                        class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition-colors"
+                        class="px-4 py-2 rounded-lg text-xs font-bold text-[#52646a] hover:bg-[#eef2ee] transition-colors"
                     >
                         Batal
                     </button>
                     <button
                         wire:click="deleteConversation"
                         type="button"
-                        class="px-4 py-2 rounded-xl text-xs font-bold bg-red-600 hover:bg-red-700 text-white shadow-md shadow-red-500/20 transition-all"
+                        class="px-4 py-2 rounded-lg text-xs font-bold bg-[#7a3d3d] hover:bg-[#7a3d3d] text-white shadow-none  transition-all"
                     >
                         Ya, Hapus
                     </button>
@@ -980,36 +980,36 @@ new #[Layout('layouts.app')] class extends Component {
 
     {{-- MODAL: DeepSeek Sliding Window & Payload JSON Inspector --}}
     @if($showPayloadModal)
-        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
-            <div class="w-full max-w-3xl max-h-[85vh] rounded-3xl bg-slate-900 text-white p-6 shadow-2xl border border-slate-800 flex flex-col space-y-4">
-                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#17343d]/60 backdrop-blur-sm animate-fadeIn">
+            <div class="w-full max-w-3xl max-h-[85vh] rounded-lg bg-[#17343d] text-white p-6 shadow-none border border-[#a9beb5] flex flex-col space-y-4">
+                <div class="flex items-center justify-between border-b border-[#a9beb5] pb-3">
                     <div class="flex items-center gap-2.5">
-                        <span class="p-2 rounded-xl bg-blue-500/20 text-blue-400 font-mono text-xs font-bold">{ }</span>
+                        <span class="p-2 rounded-lg bg-[#315b50]/20 text-[#527c70] font-mono text-xs font-bold">{ }</span>
                         <div>
                             <h4 class="text-sm font-extrabold text-white">DeepSeek API Payload Builder</h4>
-                            <p class="text-[11px] text-slate-400">Sliding Window Memory & Context Caching Structure (>1024 Token System Prompt)</p>
+                            <p class="text-[11px] text-[#71817f]">Sliding Window Memory & Context Caching Structure (>1024 Token System Prompt)</p>
                         </div>
                     </div>
                     <button
                         wire:click="$set('showPayloadModal', false)"
                         type="button"
-                        class="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800"
+                        class="p-1.5 rounded-lg text-[#71817f] hover:text-white hover:bg-[#1d3d45]"
                     >
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                 </div>
 
-                <div class="flex-1 overflow-y-auto bg-slate-950 p-4 rounded-2xl border border-slate-800/80 font-mono text-xs text-emerald-400 select-all leading-relaxed">
+                <div class="flex-1 overflow-y-auto bg-[#17343d] p-4 rounded-lg border border-[#a9beb5]/80 font-mono text-xs text-[#527c70] select-all leading-relaxed">
                     <pre>{{ $this->payloadJson }}</pre>
                 </div>
 
-                <div class="flex items-center justify-between pt-1 text-[11px] text-slate-400">
+                <div class="flex items-center justify-between pt-1 text-[11px] text-[#71817f]">
                     <div>
-                        Model: <span class="text-blue-400 font-bold font-mono">{{ config('deepseek.model', 'deepseek-chat') }}</span> | Max Context: <span class="text-blue-400 font-bold font-mono">{{ config('deepseek.max_context_messages', 10) }}</span> Pesan
+                        Model: <span class="text-[#527c70] font-bold font-mono">{{ config('deepseek.model', 'deepseek-chat') }}</span> | Max Context: <span class="text-[#527c70] font-bold font-mono">{{ config('deepseek.max_context_messages', 10) }}</span> Pesan
                     </div>
                     <button
                         wire:click="$set('showPayloadModal', false)"
-                        class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs"
+                        class="px-4 py-2 rounded-lg bg-[#244e49] hover:bg-[#17343d] text-white font-bold text-xs"
                     >
                         Tutup
                     </button>

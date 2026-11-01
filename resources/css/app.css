@@ -12,22 +12,22 @@
 	}
 
 	nav[role="navigation"][aria-label="Pagination Navigation"] [aria-current="page"] > span {
-		background-color: #2563eb !important;
+		background-color: #244e49 !important;
 		color: #ffffff !important;
-		border-color: #2563eb !important;
-		border-radius: 0.875rem !important;
+		border-color: #244e49 !important;
+		border-radius: 0.5rem !important;
 		font-weight: 800 !important;
-		box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2) !important;
+		box-shadow: 0 4px 12px rgba(36, 78, 73, 0.16) !important;
 	}
 
 	nav[role="navigation"][aria-label="Pagination Navigation"] a,
 	nav[role="navigation"][aria-label="Pagination Navigation"] button,
 	nav[role="navigation"][aria-label="Pagination Navigation"] [aria-disabled="true"] > span {
-		border: 1px solid #e2e8f0 !important;
-		border-radius: 0.875rem !important;
+		border: 1px solid #dce1de !important;
+		border-radius: 0.5rem !important;
 		padding: 0.5rem 0.85rem !important;
 		background-color: #ffffff !important;
-		color: #475569 !important;
+		color: #52646a !important;
 		font-size: 0.75rem !important;
 		font-weight: 700 !important;
 		transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1) !important;
@@ -35,13 +35,13 @@
 
 	nav[role="navigation"][aria-label="Pagination Navigation"] a:hover,
 	nav[role="navigation"][aria-label="Pagination Navigation"] button:hover:not(:disabled) {
-		border-color: #bfdbfe !important;
-		background-color: #eff6ff !important;
-		color: #2563eb !important;
+		border-color: #c8d0cc !important;
+		background-color: #e8efeb !important;
+		color: #315b50 !important;
 	}
 
 	nav[role="navigation"][aria-label="Pagination Navigation"] p {
-		color: #64748b !important;
+		color: #64747a !important;
 		font-size: 0.75rem !important;
 		font-weight: 600 !important;
 	}

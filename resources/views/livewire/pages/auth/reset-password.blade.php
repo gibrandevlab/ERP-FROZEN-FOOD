@@ -20,5 +20,5 @@ new #[Layout('layouts.guest')] class extends Component
 
 <div>
     {{-- Halaman ini redirect otomatis ke /pulihkan-akun --}}
-    <p class="text-sm text-gray-500 text-center">Mengalihkan...</p>
+    <p class="text-sm text-[#64747a] text-center">Mengalihkan...</p>
 </div>

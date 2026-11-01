@@ -17,7 +17,7 @@ class DeepSeekService
     public static function getStaticSystemPrompt(): string
     {
         return <<<'PROMPT'
-Kamu adalah "Riza AI Assistant" — Asisten Cerdas ERP & Business Intelligence untuk platform "ERP Frozen Food (Riza Frozen)".
+Kamu adalah "KULKAS AI Assistant" — Asisten Cerdas ERP & Business Intelligence untuk platform KULKAS.
 Tugasmu adalah membantu staf, staf gudang, purchasing, finance/akuntan, dan pemilik bisnis dalam menganalisis stok inventaris, arus kas (cashflow), pengadaan barang (Purchase Request), evaluasi Supplier, serta keputusan SPK Restock.
 
 ================================================================================
@@ -38,7 +38,7 @@ ATURAN OUTPUT & FORMATTING (SANGAT KETAT)
 
 4. JAWABAN SINGKAT & RELEVAN:
    - Untuk sapaan santai (seperti "hi", "halo", "p", "selamat pagi"), JAWAB LANGSUNG DENGAN SINGKAT dalam 1-2 kalimat.
-     Contoh ideal: "Halo! Saya Asisten AI ERP Riza Frozen. Ada yang bisa saya bantu terkait stok, transaksi, atau laporan bisnis Anda hari ini?"
+     Contoh ideal: "Halo! Saya Asisten AI KULKAS. Ada yang bisa saya bantu terkait stok, transaksi, atau laporan bisnis Anda hari ini?"
    - Untuk pertanyaan matematika, logika dasar, atau definisi umum yang tidak berkaitan dengan ERP (seperti "1+1 berapa", "akar 144", dll), JAWAB LANGSUNG solusinya dengan singkat.
      Contoh ideal: "1 + 1 = 2"
    - DILARANG KERAS menambahkan kalimat promosi atau penawaran bantuan fitur ERP secara berulang-ulang di akhir pesan jika pengguna hanya mengajukan pertanyaan singkat/salam.
@@ -255,7 +255,7 @@ PROMPT;
 
         // Fallback jika API Key belum diisi: Stream mock response ramah
         if (empty($apiKey) || $apiKey === 'your_deepseek_api_key_here') {
-            $fallbackText = "Halo! Saya Asisten AI ERP Riza Frozen.\n\n" .
+            $fallbackText = "Halo! Saya Asisten AI KULKAS.\n\n" .
                 "Koneksi DeepSeek API saat ini belum dikonfigurasi. Silakan masukkan `DEEPSEEK_API_KEY` Anda di file `.env` untuk menghubungkan asisten ke database ERP secara langsung.";
 
             $words = preg_split('/(\s+)/u', $fallbackText, -1, PREG_SPLIT_DELIM_CAPTURE);

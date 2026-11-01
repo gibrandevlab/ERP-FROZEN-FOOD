@@ -173,7 +173,7 @@ new class extends Component {
         <button
             @click="handleBtnClick($event)"
             type="button"
-            class="group relative flex items-center gap-2.5 py-3 px-4 rounded-full bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-700 hover:to-indigo-800 text-white shadow-2xl shadow-blue-600/40 hover:shadow-blue-600/60 active:scale-95 border-2 border-white cursor-grab active:cursor-grabbing transition-all"
+            class="group relative flex items-center gap-2.5 py-3 px-4 rounded-full bg-gradient-to-r from-[#244e49] via-[#244e49] to-[#17343d] hover:from-[#17343d] hover:to-[#17343d] text-white shadow-none   active:scale-95 border-2 border-white cursor-grab active:cursor-grabbing transition-all"
             title="Tahan & geser untuk memindahkan, klik untuk buka chat"
         >
             <span class="flex h-6 w-6 items-center justify-center rounded-full bg-white/20 text-white font-extrabold text-xs">
@@ -183,8 +183,8 @@ new class extends Component {
                 Tanya AI
             </span>
             <span class="absolute -top-1 -right-1 flex h-3.5 w-3.5">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500 border-2 border-white"></span>
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#527c70] opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-3.5 w-3.5 bg-[#527c70] border-2 border-white"></span>
             </span>
         </button>
     </div>
@@ -195,24 +195,24 @@ new class extends Component {
     @if($isOpen)
         <div
             x-ref="chatCard"
-            class="fixed z-50 flex flex-col rounded-3xl border border-slate-200/90 bg-white/95 shadow-2xl shadow-blue-950/25 backdrop-blur-2xl overflow-hidden animate-fadeIn"
+            class="fixed z-50 flex flex-col rounded-lg border border-[#dce1de]/90 bg-white/95 shadow-none  backdrop-blur-2xl overflow-hidden animate-fadeIn"
             :style="`left: ${cardX}px; top: ${cardY}px; width: ${cardW}px; height: ${cardH}px; min-width: 300px; min-height: 380px; max-width: calc(100vw - 20px); max-height: calc(100vh - 20px);`"
         >
             {{-- Header Card (Drag Handle) --}}
             <div
                 @mousedown="startCardDrag($event)"
                 @touchstart.passive="startCardTouchDrag($event)"
-                class="px-4 py-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 text-white flex items-center justify-between gap-2 shrink-0 shadow-md cursor-move select-none"
+                class="px-4 py-3 bg-gradient-to-r from-[#244e49] via-[#244e49] to-[#17343d] text-white flex items-center justify-between gap-2 shrink-0 shadow-none cursor-move select-none"
                 title="Tahan & geser header ini untuk memindahkan kartu"
             >
                 <div class="flex items-center gap-2.5 min-w-0">
-                    <span class="w-7 h-7 rounded-xl bg-white/20 flex items-center justify-center font-bold text-xs shrink-0">AI</span>
+                    <span class="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center font-bold text-xs shrink-0">AI</span>
                     <div class="min-w-0">
                         <h4 class="font-extrabold text-xs sm:text-sm truncate">
-                            {{ $this->activeConversation ? $this->activeConversation->title : 'Asisten AI Riza Frozen' }}
+                            {{ $this->activeConversation ? $this->activeConversation->title : 'Asisten AI KULKAS' }}
                         </h4>
-                        <div class="flex items-center gap-1.5 text-[10px] text-blue-100">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <div class="flex items-center gap-1.5 text-[10px] text-[#e8efeb]">
+                            <span class="w-1.5 h-1.5 rounded-full bg-[#527c70] animate-pulse"></span>
                             <span>DeepSeek Sliding Window</span>
                         </div>
                     </div>
@@ -224,7 +224,7 @@ new class extends Component {
                     <button
                         wire:click="newConversation"
                         type="button"
-                        class="p-1.5 rounded-lg text-blue-100 hover:text-white hover:bg-white/15 transition-colors"
+                        class="p-1.5 rounded-lg text-[#e8efeb] hover:text-white hover:bg-white/15 transition-colors"
                         title="Percakapan Baru (+)"
                     >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
@@ -234,7 +234,7 @@ new class extends Component {
                     <button
                         @click="cycleSizePreset()"
                         type="button"
-                        class="p-1.5 rounded-lg text-blue-100 hover:text-white hover:bg-white/15 transition-colors"
+                        class="p-1.5 rounded-lg text-[#e8efeb] hover:text-white hover:bg-white/15 transition-colors"
                         title="Ganti Ukuran Card (Compact / Normal / Lebar)"
                     >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
@@ -244,7 +244,7 @@ new class extends Component {
                     <a
                         href="{{ $activeConversationId ? route('chat.index', $activeConversationId) : route('chat.index') }}"
                         wire:navigate
-                        class="p-1.5 rounded-lg text-blue-100 hover:text-white hover:bg-white/15 transition-colors"
+                        class="p-1.5 rounded-lg text-[#e8efeb] hover:text-white hover:bg-white/15 transition-colors"
                         title="Buka Layar Penuh (Fullscreen Mode)"
                     >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
@@ -254,7 +254,7 @@ new class extends Component {
                     <button
                         wire:click="toggleWidget"
                         type="button"
-                        class="p-1.5 rounded-lg text-blue-100 hover:text-white hover:bg-white/15 transition-colors"
+                        class="p-1.5 rounded-lg text-[#e8efeb] hover:text-white hover:bg-white/15 transition-colors"
                         title="Minimize ke Tombol Floating"
                     >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -263,24 +263,24 @@ new class extends Component {
             </div>
 
             {{-- Message Body --}}
-            <div id="floating-chat-scroll" class="flex-1 overflow-y-auto p-3.5 space-y-3.5 bg-slate-50/50 scrollbar-thin scrollbar-thumb-slate-200">
+            <div id="floating-chat-scroll" class="flex-1 overflow-y-auto p-3.5 space-y-3.5 bg-[#f5f6f3]/50 scrollbar-thin scrollbar-thumb-[#dce1de]">
                 @php $activeConv = $this->activeConversation; @endphp
 
                 @if(! $activeConv || $activeConv->messages->isEmpty())
                     <div class="py-8 px-2 text-center space-y-4">
-                        <div class="w-12 h-12 mx-auto rounded-2xl bg-blue-100/70 text-blue-600 flex items-center justify-center shadow-inner">
+                        <div class="w-12 h-12 mx-auto rounded-lg bg-[#e8efeb]/70 text-[#315b50] flex items-center justify-center shadow-none">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                         </div>
                         <div>
-                            <p class="text-xs font-extrabold text-slate-800">Ada yang bisa dibantu?</p>
-                            <p class="text-[11px] text-slate-500 mt-0.5">Tanya seputar stok gudang, penjualan, atau supplier.</p>
+                            <p class="text-xs font-extrabold text-[#344950]">Ada yang bisa dibantu?</p>
+                            <p class="text-[11px] text-[#64747a] mt-0.5">Tanya seputar stok gudang, penjualan, atau supplier.</p>
                         </div>
 
                         <div class="space-y-1.5 text-left">
                             <button
                                 wire:click="sendSuggestedPrompt('Tolong cek stok produk yang mau habis')"
                                 type="button"
-                                class="w-full p-2 rounded-xl border border-slate-200 bg-white hover:bg-blue-50 text-[11px] font-semibold text-slate-700 hover:text-blue-700 transition-all text-left truncate flex items-center gap-2"
+                                class="w-full p-2 rounded-lg border border-[#dce1de] bg-white hover:bg-[#f5f6f3] text-[11px] font-semibold text-[#344950] hover:text-[#17343d] transition-all text-left truncate flex items-center gap-2"
                             >
                                 <span>📦</span>
                                 <span class="truncate">Cek stok produk menipis</span>
@@ -288,7 +288,7 @@ new class extends Component {
                             <button
                                 wire:click="sendSuggestedPrompt('Bagaimana ringkasan keuangan dan laba?')"
                                 type="button"
-                                class="w-full p-2 rounded-xl border border-slate-200 bg-white hover:bg-blue-50 text-[11px] font-semibold text-slate-700 hover:text-blue-700 transition-all text-left truncate flex items-center gap-2"
+                                class="w-full p-2 rounded-lg border border-[#dce1de] bg-white hover:bg-[#f5f6f3] text-[11px] font-semibold text-[#344950] hover:text-[#17343d] transition-all text-left truncate flex items-center gap-2"
                             >
                                 <span>📊</span>
                                 <span class="truncate">Ringkasan kas dan laba</span>
@@ -303,14 +303,14 @@ new class extends Component {
                                 <button
                                     @click="open = !open"
                                     type="button"
-                                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-blue-50/90 hover:bg-blue-100 text-blue-700 border border-blue-200/80 transition-all shadow-xs"
+                                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-[#f5f6f3]/90 hover:bg-[#e8efeb] text-[#17343d] border border-[#dce1de]/80 transition-all shadow-xs"
                                     :title="open ? 'Sembunyikan proses' : 'Lihat proses AI'"
                                 >
-                                    <span class="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse"></span>
+                                    <span class="w-1.5 h-1.5 rounded-full bg-[#244e49] animate-pulse"></span>
                                     <span class="font-bold">Proses ERP ({{ count($group['items']) }} aksi)</span>
                                     <span class="text-[9px] font-bold" x-text="open ? 'Sembunyikan ▴' : 'Lihat ▸'"></span>
                                 </button>
-                                <div x-show="open" x-transition.duration.200ms class="mt-1.5 space-y-1.5 pl-2 border-l border-blue-200 ml-2">
+                                <div x-show="open" x-transition.duration.200ms class="mt-1.5 space-y-1.5 pl-2 border-l border-[#dce1de] ml-2">
                                     @foreach($group['items'] as $item)
                                         @if($item->role === 'assistant' && $item->tool_calls_json)
                                             @php
@@ -321,16 +321,16 @@ new class extends Component {
                                                     $args = json_decode($call['function']['arguments'] ?? '{}', true) ?: [];
                                                     $desc = $args['description'] ?? 'Membaca data ERP...';
                                                 @endphp
-                                                <div class="text-[10px] text-blue-700 bg-blue-50/90 border border-blue-200/80 rounded-lg px-2 py-1">
+                                                <div class="text-[10px] text-[#17343d] bg-[#f5f6f3]/90 border border-[#dce1de]/80 rounded-lg px-2 py-1">
                                                     🌐 {{ $desc }}
                                                 </div>
                                             @endforeach
                                         @elseif($item->role === 'tool')
-                                            <details class="text-[10px] text-slate-600 bg-white border border-slate-200 rounded-lg px-2 py-1">
+                                            <details class="text-[10px] text-[#52646a] bg-white border border-[#dce1de] rounded-lg px-2 py-1">
                                                 <summary class="font-medium cursor-pointer select-none">
                                                     📦 Hasil Kueri
                                                 </summary>
-                                                <pre class="mt-1 text-[9px] bg-slate-900 text-emerald-400 p-1.5 rounded font-mono max-h-32 overflow-x-auto whitespace-pre-wrap">{{ $item->content }}</pre>
+                                                <pre class="mt-1 text-[9px] bg-[#17343d] text-[#527c70] p-1.5 rounded font-mono max-h-32 overflow-x-auto whitespace-pre-wrap">{{ $item->content }}</pre>
                                             </details>
                                         @endif
                                     @endforeach
@@ -340,12 +340,12 @@ new class extends Component {
                             @php $msg = $group['message']; @endphp
                             <div wire:key="float-msg-{{ $msg->id }}" class="flex {{ $msg->isUser() ? 'justify-end' : 'justify-start' }} gap-2">
                                 @if(! $msg->isUser())
-                                    <div class="w-6 h-6 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0 font-bold text-[10px]">
+                                    <div class="w-6 h-6 rounded-lg bg-[#244e49] text-white flex items-center justify-center shrink-0 font-bold text-[10px]">
                                         AI
                                     </div>
                                 @endif
 
-                                <div class="max-w-[88%] rounded-2xl px-3 py-2 text-xs {{ $msg->isUser() ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-white text-slate-800 border border-slate-200/80 rounded-tl-none shadow-sm' }} leading-relaxed">
+                                <div class="max-w-[88%] rounded-lg px-3 py-2 text-xs {{ $msg->isUser() ? 'bg-[#244e49] text-white rounded-tr-none' : 'bg-white text-[#344950] border border-[#dce1de]/80 rounded-tl-none shadow-none' }} leading-relaxed">
                                     @if($msg->isUser())
                                         <div class="whitespace-pre-wrap font-sans">
                                             {{ $msg->content }}
@@ -381,7 +381,7 @@ new class extends Component {
                                             >
                                                 <span x-ref="rawStreamFloat" class="hidden" wire:stream="stream-float-msg-{{ $msg->id }}">{{ $msg->content }}</span>
                                                 <div x-ref="streamOutputFloat" class="markdown-content text-xs"></div>
-                                                <span class="inline-block w-1.5 h-3 bg-blue-600 animate-pulse ml-0.5 align-middle rounded-xs"></span>
+                                                <span class="inline-block w-1.5 h-3 bg-[#244e49] animate-pulse ml-0.5 align-middle rounded-xs"></span>
                                             </div>
                                         @else
                                             <div class="markdown-content text-xs">
@@ -395,11 +395,11 @@ new class extends Component {
                                 @if(!$msg->isUser() && $msg->role === 'assistant' && auth()->user()->is_admin && $msg->tokenUsage)
                                     @php $tu = $msg->tokenUsage; $ratio = $tu->prompt_tokens > 0 ? round(($tu->cache_hit_tokens / $tu->prompt_tokens) * 100) : 0; @endphp
                                     <div class="flex items-center gap-1 mt-0.5 ml-0.5">
-                                        <span class="inline-flex items-center rounded-full bg-slate-100 border border-slate-200 px-1.5 py-0.5 text-[8px] font-semibold text-slate-500">
+                                        <span class="inline-flex items-center rounded-full bg-[#eef2ee] border border-[#dce1de] px-1.5 py-0.5 text-[8px] font-semibold text-[#64747a]">
                                             {{ number_format($tu->total_tokens) }} tk
                                         </span>
                                         @if($tu->cache_hit_tokens > 0)
-                                            <span class="inline-flex items-center rounded-full bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 text-[8px] font-semibold text-emerald-600">⚡{{ $ratio }}%</span>
+                                            <span class="inline-flex items-center rounded-full bg-[#e8efeb] border border-[#b7d4ce] px-1.5 py-0.5 text-[8px] font-semibold text-[#2f6b5c]">⚡{{ $ratio }}%</span>
                                         @endif
                                     </div>
                                 @endif
@@ -409,19 +409,19 @@ new class extends Component {
                 @endif
 
                 {{-- Loader Typing --}}
-                <div wire:loading wire:target="sendMessage, sendSuggestedPrompt" class="flex items-center gap-2 text-[11px] text-slate-500" x-show="!$wire.streamingMessageId">
-                    <span class="w-1.5 h-1.5 rounded-full bg-blue-600 animate-bounce"></span>
-                    <span class="w-1.5 h-1.5 rounded-full bg-blue-600 animate-bounce [animation-delay:0.2s]"></span>
-                    <span class="w-1.5 h-1.5 rounded-full bg-blue-600 animate-bounce [animation-delay:0.4s]"></span>
+                <div wire:loading wire:target="sendMessage, sendSuggestedPrompt" class="flex items-center gap-2 text-[11px] text-[#64747a]" x-show="!$wire.streamingMessageId">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#244e49] animate-bounce"></span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#244e49] animate-bounce [animation-delay:0.2s]"></span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#244e49] animate-bounce [animation-delay:0.4s]"></span>
                     <span>AI sedang berpikir...</span>
                 </div>
             </div>
 
             {{-- Input Mini Form & Bottom Resize Handle --}}
-            <div class="p-2.5 bg-white border-t border-slate-200 shrink-0 relative">
+            <div class="p-2.5 bg-white border-t border-[#dce1de] shrink-0 relative">
                 <form
                     wire:submit.prevent="sendMessage"
-                    class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl p-1 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500"
+                    class="flex items-center gap-1.5 bg-[#f5f6f3] border border-[#dce1de] rounded-lg p-1 focus-within:border-[#527c70] focus-within:ring-1 focus-within:ring-[#527c70]"
                     x-data="{
                         init() {
                             this.$nextTick(() => this.$refs.floatInput?.focus());
@@ -435,13 +435,13 @@ new class extends Component {
                         wire:model="messageInput"
                         :disabled="$wire.streamingMessageId !== null"
                         placeholder="Ketik pesan..."
-                        class="w-full text-xs px-2 py-1.5 bg-transparent border-0 focus:outline-none focus:ring-0 text-slate-800 placeholder-slate-400 disabled:opacity-60"
+                        class="w-full text-xs px-2 py-1.5 bg-transparent border-0 focus:outline-none focus:ring-0 text-[#344950] placeholder-[#9aa6a3] disabled:opacity-60"
                     />
                     <button
                         type="submit"
                         wire:loading.attr="disabled"
                         :disabled="$wire.streamingMessageId !== null"
-                        class="h-8 w-8 rounded-lg bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center shrink-0 shadow-sm disabled:opacity-50"
+                        class="h-8 w-8 rounded-lg bg-[#244e49] hover:bg-[#17343d] text-white flex items-center justify-center shrink-0 shadow-none disabled:opacity-50"
                     >
                         <svg class="w-3.5 h-3.5 transform rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
                     </button>
@@ -451,7 +451,7 @@ new class extends Component {
                 <div
                     @mousedown.stop="startResize($event)"
                     @touchstart.stop.passive="startTouchResize($event)"
-                    class="absolute bottom-1 right-1 w-4 h-4 cursor-se-resize flex items-end justify-end p-0.5 text-slate-400 hover:text-blue-600 touch-none"
+                    class="absolute bottom-1 right-1 w-4 h-4 cursor-se-resize flex items-end justify-end p-0.5 text-[#71817f] hover:text-[#315b50] touch-none"
                     title="Tarik untuk memperbesar / memperkecil ukuran card"
                 >
                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 19H13m6-6H7"/></svg>

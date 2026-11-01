@@ -59,44 +59,44 @@ new #[Layout('layouts.app')] class extends Component {
 <div class="max-w-2xl">
     <div class="flex items-center gap-3 mb-6">
         @if(session()->has('pembukuan_return_url'))
-            <a href="{{ session('pembukuan_return_url') }}" wire:navigate class="text-gray-400 hover:text-gray-600 transition-colors text-lg">←</a>
+            <a href="{{ session('pembukuan_return_url') }}" wire:navigate class="text-[#71817f] hover:text-[#52646a] transition-colors text-lg">←</a>
         @else
-            <a href="{{ route('lokasi.index') }}" wire:navigate class="text-gray-400 hover:text-gray-600 transition-colors text-lg">←</a>
+            <a href="{{ route('lokasi.index') }}" wire:navigate class="text-[#71817f] hover:text-[#52646a] transition-colors text-lg">←</a>
         @endif
-        <h1 class="text-base font-semibold text-gray-900">
+        <h1 class="text-base font-semibold text-[#172c35]">
             {{ $modeEdit ? "Edit Lokasi: {$name}" : 'Tambah Lokasi Baru' }}
         </h1>
     </div>
 
-    <div class="bg-white rounded-xl border border-gray-200 p-6">
+    <div class="bg-white rounded-lg border border-[#dce1de] p-6">
         <form wire:submit="simpan" class="space-y-5">
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1.5">Nama Lokasi <span class="text-red-500">*</span></label>
+                <label class="block text-sm font-medium text-[#344950] mb-1.5">Nama Lokasi <span class="text-[#9c5252]">*</span></label>
                 <input wire:model="name" type="text" placeholder="Misal: Gudang Depan / Kulkas A"
-                       class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gray-300" />
-                @error('name') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                       class="w-full px-4 py-2.5 border border-[#dce1de] rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#b7d4ce]" />
+                @error('name') <p class="text-[#9c5252] text-xs mt-1">{{ $message }}</p> @enderror
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1.5">Deskripsi <span class="text-gray-400 font-normal">(opsional)</span></label>
+                <label class="block text-sm font-medium text-[#344950] mb-1.5">Deskripsi <span class="text-[#71817f] font-normal">(opsional)</span></label>
                 <textarea wire:model="description" rows="3" placeholder="Penjelasan lokasi..."
-                          class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gray-300 resize-none"></textarea>
-                @error('description') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                          class="w-full px-4 py-2.5 border border-[#dce1de] rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#b7d4ce] resize-none"></textarea>
+                @error('description') <p class="text-[#9c5252] text-xs mt-1">{{ $message }}</p> @enderror
             </div>
 
             <div class="flex items-center gap-3">
                 <input wire:model="is_active" id="is_active" type="checkbox"
-                       class="w-4 h-4 rounded border-gray-300 text-gray-900 focus:ring-0" />
-                <label for="is_active" class="text-sm text-gray-700">Lokasi aktif (bisa dipilih untuk stok)</label>
+                       class="w-4 h-4 rounded border-[#cbd3d0] text-[#172c35] focus:ring-0" />
+                <label for="is_active" class="text-sm text-[#344950]">Lokasi aktif (bisa dipilih untuk stok)</label>
             </div>
 
-            <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+            <div class="flex items-center justify-between pt-4 border-t border-[#e6eae7]">
                 @if(session()->has('pembukuan_return_url'))
-                    <a href="{{ session('pembukuan_return_url') }}" wire:navigate class="text-sm text-gray-500 hover:text-gray-700 transition-colors">Batal</a>
+                    <a href="{{ session('pembukuan_return_url') }}" wire:navigate class="text-sm text-[#64747a] hover:text-[#344950] transition-colors">Batal</a>
                 @else
-                    <a href="{{ route('lokasi.index') }}" wire:navigate class="text-sm text-gray-500 hover:text-gray-700 transition-colors">Batal</a>
+                    <a href="{{ route('lokasi.index') }}" wire:navigate class="text-sm text-[#64747a] hover:text-[#344950] transition-colors">Batal</a>
                 @endif
-                <button type="submit" class="px-5 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:opacity-80 transition-opacity">
+                <button type="submit" class="px-5 py-2 bg-[#17343d] text-white rounded-lg text-sm font-medium hover:opacity-80 transition-opacity">
                     {{ $modeEdit ? 'Simpan Perubahan' : 'Tambah Lokasi' }}
                 </button>
             </div>

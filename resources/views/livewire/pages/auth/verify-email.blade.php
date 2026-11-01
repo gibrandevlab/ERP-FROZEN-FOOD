@@ -17,5 +17,5 @@ new #[Layout('layouts.guest')] class extends Component
 }; ?>
 
 <div>
-    <p class="text-sm text-gray-500 text-center">Mengalihkan ke dashboard...</p>
+    <p class="text-sm text-[#64747a] text-center">Mengalihkan ke dashboard...</p>
 </div>

@@ -42,13 +42,13 @@ new #[Layout('layouts.guest')] class extends Component
     }
 }; ?>
 
-<div>
+<x-auth-shell title="Buat akun baru" subtitle="Daftarkan akun untuk mulai mengelola operasional frozen food.">
     <form wire:submit="register">
 
         {{-- Nama Lengkap --}}
         <div>
             <x-input-label for="name" :value="__('Nama Lengkap')" />
-            <x-text-input wire:model="name" id="name" class="block mt-1 w-full"
+            <x-text-input wire:model="name" id="name" class="block mt-1.5 w-full"
                           type="text" name="name" required autofocus autocomplete="name" />
             <x-input-error :messages="$errors->get('name')" class="mt-2" />
         </div>
@@ -56,7 +56,7 @@ new #[Layout('layouts.guest')] class extends Component
         {{-- Email --}}
         <div class="mt-4">
             <x-input-label for="email" :value="__('Email')" />
-            <x-text-input wire:model="email" id="email" class="block mt-1 w-full"
+            <x-text-input wire:model="email" id="email" class="block mt-1.5 w-full"
                           type="email" name="email" required autocomplete="username" />
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
@@ -64,7 +64,7 @@ new #[Layout('layouts.guest')] class extends Component
         {{-- Password --}}
         <div class="mt-4">
             <x-input-label for="password" :value="__('Password')" />
-            <x-text-input wire:model="password" id="password" class="block mt-1 w-full"
+            <x-text-input wire:model="password" id="password" class="block mt-1.5 w-full"
                           type="password" name="password" required autocomplete="new-password" />
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
@@ -73,17 +73,17 @@ new #[Layout('layouts.guest')] class extends Component
         <div class="mt-4">
             <x-input-label for="password_confirmation" :value="__('Konfirmasi Password')" />
             <x-text-input wire:model="password_confirmation" id="password_confirmation"
-                          class="block mt-1 w-full" type="password"
+                          class="block mt-1.5 w-full" type="password"
                           name="password_confirmation" required autocomplete="new-password" />
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
         </div>
 
         {{-- ─── Kata Rahasia (Recovery Phrase) ───────────────────────────── --}}
-        <div class="mt-6 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700 rounded-lg">
-            <p class="text-sm font-semibold text-amber-800 dark:text-amber-300 mb-1">
+        <div class="mt-6 rounded-lg border border-[#ddcba7] bg-[#f7f1e4] p-4">
+            <p class="mb-1 text-sm font-semibold text-[#5e4820]">
                 🔑 Kata Rahasia — Simpan Baik-Baik!
             </p>
-            <p class="text-xs text-amber-700 dark:text-amber-400 mb-3 leading-relaxed">
+            <p class="mb-3 text-xs leading-relaxed text-[#5e4820]">
                 Kata rahasia ini <strong>pengganti link reset password via email</strong>.
                 Jika kamu lupa password, kamu wajib memasukkan kata rahasia ini untuk bisa menggantinya.
                 <br><strong>Jika lupa kata rahasia, akun tidak bisa dipulihkan.</strong>
@@ -91,7 +91,7 @@ new #[Layout('layouts.guest')] class extends Component
 
             <x-input-label for="recovery_phrase" :value="__('Kata Rahasia')" />
             <x-text-input wire:model="recovery_phrase" id="recovery_phrase"
-                          class="block mt-1 w-full" type="text"
+                          class="block mt-1.5 w-full" type="text"
                           name="recovery_phrase" required autocomplete="off"
                           placeholder="Contoh: kucing hitam lari di taman belakang" />
             <x-input-error :messages="$errors->get('recovery_phrase')" class="mt-2" />
@@ -99,23 +99,23 @@ new #[Layout('layouts.guest')] class extends Component
             <div class="mt-3">
                 <x-input-label for="recovery_phrase_confirmation" :value="__('Konfirmasi Kata Rahasia')" />
                 <x-text-input wire:model="recovery_phrase_confirmation" id="recovery_phrase_confirmation"
-                              class="block mt-1 w-full" type="text"
+                              class="block mt-1.5 w-full" type="text"
                               name="recovery_phrase_confirmation" required autocomplete="off"
                               placeholder="Ketik ulang kata rahasia di atas" />
                 <x-input-error :messages="$errors->get('recovery_phrase_confirmation')" class="mt-2" />
             </div>
         </div>
 
-        <div class="flex items-center justify-end mt-4">
-            <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800"
+        <div class="mt-6 flex flex-wrap items-center justify-end gap-3 border-t border-[#e6eae7] pt-5">
+            <a class="text-sm font-medium text-[#52646a] underline decoration-[#a9beb5] underline-offset-4 transition-colors hover:text-[#172c35] focus:outline-none focus:ring-2 focus:ring-[#527c70] focus:ring-offset-2"
                href="{{ route('login') }}" wire:navigate>
                 {{ __('Sudah punya akun?') }}
             </a>
 
-            <x-primary-button class="ms-4">
+            <x-primary-button>
                 {{ __('Daftar Sekarang') }}
             </x-primary-button>
         </div>
 
     </form>
-</div>
+</x-auth-shell>

@@ -245,28 +245,28 @@ new #[Layout('layouts.app')] class extends Component {
 <div class="space-y-6 max-w-6xl mx-auto">
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-            <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900">Permintaan Pembelian</h1>
-            <p class="mt-1 text-sm text-slate-500">Ajukan kebutuhan stok, catat pembelian, dan konfirmasi penerimaan.</p>
+            <h1 class="text-xl sm:text-2xl font-extrabold text-[#172c35]">Permintaan Pembelian</h1>
+            <p class="mt-1 text-sm text-[#64747a]">Ajukan kebutuhan stok, catat pembelian, dan konfirmasi penerimaan.</p>
             @can('view-purchase_approval')
-                <p class="mt-2 text-xs font-semibold text-blue-700">
+                <p class="mt-2 text-xs font-semibold text-[#17343d]">
                     Persetujuan dilakukan di modul <a href="{{ route('purchase-approval.index') }}" wire:navigate class="underline">Persetujuan PR</a>.
                 </p>
             @endcan
         </div>
         @can('create-purchase_request')
-            <button wire:click="openCreate" class="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-blue-700">
+            <button wire:click="openCreate" class="inline-flex items-center gap-2 rounded-lg bg-[#244e49] px-4 py-2.5 text-sm font-bold text-white hover:bg-[#17343d]">
                 <span aria-hidden="true">+</span> Ajukan PR
             </button>
         @endcan
     </div>
 
     @if (session('success'))
-        <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm font-semibold text-emerald-800">{{ session('success') }}</div>
+        <div class="rounded-lg border border-[#b7d4ce] bg-[#e8efeb] p-3 text-sm font-semibold text-[#2f6b5c]">{{ session('success') }}</div>
     @endif
 
     <div class="flex flex-col gap-3 sm:flex-row">
-        <input wire:model.live.debounce.300ms="search" type="search" placeholder="Cari nomor tiket atau produk" class="min-w-0 flex-1 rounded-xl border-slate-300 text-sm" />
-        <select wire:model.live="statusFilter" class="rounded-xl border-slate-300 text-sm sm:w-52">
+        <input wire:model.live.debounce.300ms="search" type="search" placeholder="Cari nomor tiket atau produk" class="min-w-0 flex-1 rounded-lg border-[#cbd3d0] text-sm" />
+        <select wire:model.live="statusFilter" class="rounded-lg border-[#cbd3d0] text-sm sm:w-52">
             <option value="">Semua status</option>
             @foreach (['pending', 'approved', 'rejected', 'purchased', 'completed'] as $status)
                 <option value="{{ $status }}">{{ ucfirst($status) }}</option>
@@ -274,9 +274,9 @@ new #[Layout('layouts.app')] class extends Component {
         </select>
     </div>
 
-    <div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <div class="overflow-x-auto rounded-lg border border-[#dce1de] bg-white shadow-none">
         <table class="w-full min-w-[850px] text-left text-sm">
-            <thead class="bg-slate-50 text-xs uppercase text-slate-500">
+            <thead class="bg-[#f5f6f3] text-xs uppercase text-[#64747a]">
                 <tr>
                     <th class="px-4 py-3">Tiket / Produk</th>
                     <th class="px-4 py-3">Lokasi</th>
@@ -286,55 +286,55 @@ new #[Layout('layouts.app')] class extends Component {
                     <th class="px-4 py-3 text-right">Aksi</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100">
+            <tbody class="divide-y border-[#e6eae7]">
                 @forelse ($this->requests as $request)
                     <tr>
                         <td class="px-4 py-3">
-                            <div class="font-bold text-slate-900">{{ $request->ticket_number }}</div>
-                            <div class="text-slate-600">{{ $request->product?->name ?? 'Produk dihapus' }}</div>
-                            @if ($request->request_notes)<div class="mt-1 max-w-sm text-xs text-slate-400">{{ $request->request_notes }}</div>@endif
+                            <div class="font-bold text-[#172c35]">{{ $request->ticket_number }}</div>
+                            <div class="text-[#52646a]">{{ $request->product?->name ?? 'Produk dihapus' }}</div>
+                            @if ($request->request_notes)<div class="mt-1 max-w-sm text-xs text-[#71817f]">{{ $request->request_notes }}</div>@endif
                         </td>
-                        <td class="px-4 py-3 text-slate-600">{{ $request->location?->name ?? 'Lokasi dihapus' }}</td>
+                        <td class="px-4 py-3 text-[#52646a]">{{ $request->location?->name ?? 'Lokasi dihapus' }}</td>
                         <td class="px-4 py-3 text-right tabular-nums">{{ $request->received_qty ?? $request->requested_qty }} / {{ $request->requested_qty }}</td>
                         <td class="px-4 py-3">
                             <span @class([
                                 'inline-flex rounded-full px-2.5 py-1 text-xs font-bold',
-                                'bg-amber-50 text-amber-700' => $request->status === 'pending',
-                                'bg-blue-50 text-blue-700' => $request->status === 'approved',
-                                'bg-rose-50 text-rose-700' => $request->status === 'rejected',
-                                'bg-cyan-50 text-cyan-700' => $request->status === 'purchased',
-                                'bg-emerald-50 text-emerald-700' => $request->status === 'completed',
+                                'bg-[#f7f1e4] text-[#5e4820]' => $request->status === 'pending',
+                                'bg-[#f5f6f3] text-[#17343d]' => $request->status === 'approved',
+                                'bg-[#f7eceb] text-[#9c5252]' => $request->status === 'rejected',
+                                'bg-[#f5f6f3] text-[#17343d]' => $request->status === 'purchased',
+                                'bg-[#e8efeb] text-[#2f6b5c]' => $request->status === 'completed',
                             ])>{{ ucfirst($request->status) }}</span>
                             @if ($request->status === 'rejected' && $request->rejection_reason)
-                                <div class="mt-1 max-w-xs text-xs text-rose-600">{{ $request->rejection_reason }}</div>
+                                <div class="mt-1 max-w-xs text-xs text-[#9c5252]">{{ $request->rejection_reason }}</div>
                             @endif
                         </td>
-                        <td class="px-4 py-3 text-slate-600">{{ $request->requestedBy?->name ?? '-' }}</td>
+                        <td class="px-4 py-3 text-[#52646a]">{{ $request->requestedBy?->name ?? '-' }}</td>
                         <td class="px-4 py-3">
                             <div class="flex justify-end gap-2 whitespace-nowrap">
                                 @if ($request->status === 'pending')
                                     @can('edit-purchase_request')
-                                        <button wire:click="openEdit({{ $request->id }})" class="text-xs font-bold text-blue-700 hover:underline">Edit</button>
+                                        <button wire:click="openEdit({{ $request->id }})" class="text-xs font-bold text-[#17343d] hover:underline">Edit</button>
                                     @endcan
                                 @elseif ($request->status === 'approved')
                                     @can('edit-purchase_request')
-                                        <button wire:click="openPurchase({{ $request->id }})" class="text-xs font-bold text-blue-700 hover:underline">Catat Pembelian</button>
+                                        <button wire:click="openPurchase({{ $request->id }})" class="text-xs font-bold text-[#17343d] hover:underline">Catat Pembelian</button>
                                     @endcan
                                 @elseif ($request->status === 'purchased')
                                     @can('edit-purchase_request')
-                                        <button wire:click="openReceive({{ $request->id }})" class="text-xs font-bold text-emerald-700 hover:underline">Terima Barang</button>
+                                        <button wire:click="openReceive({{ $request->id }})" class="text-xs font-bold text-[#2f6b5c] hover:underline">Terima Barang</button>
                                     @endcan
                                 @endif
                                 @if (in_array($request->status, ['pending', 'rejected'], true))
                                     @can('delete-purchase_request')
-                                        <button wire:click="hapus({{ $request->id }})" wire:confirm="Hapus permintaan ini?" class="text-xs font-bold text-rose-700 hover:underline">Hapus</button>
+                                        <button wire:click="hapus({{ $request->id }})" wire:confirm="Hapus permintaan ini?" class="text-xs font-bold text-[#9c5252] hover:underline">Hapus</button>
                                     @endcan
                                 @endif
                             </div>
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="6" class="px-4 py-12 text-center text-slate-400">Belum ada permintaan pembelian.</td></tr>
+                    <tr><td colspan="6" class="px-4 py-12 text-center text-[#71817f]">Belum ada permintaan pembelian.</td></tr>
                 @endforelse
             </tbody>
         </table>
@@ -342,89 +342,89 @@ new #[Layout('layouts.app')] class extends Component {
     {{ $this->requests->links() }}
 
     @if ($showForm)
-        <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4">
-            <form wire:submit="saveRequest" class="max-h-[90vh] w-full max-w-xl space-y-4 overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl">
-                <h2 class="text-lg font-extrabold text-slate-900">{{ $editingId ? 'Edit Permintaan' : 'Ajukan Permintaan Pembelian' }}</h2>
-                <label class="block text-sm font-semibold text-slate-700">Produk
-                    <select wire:model="product_id" class="mt-1 w-full rounded-lg border-slate-300 text-sm">
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-[#17343d]/40 p-4">
+            <form wire:submit="saveRequest" class="max-h-[90vh] w-full max-w-xl space-y-4 overflow-y-auto rounded-lg bg-white p-6 shadow-none">
+                <h2 class="text-lg font-extrabold text-[#172c35]">{{ $editingId ? 'Edit Permintaan' : 'Ajukan Permintaan Pembelian' }}</h2>
+                <label class="block text-sm font-semibold text-[#344950]">Produk
+                    <select wire:model="product_id" class="mt-1 w-full rounded-lg border-[#cbd3d0] text-sm">
                         <option value="">Pilih produk</option>
                         @foreach ($this->products as $product)<option value="{{ $product->id }}">{{ $product->name }}</option>@endforeach
                     </select>
-                    @error('product_id')<span class="text-xs text-rose-600">{{ $message }}</span>@enderror
+                    @error('product_id')<span class="text-xs text-[#9c5252]">{{ $message }}</span>@enderror
                 </label>
-                <label class="block text-sm font-semibold text-slate-700">Lokasi
-                    <select wire:model="location_id" class="mt-1 w-full rounded-lg border-slate-300 text-sm">
+                <label class="block text-sm font-semibold text-[#344950]">Lokasi
+                    <select wire:model="location_id" class="mt-1 w-full rounded-lg border-[#cbd3d0] text-sm">
                         <option value="">Pilih lokasi</option>
                         @foreach ($this->locations as $location)<option value="{{ $location->id }}">{{ $location->name }}</option>@endforeach
                     </select>
-                    @error('location_id')<span class="text-xs text-rose-600">{{ $message }}</span>@enderror
+                    @error('location_id')<span class="text-xs text-[#9c5252]">{{ $message }}</span>@enderror
                 </label>
-                <label class="block text-sm font-semibold text-slate-700">Supplier (opsional)
-                    <select wire:model="supplier_id" class="mt-1 w-full rounded-lg border-slate-300 text-sm">
+                <label class="block text-sm font-semibold text-[#344950]">Supplier (opsional)
+                    <select wire:model="supplier_id" class="mt-1 w-full rounded-lg border-[#cbd3d0] text-sm">
                         <option value="">Belum ditentukan</option>
                         @foreach ($this->suppliers as $supplier)<option value="{{ $supplier->id }}">{{ $supplier->name }}</option>@endforeach
                     </select>
-                    @error('supplier_id')<span class="text-xs text-rose-600">{{ $message }}</span>@enderror
+                    @error('supplier_id')<span class="text-xs text-[#9c5252]">{{ $message }}</span>@enderror
                 </label>
-                <label class="block text-sm font-semibold text-slate-700">Jumlah diminta
-                    <input wire:model="requested_qty" type="number" min="1" step="1" class="mt-1 w-full rounded-lg border-slate-300 text-sm" />
-                    @error('requested_qty')<span class="text-xs text-rose-600">{{ $message }}</span>@enderror
+                <label class="block text-sm font-semibold text-[#344950]">Jumlah diminta
+                    <input wire:model="requested_qty" type="number" min="1" step="1" class="mt-1 w-full rounded-lg border-[#cbd3d0] text-sm" />
+                    @error('requested_qty')<span class="text-xs text-[#9c5252]">{{ $message }}</span>@enderror
                 </label>
-                <label class="block text-sm font-semibold text-slate-700">Catatan (opsional)
-                    <textarea wire:model="request_notes" rows="3" class="mt-1 w-full rounded-lg border-slate-300 text-sm"></textarea>
-                    @error('request_notes')<span class="text-xs text-rose-600">{{ $message }}</span>@enderror
+                <label class="block text-sm font-semibold text-[#344950]">Catatan (opsional)
+                    <textarea wire:model="request_notes" rows="3" class="mt-1 w-full rounded-lg border-[#cbd3d0] text-sm"></textarea>
+                    @error('request_notes')<span class="text-xs text-[#9c5252]">{{ $message }}</span>@enderror
                 </label>
-                <div class="flex justify-end gap-3 border-t border-slate-100 pt-4">
-                    <button type="button" wire:click="$set('showForm', false)" class="rounded-lg px-4 py-2 text-sm font-semibold text-slate-600">Batal</button>
-                    <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white">Simpan</button>
+                <div class="flex justify-end gap-3 border-t border-[#e6eae7] pt-4">
+                    <button type="button" wire:click="$set('showForm', false)" class="rounded-lg px-4 py-2 text-sm font-semibold text-[#52646a]">Batal</button>
+                    <button type="submit" class="rounded-lg bg-[#244e49] px-4 py-2 text-sm font-bold text-white">Simpan</button>
                 </div>
             </form>
         </div>
     @endif
 
     @if ($showPurchaseForm)
-        <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4">
-            <form wire:submit="markPurchased" class="max-h-[90vh] w-full max-w-md space-y-4 overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl">
-                <h2 class="text-lg font-extrabold text-slate-900">Catat Pembelian</h2>
-                <label class="block text-sm font-semibold text-slate-700">Supplier
-                    <select wire:model="supplier_id" class="mt-1 w-full rounded-lg border-slate-300 text-sm">
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-[#17343d]/40 p-4">
+            <form wire:submit="markPurchased" class="max-h-[90vh] w-full max-w-md space-y-4 overflow-y-auto rounded-lg bg-white p-6 shadow-none">
+                <h2 class="text-lg font-extrabold text-[#172c35]">Catat Pembelian</h2>
+                <label class="block text-sm font-semibold text-[#344950]">Supplier
+                    <select wire:model="supplier_id" class="mt-1 w-full rounded-lg border-[#cbd3d0] text-sm">
                         <option value="">Tanpa supplier</option>
                         @foreach ($this->suppliers as $supplier)<option value="{{ $supplier->id }}">{{ $supplier->name }}</option>@endforeach
                     </select>
-                    @error('supplier_id')<span class="text-xs text-rose-600">{{ $message }}</span>@enderror
+                    @error('supplier_id')<span class="text-xs text-[#9c5252]">{{ $message }}</span>@enderror
                 </label>
-                <label class="block text-sm font-semibold text-slate-700">Nomor invoice (opsional)
-                    <input wire:model="invoice_number" type="text" maxlength="255" class="mt-1 w-full rounded-lg border-slate-300 text-sm" />
-                    @error('invoice_number')<span class="text-xs text-rose-600">{{ $message }}</span>@enderror
+                <label class="block text-sm font-semibold text-[#344950]">Nomor invoice (opsional)
+                    <input wire:model="invoice_number" type="text" maxlength="255" class="mt-1 w-full rounded-lg border-[#cbd3d0] text-sm" />
+                    @error('invoice_number')<span class="text-xs text-[#9c5252]">{{ $message }}</span>@enderror
                 </label>
-                <label class="block text-sm font-semibold text-slate-700">Total biaya
-                    <input wire:model="total_cost" type="number" min="0" step="0.01" class="mt-1 w-full rounded-lg border-slate-300 text-sm" />
-                    @error('total_cost')<span class="text-xs text-rose-600">{{ $message }}</span>@enderror
+                <label class="block text-sm font-semibold text-[#344950]">Total biaya
+                    <input wire:model="total_cost" type="number" min="0" step="0.01" class="mt-1 w-full rounded-lg border-[#cbd3d0] text-sm" />
+                    @error('total_cost')<span class="text-xs text-[#9c5252]">{{ $message }}</span>@enderror
                 </label>
-                <label class="block text-sm font-semibold text-slate-700">Bukti pembelian (maks. 2 MB)
+                <label class="block text-sm font-semibold text-[#344950]">Bukti pembelian (maks. 2 MB)
                     <input wire:model="proof_image" type="file" accept="image/*" class="mt-1 block w-full text-sm" />
-                    @error('proof_image')<span class="text-xs text-rose-600">{{ $message }}</span>@enderror
+                    @error('proof_image')<span class="text-xs text-[#9c5252]">{{ $message }}</span>@enderror
                 </label>
-                <div class="flex justify-end gap-3 border-t border-slate-100 pt-4">
-                    <button type="button" wire:click="$set('showPurchaseForm', false)" class="rounded-lg px-4 py-2 text-sm font-semibold text-slate-600">Batal</button>
-                    <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white">Simpan Pembelian</button>
+                <div class="flex justify-end gap-3 border-t border-[#e6eae7] pt-4">
+                    <button type="button" wire:click="$set('showPurchaseForm', false)" class="rounded-lg px-4 py-2 text-sm font-semibold text-[#52646a]">Batal</button>
+                    <button type="submit" class="rounded-lg bg-[#244e49] px-4 py-2 text-sm font-bold text-white">Simpan Pembelian</button>
                 </div>
             </form>
         </div>
     @endif
 
     @if ($showReceiveForm)
-        <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4">
-            <form wire:submit="receive" class="w-full max-w-md space-y-4 rounded-2xl bg-white p-6 shadow-2xl">
-                <h2 class="text-lg font-extrabold text-slate-900">Konfirmasi Penerimaan</h2>
-                <label class="block text-sm font-semibold text-slate-700">Jumlah diterima
-                    <input wire:model="received_qty" type="number" min="1" step="1" class="mt-1 w-full rounded-lg border-slate-300 text-sm" />
-                    @error('received_qty')<span class="text-xs text-rose-600">{{ $message }}</span>@enderror
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-[#17343d]/40 p-4">
+            <form wire:submit="receive" class="w-full max-w-md space-y-4 rounded-lg bg-white p-6 shadow-none">
+                <h2 class="text-lg font-extrabold text-[#172c35]">Konfirmasi Penerimaan</h2>
+                <label class="block text-sm font-semibold text-[#344950]">Jumlah diterima
+                    <input wire:model="received_qty" type="number" min="1" step="1" class="mt-1 w-full rounded-lg border-[#cbd3d0] text-sm" />
+                    @error('received_qty')<span class="text-xs text-[#9c5252]">{{ $message }}</span>@enderror
                 </label>
-                <p class="text-xs text-slate-500">Konfirmasi akan membuat ledger pembelian dan menambah stok secara otomatis.</p>
-                <div class="flex justify-end gap-3 border-t border-slate-100 pt-4">
-                    <button type="button" wire:click="$set('showReceiveForm', false)" class="rounded-lg px-4 py-2 text-sm font-semibold text-slate-600">Batal</button>
-                    <button type="submit" class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-bold text-white">Terima Barang</button>
+                <p class="text-xs text-[#64747a]">Konfirmasi akan membuat ledger pembelian dan menambah stok secara otomatis.</p>
+                <div class="flex justify-end gap-3 border-t border-[#e6eae7] pt-4">
+                    <button type="button" wire:click="$set('showReceiveForm', false)" class="rounded-lg px-4 py-2 text-sm font-semibold text-[#52646a]">Batal</button>
+                    <button type="submit" class="rounded-lg bg-[#2f6b5c] px-4 py-2 text-sm font-bold text-white">Terima Barang</button>
                 </div>
             </form>
         </div>
