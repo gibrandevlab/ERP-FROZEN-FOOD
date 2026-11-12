@@ -12,7 +12,11 @@ new #[Layout('layouts.app')] class extends Component {
     public function mount(string $slug): void
     {
         $this->authorize('view-stok');
-        $this->product = Product::with(['category', 'ledgers' => fn($q) => $q->latest()->limit(10)])->where('slug', $slug)->firstOrFail();
+        $this->product = Product::with([
+            'category',
+            'ledgers' => fn($q) => $q->latest()->limit(10),
+            'ledgerItems' => fn($q) => $q->with('ledger')->whereHas('ledger')->latest()->limit(10),
+        ])->where('slug', $slug)->firstOrFail();
     }
 }; ?>
 
@@ -176,6 +180,27 @@ new #[Layout('layouts.app')] class extends Component {
                     @endforelse
                 </div>
             </div>
+            @if($product->ledgerItems->isNotEmpty())
+                <div class="mt-4 bg-white rounded-lg border border-[#dce1de]/80 overflow-hidden shadow-none">
+                    <div class="px-6 py-4 bg-[#f5f6f3]/80 border-b border-[#dce1de]/80">
+                        <h2 class="text-xs font-extrabold text-[#64747a] uppercase tracking-wider">Detail Invoice per Lokasi</h2>
+                    </div>
+                    <div class="divide-y divide-[#e6eae7]">
+                        @foreach($product->ledgerItems as $item)
+                            <div class="px-6 py-4 flex flex-wrap items-center justify-between gap-3">
+                                <div>
+                                    <p class="text-sm font-extrabold text-[#172c35]">{{ $item->ledger->title }}</p>
+                                    <p class="text-xs text-[#64747a] mt-1">{{ $item->location_name }} · {{ $item->ledger->date->format('d M Y') }} · Invoice {{ $item->ledger->reference ?: '—' }}</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-sm font-extrabold text-[#315b50]">{{ $item->quantity }} {{ $product->unit }}</p>
+                                    <p class="text-xs text-[#64747a] mt-1">Rp {{ number_format((float) $item->unit_price * $item->quantity, 0, ',', '.') }}</p>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
             @endcan
         </div>
     </div>

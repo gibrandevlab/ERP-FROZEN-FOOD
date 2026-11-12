@@ -115,7 +115,16 @@ class SpkService
                 if ($dateFilter) {
                     $terjualQuery->where('date', '>=', $dateFilter);
                 }
-                $totalTerjual = (float) ($terjualQuery->sum('quantity') ?? 0);
+                $itemTerjualQuery = DB::table('ledger_items')
+                    ->join('ledgers', 'ledgers.id', '=', 'ledger_items.ledger_id')
+                    ->where('ledger_items.product_id', $product->id)
+                    ->where('ledgers.type', 'income')
+                    ->whereNull('ledgers.deleted_at');
+                if ($dateFilter) {
+                    $itemTerjualQuery->where('ledgers.date', '>=', $dateFilter);
+                }
+                $totalTerjual = (float) ($terjualQuery->sum('quantity') ?? 0)
+                    + (float) ($itemTerjualQuery->sum('ledger_items.quantity') ?? 0);
 
                 // C3 — Perputaran stok (terjual / stok, hindari div/0)
                 $perputaran = ($totalStok > 0 && $totalTerjual > 0)

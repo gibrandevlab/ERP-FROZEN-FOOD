@@ -18,6 +18,7 @@ class DatabaseQueryTool
         'suppliers',
         'customers',
         'ledgers',
+        'ledger_items',
         'purchase_requests',
         'conversations',
         'chat_messages',
@@ -62,13 +63,13 @@ class DatabaseQueryTool
             'type' => 'function',
             'function' => [
                 'name' => 'query_database',
-                'description' => 'Menjalankan query SQL SELECT READ-ONLY ke database ERP Frozen Food. HANYA SELECT diperbolehkan. ATURAN EFISIENSI TOKEN: (1) Wajib sebutkan hanya kolom yang dibutuhkan, DILARANG SELECT *. (2) Wajib gunakan fungsi agregasi (COUNT, SUM, AVG, MIN, MAX, GROUP BY) untuk ringkasan/total/omzet alih-alih menarik banyak baris mentah. (3) Batasi hasil dengan LIMIT 10-20.',
+                'description' => 'Menjalankan query SQL SELECT READ-ONLY ke database ERP Frozen Food. HANYA SELECT diperbolehkan. Untuk stok saat ini gunakan stocks. Transaksi stok baru memakai ledger_items (join ke ledgers); transaksi lama/Purchase Request dapat memakai kolom legacy di ledgers. Hindari penghitungan ganda, filter ledgers.deleted_at IS NULL, dan jangan menjumlahkan ledgers.amount setelah join ke baris detail. ATURAN EFISIENSI TOKEN: (1) Wajib sebutkan hanya kolom yang dibutuhkan, DILARANG SELECT *. (2) Wajib gunakan fungsi agregasi (COUNT, SUM, AVG, MIN, MAX, GROUP BY) untuk ringkasan/total/omzet alih-alih menarik banyak baris mentah. (3) Batasi hasil dengan LIMIT 10-20.',
                 'parameters' => [
                     'type' => 'object',
                     'properties' => [
                         'sql' => [
                             'type' => 'string',
-                            'description' => 'Query SQL SELECT yang ringkas dan hemat token. Contoh agregasi: SELECT COUNT(*) as total_transaksi, SUM(amount) as total_omzet FROM ledgers WHERE type = "income". Contoh daftar: SELECT p.name, s.quantity FROM products p JOIN stocks s ON p.id = s.product_id ORDER BY s.quantity ASC LIMIT 15',
+                            'description' => 'Query SQL SELECT yang ringkas dan hemat token. Contoh omzet header: SELECT COUNT(*) as total_transaksi, SUM(amount) as total_omzet FROM ledgers WHERE type = "income" AND deleted_at IS NULL. Contoh stok per lokasi: SELECT p.name, l.name as lokasi, s.quantity FROM stocks s JOIN products p ON p.id = s.product_id JOIN locations l ON l.id = s.location_id ORDER BY s.quantity ASC LIMIT 15. Contoh penjualan detail per lokasi: SELECT li.product_name, li.location_name, SUM(li.quantity) as terjual FROM ledger_items li JOIN ledgers g ON g.id = li.ledger_id WHERE g.type = "income" AND g.deleted_at IS NULL GROUP BY li.product_name, li.location_name LIMIT 15',
                         ],
                         'description' => [
                             'type' => 'string',

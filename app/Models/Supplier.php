@@ -39,6 +39,11 @@ class Supplier extends Model
         return $this->hasMany(Ledger::class)->where('type', 'expense');
     }
 
+    public function ledgerItems()
+    {
+        return $this->hasManyThrough(LedgerItem::class, Ledger::class, 'supplier_id', 'ledger_id');
+    }
+
     /**
      * Produk yang disuplai oleh supplier ini (melalui transaksi pembukuan/ledger).
      */
@@ -61,7 +66,8 @@ class Supplier extends Model
 
     public function totalItemsSupplied(): int
     {
-        return (int) $this->ledgers()->where('type', 'expense')->sum('quantity');
+        return (int) $this->ledgers()->where('type', 'expense')->sum('quantity')
+            + (int) $this->ledgerItems()->whereHas('ledger', fn ($query) => $query->where('type', 'expense'))->sum('ledger_items.quantity');
     }
 
     public function totalPurchases(): float

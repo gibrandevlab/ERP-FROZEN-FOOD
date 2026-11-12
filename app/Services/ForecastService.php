@@ -20,7 +20,7 @@ use Illuminate\Validation\ValidationException;
  *   - Reorder Point (ROP) = laju harian x lead time + safety stock
  *   - Saran beli = kebutuhan selama (lead time + horizon) - stok saat ini
  *
- * Data penjualan diambil dari ledgers (type income, stock_movement out).
+ * Penjualan lama dibaca dari ledgers; detail transaksi baru dibaca dari ledger_items.
  */
 class ForecastService
 {
@@ -44,7 +44,7 @@ class ForecastService
         $today = now('Asia/Jakarta')->startOfDay();
         $start = $today->copy()->subDays($history - 1);
         $startDate = $start->toDateString();
-        $endDate   = $today->toDateString();
+        $endDate   = $today->copy()->endOfDay()->toDateTimeString();
 
         $products = Product::query()
             ->where('is_active', true)
@@ -53,7 +53,7 @@ class ForecastService
             ->get();
 
         // Agregasi penjualan per produk per tanggal (1 query untuk semua produk).
-        $salesRows = DB::table('ledgers')
+        $legacySalesRows = DB::table('ledgers')
             ->selectRaw('product_id, DATE(date) as sale_date, SUM(quantity) as qty')
             ->where('type', 'income')
             ->where('stock_movement', 'out')
@@ -62,6 +62,23 @@ class ForecastService
             ->whereBetween('date', [$startDate, $endDate])
             ->groupBy('product_id', DB::raw('DATE(date)'))
             ->get();
+
+        $itemSalesRows = DB::table('ledger_items')
+            ->join('ledgers', 'ledgers.id', '=', 'ledger_items.ledger_id')
+            ->selectRaw('ledger_items.product_id, DATE(ledgers.date) as sale_date, SUM(ledger_items.quantity) as qty')
+            ->where('ledgers.type', 'income')
+            ->whereNull('ledgers.deleted_at')
+            ->whereBetween('ledgers.date', [$startDate, $endDate])
+            ->groupBy('ledger_items.product_id', DB::raw('DATE(ledgers.date)'))
+            ->get();
+
+        $salesRows = $legacySalesRows->concat($itemSalesRows)
+            ->groupBy(fn ($row) => $row->product_id.'_'.$row->sale_date)
+            ->map(fn ($rows) => (object) [
+                'product_id' => $rows->first()->product_id,
+                'sale_date' => $rows->first()->sale_date,
+                'qty' => $rows->sum('qty'),
+            ]);
 
         $salesByProduct = $salesRows
             ->groupBy('product_id')

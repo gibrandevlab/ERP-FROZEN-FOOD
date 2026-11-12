@@ -136,7 +136,7 @@ new #[Layout('layouts.app')] class extends Component {
         $this->authorize('edit-purchase_request');
         $validated = $this->validate([
             'supplier_id' => ['nullable', Rule::exists('suppliers', 'id')->where('is_active', true)->whereNull('deleted_at')],
-            'invoice_number' => ['nullable', 'string', 'max:255'],
+            'invoice_number' => ['required', 'string', 'max:255'],
             'total_cost' => ['required', 'numeric', 'min:0', 'max:999999999999.99'],
             'proof_image' => ['nullable', 'image', 'max:2048'],
         ]);
@@ -393,8 +393,8 @@ new #[Layout('layouts.app')] class extends Component {
                     </select>
                     @error('supplier_id')<span class="text-xs text-[#9c5252]">{{ $message }}</span>@enderror
                 </label>
-                <label class="block text-sm font-semibold text-[#344950]">Nomor invoice (opsional)
-                    <input wire:model="invoice_number" type="text" maxlength="255" class="mt-1 w-full rounded-lg border-[#cbd3d0] text-sm" />
+                <label class="block text-sm font-semibold text-[#344950]">Nomor invoice (wajib)
+                    <input wire:model="invoice_number" type="text" maxlength="255" required class="mt-1 w-full rounded-lg border-[#cbd3d0] text-sm" />
                     @error('invoice_number')<span class="text-xs text-[#9c5252]">{{ $message }}</span>@enderror
                 </label>
                 <label class="block text-sm font-semibold text-[#344950]">Total biaya

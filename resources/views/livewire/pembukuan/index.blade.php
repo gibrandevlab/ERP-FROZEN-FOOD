@@ -21,7 +21,7 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function getLedgersProperty()
     {
-        return Ledger::with(['product', 'location'])
+        return Ledger::with(['product', 'location', 'items.product', 'items.location'])
             ->when($this->search, fn($q) => $q->where(fn($searchQuery) => $searchQuery
                 ->where('title', 'like', "%{$this->search}%")
                 ->orWhere('reference', 'like', "%{$this->search}%")))
@@ -154,7 +154,13 @@ new #[Layout('layouts.app')] class extends Component {
                 <div class="min-w-0 flex-1">
                     <p class="font-extrabold text-[#172c35] text-sm truncate">{{ $l->title }}</p>
                     <p class="text-[11px] font-semibold text-[#71817f] mt-0.5">{{ $l->date->format('d M Y') }}</p>
-                    @if($l->product)
+                    @if($l->items->isNotEmpty())
+                        <p class="text-[10px] font-extrabold text-[#315b50] mt-1.5 inline-flex flex-wrap items-center gap-1 bg-[#e8efeb] px-2 py-0.5 rounded-lg border border-[#dce1de]">
+                            @foreach($l->items as $item)
+                                <span>{{ $item->product_name }} × {{ $item->quantity }} · {{ $item->location_name }}</span>@if(!$loop->last)<span> / </span>@endif
+                            @endforeach
+                        </p>
+                    @elseif($l->product)
                         <p class="text-[10px] font-extrabold text-[#315b50] mt-1.5 inline-flex items-center gap-1 bg-[#e8efeb] px-2 py-0.5 rounded-lg border border-[#dce1de]">
                             <svg class="w-3 h-3 text-[#527c70]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
                             {{ $l->product->name }}
@@ -165,7 +171,15 @@ new #[Layout('layouts.app')] class extends Component {
                     <p class="text-sm font-extrabold {{ $l->type === 'income' ? 'text-[#2f6b5c]' : 'text-[#8f4a4a]' }}">
                         {{ $l->type === 'income' ? '+' : '-' }} Rp {{ number_format($l->amount, 0, ',', '.') }}
                     </p>
-                    @if($l->stock_movement && $l->quantity)
+                    @if($l->items->isNotEmpty())
+                        <div class="mt-1.5 space-y-1">
+                            @foreach($l->items as $item)
+                                <p class="text-[10px] font-extrabold {{ $l->type === 'expense' ? 'text-[#315b50]' : 'text-[#8a6a2f]' }}">
+                                    {{ $l->type === 'expense' ? '+' : '-' }}{{ $item->quantity }} · {{ $item->location_name }}
+                                </p>
+                            @endforeach
+                        </div>
+                    @elseif($l->stock_movement && $l->quantity)
                         <p class="text-[10px] font-extrabold mt-1.5 {{ $l->stock_movement === 'in' ? 'text-[#315b50] bg-[#e8efeb] border-[#dce1de]' : 'text-[#8a6a2f] bg-[#f7f1e4] border-[#ebdfc6]' }} px-2 py-0.5 rounded-lg border inline-block">
                             {{ $l->stock_movement === 'in' ? 'Masuk' : 'Keluar' }} {{ $l->quantity }} pcs
                         </p>
@@ -219,10 +233,26 @@ new #[Layout('layouts.app')] class extends Component {
                     <td class="px-6 py-4">
                         <p class="font-extrabold text-[#172c35]">{{ $l->title }}</p>
                         @if($l->reference)<p class="text-xs text-[#71817f] font-mono mt-0.5">Ref: {{ $l->reference }}</p>@endif
-                        @if($l->product)<p class="text-xs font-bold text-[#315b50] mt-0.5 flex items-center gap-1"><svg class="w-3.5 h-3.5 text-[#527c70]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg> {{ $l->product->name }}</p>@endif
+                        @if($l->items->isNotEmpty())
+                            <p class="text-xs font-bold text-[#315b50] mt-0.5">
+                                @foreach($l->items as $item)
+                                    {{ $item->product_name }} × {{ $item->quantity }} ({{ $item->location_name }})@if(!$loop->last); @endif
+                                @endforeach
+                            </p>
+                        @elseif($l->product)
+                            <p class="text-xs font-bold text-[#315b50] mt-0.5 flex items-center gap-1"><svg class="w-3.5 h-3.5 text-[#527c70]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg> {{ $l->product->name }}</p>
+                        @endif
                     </td>
                     <td class="px-6 py-4">
-                        @if($l->stock_movement)
+                        @if($l->items->isNotEmpty())
+                            <div class="space-y-1">
+                                @foreach($l->items as $item)
+                                    <p class="text-xs font-extrabold {{ $l->type === 'expense' ? 'text-[#315b50]' : 'text-[#8a6a2f]' }}">
+                                        {{ $l->type === 'expense' ? '+' : '-' }}{{ $item->quantity }} · {{ $item->location_name }}
+                                    </p>
+                                @endforeach
+                            </div>
+                        @elseif($l->stock_movement)
                             <div class="flex items-center gap-1.5">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider {{ $l->stock_movement === 'in' ? 'bg-[#e8efeb] text-[#315b50] border border-[#dce1de]' : 'bg-[#f7f1e4] text-[#8a6a2f] border border-[#ebdfc6]' }}">
                                     {{ $l->stock_movement === 'in' ? '+ Masuk' : '- Keluar' }}

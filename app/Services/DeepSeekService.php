@@ -65,14 +65,16 @@ Berikut adalah struktur skema database relasional lengkap sistem ini untuk refer
    - CATATAN: Kolom `password` dan `recovery_phrase` DILINDUNGI dan tidak boleh diakses.
 
 2. Tabel `permissions` & `user_permissions`:
-   - `permissions`: `id`, `name`, `key` ('products', 'ledger', 'categories', 'suppliers', 'customers', 'purchase_requests', 'spk', 'users').
-   - `user_permissions`: `id`, `user_id`, `permission_id`, `can_view`, `can_create`, `can_edit`, `can_delete`.
+   - `permissions`: `id`, `key` (unik), `label`, `category`, `description` (nullable), `created_at`, `updated_at`.
+   - `user_permissions`: `id`, `user_id`, `permission_id`, `can_view`, `can_create`, `can_edit`, `can_delete`, `created_at`, `updated_at`; unik per pasangan `user_id` + `permission_id`.
+   - Permission key modul yang digunakan antara lain `dashboard`, `stok`, `kategori`, `lokasi`, `pelanggan`, `supplier`, `spk`, `purchase_request`, `purchase_approval`, `forecast`, `pembukuan`, `ringkasan`, `pengguna`, dan `audit_logs`. Key permission bukan nama tabel.
 
 3. Tabel `categories`:
    - `id` (bigint, PK): ID kategori.
    - `name` (string): Nama kategori ('Nugget & Sosis', 'Daging Sapi & Ayam', 'Seafood Frozen', 'Kentang & Sayur', 'Dimsum & Frozen Snack').
    - `slug` (string, unique): Slug URL kategori.
    - `description` (text, nullable): Deskripsi kategori.
+   - `user_id` (bigint, FK users, nullable): Pembuat kategori.
    - `created_at`, `updated_at` (timestamps).
 
 4. Tabel `products`:
@@ -85,19 +87,21 @@ Berikut adalah struktur skema database relasional lengkap sistem ini untuk refer
    - `description` (text, nullable): Deskripsi detail produk & instruksi simpan.
    - `price` (decimal 15,2): Harga jual eceran normal.
    - `wholesale_price` (decimal 15,2, nullable): Harga grosir.
-   - `wholesale_min_qty` (integer, default 0): Minimal pembelian grosir.
+   - `wholesale_min_qty` (integer, nullable): Minimal pembelian grosir.
    - `cost` (decimal 15,2): Harga pokok pembelian (HPP/Cost per unit).
+   - `min_stock` (integer, default 10): Batas stok minimum.
    - `unit` (string): Satuan unit ('pcs', 'pack', 'kg', 'dus', 'karton').
    - `image` (string, nullable): Path gambar produk.
    - `is_active` (boolean, default 1): Status aktif katalog.
-   - `lead_time` (integer, default 2): Waktu tunggu pengiriman dari supplier (hari).
-   - `min_stock` (integer, default 10): Batas safety stock minimum sebelum peringatan restock.
-   - `created_at`, `updated_at`, `deleted_at` (timestamps, soft deletes).
+   - `lead_time` (integer, default 0): Waktu tunggu pengiriman dari supplier (hari).
+   - `updated_by` (bigint, FK users, nullable): User terakhir yang memperbarui produk.
+   - `created_at`, `updated_at`, `deleted_at` (timestamps; `deleted_at` untuk soft delete).
 
 5. Tabel `locations`:
    - `id` (bigint, PK): ID gudang / freezer.
    - `name` (string): Nama lokasi ('Cold Storage Utama -18°C', 'Freezer Display Toko', 'Gudang Transit').
    - `description` (text, nullable): Spesifikasi suhu atau catatan lokasi.
+   - `is_active` (boolean, default 1), `user_id` (bigint, FK users, nullable).
    - `created_at`, `updated_at` (timestamps).
 
 6. Tabel `stocks`:
@@ -105,6 +109,8 @@ Berikut adalah struktur skema database relasional lengkap sistem ini untuk refer
    - `product_id` (bigint, FK products): Relasi produk.
    - `location_id` (bigint, FK locations): Relasi lokasi cold storage.
    - `quantity` (integer): Jumlah unit fisik tersedia di lokasi tersebut.
+   - Satu kombinasi `product_id` + `location_id` hanya memiliki satu baris; gunakan tabel ini untuk stok saat ini, bukan menjumlahkan mutasi ledger.
+   - `user_id` (bigint, FK users, nullable).
    - `created_at`, `updated_at` (timestamps).
 
 7. Tabel `suppliers`:
@@ -112,14 +118,15 @@ Berikut adalah struktur skema database relasional lengkap sistem ini untuk refer
    - `name` (string): Nama perusahaan distributor / supplier frozen food.
    - `phone` (string, nullable): Nomor WhatsApp / Telepon salesman.
    - `address` (text, nullable): Alamat gudang supplier.
-   - `email` (string, nullable): Email supplier.
-   - `created_at`, `updated_at` (timestamps).
+   - `description` (text, nullable), `is_active` (boolean, default 1).
+   - `created_at`, `updated_at`, `deleted_at` (timestamps; `deleted_at` untuk soft delete). Tidak ada kolom `email`.
 
 8. Tabel `customers`:
    - `id` (bigint, PK): ID pelanggan.
    - `name` (string): Nama pelanggan.
    - `phone` (string, nullable): Nomor WhatsApp/telepon pelanggan.
    - `type` (enum 'seller', 'non_seller'): Tipe pembeli ('seller' = reseller/pedagang, 'non_seller' = eceran/umum).
+   - `user_id` (bigint, FK users, nullable).
    - `created_at`, `updated_at` (timestamps).
    - CATATAN PENTING: Tabel `customers` TIDAK MEMILIKI kolom `address`.
 
@@ -132,33 +139,50 @@ Berikut adalah struktur skema database relasional lengkap sistem ini untuk refer
    - `payment_status` (enum 'paid', 'unpaid'): 'paid' (lunas), 'unpaid' (belum lunas / piutang pelanggan).
    - `due_date` (date, nullable): Tanggal jatuh tempo.
    - `date` (date): Tanggal aktual transaksi (CATATAN: nama kolomnya adalah `date`, BUKAN `transaction_date`).
-   - `reference` (string, nullable): Nomor nota / invoice.
-   - `product_id` (bigint, FK products, nullable): Relasi ID produk (WAJIB JOIN ke products p ON l.product_id = p.id untuk mencari produk terlaris).
-   - `location_id` (bigint, FK locations, nullable): Lokasi cold storage.
-   - `quantity` (integer, nullable): Jumlah pcs/unit barang terjual.
-   - `stock_movement` (enum 'in', 'out', nullable): 'out' saat penjualan (stok berkurang), 'in' saat restock (stok bertambah).
+   - `reference` (string, nullable): Nomor nota / invoice; diwajibkan pada transaksi pembelian stok dan penjualan.
+   - `product_id`, `location_id`, `quantity`, `stock_movement`: Kolom legacy untuk transaksi lama dan alur Purchase Request.
    - `customer_id` (bigint, FK customers, nullable): Relasi pembeli.
    - `supplier_id` (bigint, FK suppliers, nullable): Relasi supplier.
-   - `user_id` (bigint, FK users): Petugas admin/kasir.
+   - `proof_image` (string, nullable): Path bukti transaksi.
+   - `user_id`, `updated_by` (bigint, FK users, nullable): Petugas pembuat dan updater.
    - `description` (text, nullable): Catatan tambahan.
    - `created_at`, `updated_at`, `deleted_at` (timestamps, soft deletes).
 
-10. Tabel `purchase_requests` (Pengajuan Pembelian Stok):
-    - `id` (bigint, PK): ID PR.
-    - `code` (string, unique): Kode PR (contoh: PR-202610-001).
-    - `product_id` (bigint, FK products): Produk yang diajukan.
-    - `supplier_id` (bigint, FK suppliers, nullable): Target supplier.
-    - `requested_by` (bigint, FK users): Staf pemohon.
-    - `approved_by` (bigint, FK users, nullable): Manajer penyetuju.
-    - `quantity` (integer): Jumlah unit pengajuan.
-    - `estimated_cost` (decimal 15,2): Estimasi biaya (qty * cost).
-    - `status` (enum 'draft', 'pending', 'approved', 'rejected', 'ordered', 'received').
-    - `notes` (text, nullable): Alasan pengajuan restock.
-    - `created_at`, `updated_at` (timestamps).
+10. Tabel `ledger_items` (Rincian Baris Produk/Lokasi per Transaksi):
+   - `id` (bigint, PK): ID baris detail.
+   - `ledger_id` (bigint, FK ledgers): Header transaksi; gunakan untuk menggabungkan detail dengan tanggal, tipe, invoice, supplier, dan pelanggan.
+   - `product_id` (bigint, FK products, nullable): Produk; dapat null jika produk terkait dihapus.
+   - `location_id` (bigint, FK locations, nullable): Lokasi stok; dapat null jika lokasi terkait dihapus.
+   - `product_name`, `location_name` (string): Snapshot nama saat transaksi, tetap tersedia sebagai identitas jika relasi produk/lokasi sudah tidak ada.
+   - `quantity` (integer): Jumlah unit untuk baris produk di lokasi tersebut.
+   - `unit_price` (decimal 15,2): Harga per unit pada transaksi.
+   - `created_at`, `updated_at` (timestamps).
 
-11. Tabel `conversations` & `chat_messages` (AI Memory Engine):
-    - `conversations`: `id` (UUID PK), `user_id` (FK users), `title` (string), `created_at`, `updated_at`.
-    - `chat_messages`: `id` (UUID PK), `conversation_id` (FK conversations), `role` (enum 'system', 'user', 'assistant', 'tool'), `content` (longText), `created_at`, `updated_at`.
+   Satu ledger/invoice dapat memiliki banyak baris produk dan lokasi; produk yang sama boleh muncul pada beberapa lokasi dalam invoice yang sama. Untuk transaksi stok baru, gunakan `ledger_items` sebagai sumber rincian produk/lokasi. Baris legacy dan alur Purchase Request lama dapat menyimpan rincian langsung di kolom `ledgers.product_id`, `location_id`, `quantity`, dan `stock_movement`. Jangan menghitung satu transaksi dua kali: hitung detail baru dari `ledger_items`, dan data lama dari kolom legacy yang memiliki produk.
+
+   Untuk stok saat ini per lokasi, agregasikan `stocks.quantity` dengan join ke `products` dan `locations`. Untuk riwayat pembelian/penjualan per produk/lokasi, join `ledger_items` ke `ledgers`, filter `ledgers.deleted_at IS NULL`, lalu filter tipe (`expense` = pembelian/masuk, `income` = penjualan/keluar). Nomor invoice berada di `ledgers.reference`. Jangan menjumlahkan `ledgers.amount` setelah join ke `ledger_items` karena nilai header akan terulang sebanyak jumlah baris detail. `reference` juga tidak dijamin unik; satu nomor invoice dapat dipakai pada beberapa pencatatan Purchase Request.
+
+11. Tabel `purchase_requests` (Pengajuan Pembelian Stok):
+    - `id` (bigint, PK): ID PR.
+    - `ticket_number` (string, unique): Nomor tiket PR.
+    - `product_id`, `location_id` (bigint, FK products/locations); `supplier_id` (bigint, FK suppliers, nullable).
+    - `requested_qty` (integer), `received_qty` (integer, nullable).
+    - `status` (enum 'pending', 'approved', 'rejected', 'purchased', 'completed'), default 'pending'.
+    - `requested_by` (bigint, FK users), `request_notes` (text, nullable).
+    - `reviewed_by`, `purchased_by`, `received_by` (bigint, FK users, nullable).
+    - `rejection_reason` (text, nullable); `reviewed_at`, `purchased_at`, `received_at` (timestamp, nullable).
+    - `invoice_number`, `proof_image` (string, nullable); `total_cost` (decimal 15,2, nullable).
+    - `ledger_id` (bigint, FK ledgers, nullable); `created_at`, `updated_at`, `deleted_at` (soft delete).
+    - Tahapan: `pending` -> `approved` atau `rejected` -> `purchased` -> `completed`. Penerimaan selesai terkait ke ledger melalui `ledger_id`.
+
+12. Tabel `conversations` & `chat_messages` (AI Memory Engine):
+    - `conversations`: `id` (UUID PK), `user_id` (FK users, cascade delete), `title` (string), `created_at`, `updated_at`.
+    - `chat_messages`: `id` (UUID PK), `conversation_id` (FK conversations, cascade delete), `role` (enum 'system', 'user', 'assistant', 'tool'), `content` (longText), `tool_call_id` (string, nullable), `tool_calls_json` (longText, nullable), `created_at`, `updated_at`.
+13. Tabel `token_usages`: `id`, `conversation_id` (UUID FK), `message_id` (UUID FK, nullable), `prompt_tokens`, `completion_tokens`, `total_tokens`, `cache_hit_tokens`, `cache_miss_tokens`, `model` (nullable), `created_at`, `updated_at`.
+14. Tabel `token_limits`: `id`, `user_id` (FK unik), `daily_token_limit`, `monthly_token_limit` (0 = tanpa batas), `is_enabled`, `notes` (nullable), `created_at`, `updated_at`.
+15. Tabel `audit_logs`: `id`, `actor_id` (FK users, nullable), `actor_name`, `event`, `subject_type`, `subject_id`, `subject_label`, `changes` (JSON), `created_at`. Tidak ada `updated_at`.
+
+Schema di atas mengikuti migration yang ada pada workspace. File migration baru mungkin belum dijalankan pada database environment yang sedang aktif; jangan mengasumsikan tabel sudah ada hanya karena skemanya tercantum di prompt.
 
 ================================================================================
 ATURAN BISNIS & FORMULA SPK RESTOCK

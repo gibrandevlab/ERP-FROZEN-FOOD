@@ -71,11 +71,16 @@ new #[Layout('layouts.app')] class extends Component {
             <p class="text-xs sm:text-sm font-medium text-[#52646a] mt-0.5">{{ $this->products->total() }} produk terdaftar dalam sistem.</p>
         </div>
 
-        <a href="{{ route('stok.tambah') }}" wire:navigate @click="playClick()"
+            <a href="{{ route('stok.tambah') }}" wire:navigate @click="playClick()"
            class="btn-sound inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg text-xs sm:text-sm font-extrabold text-white bg-[#244e49] hover:bg-[#173d38] shadow-none shadow-[#244e49]/15 transition-all shrink-0 self-start sm:self-auto">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
             <span>Tambah Produk</span>
         </a>
+    </div>
+
+    <div class="flex gap-2 border-b border-[#dce1de]">
+        <a href="{{ route('stok.index') }}" wire:navigate class="px-4 py-2.5 text-xs font-extrabold border-b-2 border-[#315b50] text-[#315b50]">Daftar Produk</a>
+        <a href="{{ route('stok.lokasi') }}" wire:navigate class="px-4 py-2.5 text-xs font-bold border-b-2 border-transparent text-[#64747a] hover:text-[#315b50]">Stok per Lokasi</a>
     </div>
 
     {{-- ── Filter Bar ── --}}

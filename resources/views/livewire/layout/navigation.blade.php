@@ -238,11 +238,12 @@
     @endcan
 
     {{-- ── Divider: Admin ───────────────────────────────────────── --}}
-    @can('view-pengguna')
+    @if(auth()->user()->canDo('pengguna', 'view') || auth()->user()->canDo('audit_logs', 'view'))
     <li class="pt-5 pb-1.5 px-1">
         <span class="text-[10px] font-bold text-[#71817f]  uppercase tracking-widest">Admin</span>
     </li>
 
+    @can('view-pengguna')
     <li>
         <a href="{{ route('admin.pengguna.index') }}" wire:navigate
            @click="playClick(); sidebarOpen = false"
@@ -258,5 +259,23 @@
         </a>
     </li>
     @endcan
+
+    @can('view-audit-logs')
+    <li>
+        <a href="{{ route('admin.audit-log.index') }}" wire:navigate
+           @click="playClick(); sidebarOpen = false"
+           class="btn-sound flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150
+                  {{ request()->routeIs('admin.audit-log.*')
+                      ? 'bg-gradient-to-r from-[#f5f6f3] to-[#f5f6f3] text-[#315b50] shadow-none border border-[#dce1de]/60'
+                      : 'text-[#52646a] hover:bg-[#f5f6f3] hover:text-[#344950]' }}">
+            <span class="text-base leading-none w-5 text-center">🧾</span>
+            <span>Riwayat Aktivitas</span>
+            @if(request()->routeIs('admin.audit-log.*'))
+                <span class="ml-auto w-1.5 h-1.5 rounded-full bg-[#315b50]"></span>
+            @endif
+        </a>
+    </li>
+    @endcan
+    @endif
 
 </ul>

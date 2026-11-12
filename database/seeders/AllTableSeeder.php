@@ -147,6 +147,7 @@ class AllTableSeeder extends Seeder
             ['pembukuan', 'Pembukuan', 'transaksi', 'Catat pemasukan dan pengeluaran'],
             ['ringkasan', 'Ringkasan', 'umum', 'Lihat ringkasan dan laporan'],
             ['pengguna', 'Pengguna', 'admin', 'Kelola pengguna dan hak akses'],
+            ['audit_logs', 'Riwayat Aktivitas', 'admin', 'Lihat riwayat perubahan data dan pengguna'],
         ];
         $permissionId = [];
         foreach ($permissionDefs as [$key, $label, $category, $desc]) {

@@ -64,11 +64,24 @@ class Ledger extends Model
         static::updated(function (Ledger $ledger) {
             $ledger->reverseStockMovement($ledger->getOriginal());
             $ledger->applyStockMovement();
+            if ($ledger->wasChanged('type')) {
+                $oldType = $ledger->getOriginal('type');
+                $ledger->items()->each(function (LedgerItem $item) use ($ledger, $oldType): void {
+                    $item->changeStock($item->getAttributes(), -1, $oldType);
+                    $item->changeStock($item->getAttributes(), 1, $ledger->type);
+                });
+            }
         });
 
-        static::deleted(fn (Ledger $ledger) => $ledger->reverseStockMovement($ledger->getAttributes()));
+        static::deleted(function (Ledger $ledger): void {
+            $ledger->reverseStockMovement($ledger->getAttributes());
+            $ledger->items()->each(fn (LedgerItem $item) => $item->changeStock($item->getAttributes(), -1, $ledger->type));
+        });
 
-        static::restored(fn (Ledger $ledger) => $ledger->applyStockMovement());
+        static::restored(function (Ledger $ledger): void {
+            $ledger->applyStockMovement();
+            $ledger->items()->each(fn (LedgerItem $item) => $item->changeStock($item->getAttributes(), 1, $ledger->type));
+        });
 
         static::updating(function (Ledger $ledger) {
             if (auth()->check()) {
@@ -85,6 +98,11 @@ class Ledger extends Model
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function items()
+    {
+        return $this->hasMany(LedgerItem::class);
     }
 
     /**

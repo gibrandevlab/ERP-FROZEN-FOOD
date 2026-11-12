@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\{Ledger, User};
+use App\Models\{Ledger, LedgerItem, User};
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 use Livewire\WithPagination;
@@ -20,11 +20,17 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function getMovementsProperty()
     {
-        return Ledger::with(['product', 'location', 'customer', 'supplier', 'user', 'updater'])
-            ->whereNotNull('stock_movement')
-            ->when($this->search,      fn($q) => $q->where('title', 'like', "%{$this->search}%")
-                                                    ->orWhereHas('product', fn($r) => $r->where('name', 'like', "%{$this->search}%")))
-            ->when($this->filterDir,   fn($q) => $q->where('stock_movement', $this->filterDir))
+        return Ledger::with(['product', 'location', 'customer', 'supplier', 'user', 'updater', 'items.product', 'items.location'])
+            ->where(fn ($query) => $query->whereNotNull('stock_movement')->orWhereHas('items'))
+            ->when($this->search, fn ($query) => $query->where(fn ($searchQuery) => $searchQuery
+                ->where('title', 'like', "%{$this->search}%")
+                ->orWhere('reference', 'like', "%{$this->search}%")
+                ->orWhereHas('product', fn ($productQuery) => $productQuery->where('name', 'like', "%{$this->search}%"))
+                ->orWhereHas('items', fn ($itemsQuery) => $itemsQuery->where('product_name', 'like', "%{$this->search}%"))))
+            ->when($this->filterDir, fn ($query) => $query->where(fn ($movementQuery) => $movementQuery
+                ->where('stock_movement', $this->filterDir)
+                ->orWhereHas('items', fn ($itemsQuery) => $itemsQuery->whereHas('ledger', fn ($ledgerQuery) =>
+                    $ledgerQuery->where('type', $this->filterDir === 'in' ? 'expense' : 'income')))))
             ->when($this->filterBulan, fn($q) => $q->whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$this->filterBulan]))
             ->when($this->filterUser,  fn($q) => $q->where('user_id', $this->filterUser))
             ->orderByDesc('date')->orderByDesc('id')
@@ -38,16 +44,26 @@ new #[Layout('layouts.app')] class extends Component {
 
     public function getTotalMasukProperty(): int
     {
-        return (int) Ledger::whereNotNull('stock_movement')->where('stock_movement', 'in')
+        $legacy = Ledger::where('stock_movement', 'in')
             ->when($this->filterBulan, fn($q) => $q->whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$this->filterBulan]))
             ->sum('quantity');
+        $items = LedgerItem::whereHas('ledger', fn ($query) => $query->where('type', 'expense')
+            ->when($this->filterBulan, fn ($ledgerQuery) => $ledgerQuery->whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$this->filterBulan])))
+            ->sum('quantity');
+
+        return (int) $legacy + (int) $items;
     }
 
     public function getTotalKeluarProperty(): int
     {
-        return (int) Ledger::whereNotNull('stock_movement')->where('stock_movement', 'out')
+        $legacy = Ledger::where('stock_movement', 'out')
             ->when($this->filterBulan, fn($q) => $q->whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$this->filterBulan]))
             ->sum('quantity');
+        $items = LedgerItem::whereHas('ledger', fn ($query) => $query->where('type', 'income')
+            ->when($this->filterBulan, fn ($ledgerQuery) => $ledgerQuery->whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$this->filterBulan])))
+            ->sum('quantity');
+
+        return (int) $legacy + (int) $items;
     }
 
     public function updatedSearch():      void { $this->resetPage(); }
@@ -134,15 +150,27 @@ new #[Layout('layouts.app')] class extends Component {
         <div class="bg-white rounded-lg border border-[#dce1de]/80 p-4 shadow-none relative overflow-hidden space-y-3">
             <div class="flex items-start justify-between gap-2">
                 <div class="min-w-0">
-                    <p class="font-extrabold text-[#172c35] text-sm truncate">{{ $l->product?->name ?? $l->title }}</p>
+                    <p class="font-extrabold text-[#172c35] text-sm truncate">{{ $l->product?->name ?? ($l->items->first()?->product_name ?? $l->title) }}</p>
                     <p class="text-[11px] font-medium text-[#71817f] mt-0.5">{{ $l->date->format('d M Y') }}</p>
                 </div>
-                <span class="shrink-0 px-2.5 py-1 rounded-full text-xs font-extrabold {{ $l->stock_movement === 'in' ? 'bg-[#f5f6f3] text-[#315b50] border border-[#dce1de]' : 'bg-[#f7f1e4] text-[#5e4820] border border-[#ddcba7]' }}">
-                    {{ $l->stock_movement === 'in' ? '+' : '-' }}{{ $l->quantity }} pcs
-                </span>
+                @if($l->items->isNotEmpty())
+                    <span class="shrink-0 px-2.5 py-1 rounded-full text-xs font-extrabold {{ $l->type === 'expense' ? 'bg-[#f5f6f3] text-[#315b50] border border-[#dce1de]' : 'bg-[#f7f1e4] text-[#5e4820] border border-[#ddcba7]' }}">
+                        {{ $l->type === 'expense' ? '+' : '-' }}{{ $l->items->sum('quantity') }} unit
+                    </span>
+                @else
+                    <span class="shrink-0 px-2.5 py-1 rounded-full text-xs font-extrabold {{ $l->stock_movement === 'in' ? 'bg-[#f5f6f3] text-[#315b50] border border-[#dce1de]' : 'bg-[#f7f1e4] text-[#5e4820] border border-[#ddcba7]' }}">
+                        {{ $l->stock_movement === 'in' ? '+' : '-' }}{{ $l->quantity }} pcs
+                    </span>
+                @endif
             </div>
 
-            @if($l->location)
+            @if($l->items->isNotEmpty())
+                <div class="space-y-1">
+                    @foreach($l->items as $item)
+                        <p class="text-xs text-[#64747a]">{{ $item->product_name }} × {{ $item->quantity }} · {{ $item->location_name }}</p>
+                    @endforeach
+                </div>
+            @elseif($l->location)
             <p class="text-xs text-[#64747a] font-medium flex items-center gap-1">
                 <svg class="w-3.5 h-3.5 text-[#71817f]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                 {{ $l->location->name }}
@@ -191,7 +219,14 @@ new #[Layout('layouts.app')] class extends Component {
                 <tr class="hover:bg-[#f5f6f3]/30 transition-colors">
                     <td class="px-6 py-4 text-[#71817f] font-semibold whitespace-nowrap text-xs">{{ $l->date->format('d M Y') }}</td>
                     <td class="px-6 py-4">
-                        @if($l->product)
+                        @if($l->items->isNotEmpty())
+                            <p class="font-extrabold text-[#172c35]">
+                                @foreach($l->items as $item)
+                                    {{ $item->product_name }} × {{ $item->quantity }}@if(!$loop->last); @endif
+                                @endforeach
+                            </p>
+                            <p class="text-xs text-[#71817f] font-medium mt-0.5">{{ $l->title }}</p>
+                        @elseif($l->product)
                             <p class="font-extrabold text-[#172c35]">{{ $l->product->name }}</p>
                             <p class="text-xs text-[#71817f] font-medium mt-0.5">{{ $l->title }}</p>
                         @else
@@ -199,22 +234,34 @@ new #[Layout('layouts.app')] class extends Component {
                         @endif
                     </td>
                     <td class="px-6 py-4 text-[#64747a] font-medium text-xs">
-                        {{ $l->location?->name ?? '—' }}
+                        @if($l->items->isNotEmpty())
+                            @foreach($l->items as $item)
+                                <p>{{ $item->location_name }}</p>
+                            @endforeach
+                        @else
+                            {{ $l->location?->name ?? '—' }}
+                        @endif
                     </td>
                     <td class="px-6 py-4 text-center">
-                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider {{ $l->stock_movement === 'in' ? 'bg-[#f5f6f3] text-[#315b50] border border-[#dce1de]' : 'bg-[#f7f1e4] text-[#5e4820] border border-[#ddcba7]' }}">
+                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider {{ ($l->items->isNotEmpty() ? $l->type === 'expense' : $l->stock_movement === 'in') ? 'bg-[#f5f6f3] text-[#315b50] border border-[#dce1de]' : 'bg-[#f7f1e4] text-[#5e4820] border border-[#ddcba7]' }}">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                @if($l->stock_movement === 'in')
+                                @if($l->items->isNotEmpty() ? $l->type === 'expense' : $l->stock_movement === 'in')
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
                                 @else
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
                                 @endif
                             </svg>
-                            {{ $l->stock_movement === 'in' ? 'Masuk' : 'Keluar' }}
+                            {{ ($l->items->isNotEmpty() ? $l->type === 'expense' : $l->stock_movement === 'in') ? 'Masuk' : 'Keluar' }}
                         </span>
                     </td>
                     <td class="px-6 py-4 text-right font-extrabold {{ $l->stock_movement === 'in' ? 'text-[#315b50]' : 'text-[#5e4820]' }}">
-                        {{ $l->stock_movement === 'in' ? '+' : '-' }}{{ number_format($l->quantity) }}
+                        @if($l->items->isNotEmpty())
+                            @foreach($l->items as $item)
+                                <p>{{ $l->type === 'expense' ? '+' : '-' }}{{ number_format($item->quantity) }}</p>
+                            @endforeach
+                        @else
+                            {{ $l->stock_movement === 'in' ? '+' : '-' }}{{ number_format($l->quantity) }}
+                        @endif
                     </td>
                     <td class="px-6 py-4 text-xs font-semibold text-[#52646a]">
                         @if($l->supplier)<p class="flex items-center gap-1"><svg class="w-3.5 h-3.5 text-[#527c70]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg> {{ $l->supplier->name }}</p>@endif

@@ -84,6 +84,11 @@ class Product extends Model
         return $this->hasMany(Ledger::class);
     }
 
+    public function ledgerItems()
+    {
+        return $this->hasMany(LedgerItem::class);
+    }
+
     /**
      * Stok produk di berbagai lokasi.
      */

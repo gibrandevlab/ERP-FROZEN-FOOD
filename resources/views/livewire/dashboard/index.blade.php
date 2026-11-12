@@ -342,6 +342,22 @@ new #[Layout('layouts.app')] class extends Component {
                 </a>
                 @endif
 
+                @can('view-audit-logs')
+                <a href="{{ route('admin.audit-log.index') }}" wire:navigate @click="playClick()"
+                   class="btn-sound group flex flex-col justify-between p-4 sm:p-5 bg-white rounded-lg border border-[#dce1de]/80 shadow-none hover:shadow-none hover:border-[#c8d0cc] transition-all">
+                    <div class="flex items-center justify-between w-full mb-4">
+                        <div class="w-10 h-10 bg-[#edf0f2] rounded-md flex items-center justify-center text-[#4b5b6b] group-hover:bg-[#4b5b6b] group-hover:text-white transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+                        </div>
+                        <svg class="w-4 h-4 text-[#9aa8a4] group-hover:text-[#5d6b79] group-hover:translate-x-0.5 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </div>
+                    <div>
+                        <p class="text-sm font-bold text-[#344950] group-hover:text-[#4b5b6b] transition-colors">Riwayat Aktivitas</p>
+                        <p class="text-[11px] text-[#71817f] mt-0.5 line-clamp-1">Lihat siapa mengubah data</p>
+                    </div>
+                </a>
+                @endcan
+
                 {{-- 7. SPK Restock --}}
                 <a href="{{ route('spk.index') }}" wire:navigate @click="playClick()"
                    class="btn-sound group flex flex-col justify-between p-4 sm:p-5 bg-white rounded-lg border border-[#dce1de]/80 shadow-none hover:shadow-none hover:border-[#b7d4ce] transition-all">

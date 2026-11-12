@@ -3,6 +3,19 @@
 namespace App\Providers;
 
 use App\Models\Permission;
+use App\Models\{
+    Category,
+    Customer,
+    Ledger,
+    LedgerItem,
+    Location,
+    Product,
+    PurchaseRequest,
+    Supplier,
+    User,
+    UserPermission
+};
+use App\Observers\AuditLogObserver;
 use App\Observers\PermissionObserver;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
@@ -25,6 +38,21 @@ class AppServiceProvider extends ServiceProvider
     {
         // Daftarkan observer — otomatis clear cache saat data permission berubah
         Permission::observe(PermissionObserver::class);
+
+        foreach ([
+            Product::class,
+            Category::class,
+            Location::class,
+            Customer::class,
+            Supplier::class,
+            Ledger::class,
+            LedgerItem::class,
+            PurchaseRequest::class,
+            User::class,
+            UserPermission::class,
+        ] as $model) {
+            $model::observe(AuditLogObserver::class);
+        }
 
         $this->daftarkanGates();
     }
@@ -66,6 +94,8 @@ class AppServiceProvider extends ServiceProvider
                 return true;
             }
         });
+
+        Gate::define('view-audit-logs', fn ($user) => $user->canDo('audit_logs', 'view'));
 
         // Jangan query DB saat menjalankan perintah artisan (migrate, seed, dll.)
         // agar tidak error ketika tabel belum ada

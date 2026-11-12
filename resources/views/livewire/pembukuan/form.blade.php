@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\{Category, Ledger, Product, Location, Supplier};
+use App\Models\{Category, Ledger, LedgerItem, Product, Location, Supplier};
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 use Livewire\WithFileUploads;
@@ -18,12 +18,11 @@ new #[Layout('layouts.app')] class extends Component {
     public string  $date        = '';
     public ?string $description = '';
     public ?string $reference   = '';
-    public ?string $product_id      = null;
-    public ?string $location_id     = null;
     public ?string $customer_id     = null;
     public ?string $supplier_id     = null;
-    public string  $quantity        = '';
     public string  $stock_movement  = '';
+    public array $items = [];
+    public int $activeItem = 0;
     public string  $payment_status  = 'paid';
     public ?string $due_date        = null;
     public         $proof_image     = null;
@@ -59,15 +58,46 @@ new #[Layout('layouts.app')] class extends Component {
             $this->authorize('edit-pembukuan');
             $this->modeEdit = true;
             $this->ledger   = Ledger::where('slug', $slug)->firstOrFail();
-            $this->fill($this->ledger->only(['type', 'title', 'description', 'reference', 'product_id', 'location_id', 'stock_movement', 'customer_id', 'supplier_id', 'payment_status']));
-            $this->quantity = (string) $this->ledger->quantity;
+            $this->fill([
+                ...$this->ledger->only(['type', 'title', 'description', 'reference', 'stock_movement', 'customer_id', 'supplier_id', 'payment_status']),
+                'stock_movement' => $this->ledger->stock_movement ?? '',
+            ]);
             $this->amount = (string) $this->ledger->amount;
             $this->date   = $this->ledger->date->format('Y-m-d');
             $this->due_date = $this->ledger->due_date ? $this->ledger->due_date->format('Y-m-d') : null;
+            $existingItems = $this->ledger->items;
+            if ($existingItems->isNotEmpty()) {
+                $this->items = $existingItems->map(fn (LedgerItem $item) => [
+                    'product_id' => $item->product_id ? (string) $item->product_id : '',
+                    'location_id' => $item->location_id ? (string) $item->location_id : '',
+                    'quantity' => (string) $item->quantity,
+                    'unit_price' => (string) $item->unit_price,
+                ])->all();
+            } elseif ($this->ledger->product_id) {
+                $this->items = [[
+                    'product_id' => (string) $this->ledger->product_id,
+                    'location_id' => (string) $this->ledger->location_id,
+                    'quantity' => (string) $this->ledger->quantity,
+                    'unit_price' => $this->ledger->quantity ? (string) ($this->ledger->amount / $this->ledger->quantity) : '0',
+                ]];
+            } else {
+                $this->items = [];
+            }
         } else {
             $this->authorize('create-pembukuan');
             $this->date = now()->format('Y-m-d');
-            $this->product_id = request()->query('produk');
+            $this->items = [[
+                'product_id' => (string) request()->query('produk', ''),
+                'location_id' => '',
+                'quantity' => '',
+                'unit_price' => '0',
+            ]];
+            if ($this->items[0]['product_id']) {
+                $product = Product::find($this->items[0]['product_id']);
+                if ($product) {
+                    $this->items[0]['unit_price'] = (string) ($this->type === 'income' ? $product->price : $product->cost);
+                }
+            }
             if ($this->title === 'Penjualan') {
                 $this->stock_movement = 'out';
             } elseif ($this->title === 'Pembelian stok') {
@@ -110,22 +140,54 @@ new #[Layout('layouts.app')] class extends Component {
             $this->title = 'Pembelian stok';
             $this->stock_movement = 'in';
         }
-    }
 
-    public function updatedProductId($value)
-    {
-        if ($value === 'new') {
-            $this->product_id = null;
-            $this->dispatch('open-modal', 'modal-product');
+        foreach ($this->items as $index => $item) {
+            $product = Product::find($item['product_id'] ?? null);
+            if ($product) {
+                $this->items[$index]['unit_price'] = (string) ($value === 'income' ? $product->price : $product->cost);
+            }
         }
     }
 
-    public function updatedLocationId($value)
+    public function updatedItems($value, string $key): void
     {
-        if ($value === 'new') {
-            $this->location_id = null;
+        [$index, $field] = array_pad(explode('.', $key, 2), 2, null);
+        $index = (int) $index;
+        $this->activeItem = $index;
+
+        if ($field === 'product_id') {
+            if ($value === 'new') {
+                $this->items[$index]['product_id'] = '';
+                $this->dispatch('open-modal', 'modal-product');
+            } elseif ($product = Product::find($value)) {
+                $this->items[$index]['unit_price'] = (string) ($this->type === 'income' ? $product->price : $product->cost);
+            }
+        }
+
+        if ($field === 'location_id' && $value === 'new') {
+            $this->items[$index]['location_id'] = '';
             $this->dispatch('open-modal', 'modal-location');
         }
+    }
+
+    public function addItem(): void
+    {
+        $this->items[] = ['product_id' => '', 'location_id' => '', 'quantity' => '', 'unit_price' => '0'];
+    }
+
+    public function removeItem(int $index): void
+    {
+        if (count($this->items) > 1) {
+            unset($this->items[$index]);
+            $this->items = array_values($this->items);
+        }
+    }
+
+    public function getItemsTotalProperty(): float
+    {
+        return collect($this->items)->sum(fn (array $item) =>
+            (float) ($item['quantity'] ?? 0) * (float) ($item['unit_price'] ?? 0)
+        );
     }
 
     public function updatedCustomerId($value)
@@ -152,7 +214,7 @@ new #[Layout('layouts.app')] class extends Component {
             'user_id' => auth()->id(),
         ]);
 
-        $this->location_id = (string) $loc->id;
+        $this->items[$this->activeItem]['location_id'] = (string) $loc->id;
         $this->newLocName = '';
         $this->newLocDesc = '';
         $this->newLocActive = true;
@@ -220,7 +282,8 @@ new #[Layout('layouts.app')] class extends Component {
             'updated_by' => auth()->id(),
         ]);
 
-        $this->product_id = (string) $prod->id;
+        $this->items[$this->activeItem]['product_id'] = (string) $prod->id;
+        $this->items[$this->activeItem]['unit_price'] = (string) ($this->type === 'income' ? $prod->price : $prod->cost);
         $this->newProdName = '';
         $this->newProdSku = '';
         $this->newProdCategoryId = '';
@@ -234,7 +297,6 @@ new #[Layout('layouts.app')] class extends Component {
         $this->newProdActive = true;
         $this->newProdImage = null;
         $this->dispatch('close-modal');
-        $this->dispatch('product-added', id: $prod->id, price: $prod->price, cost: $prod->cost);
     }
 
     public function updatedTitle($value)
@@ -252,56 +314,58 @@ new #[Layout('layouts.app')] class extends Component {
     {
         $this->authorize($this->modeEdit ? 'edit-pembukuan' : 'create-pembukuan');
 
-        if (!in_array($this->title, ['Penjualan', 'Pembelian stok'])) {
-            $this->product_id = null;
-            $this->location_id = null;
-            $this->quantity = null;
-            $this->stock_movement = null;
+        $tracksStock = in_array($this->title, ['Penjualan', 'Pembelian stok'], true);
+        if (! $tracksStock) {
+            $this->items = [];
+            $this->stock_movement = '';
             $this->customer_id = null;
             $this->supplier_id = null;
         }
+
+        $this->stock_movement = $this->title === 'Penjualan' ? 'out' : ($this->title === 'Pembelian stok' ? 'in' : '');
 
         if ($this->payment_status === 'paid') {
             $this->due_date = null;
         }
 
-        if ($this->stock_movement === '') {
-            $this->stock_movement = null;
-        }
-
-        if ($this->stock_movement === 'out' && $this->product_id && $this->location_id && $this->quantity) {
-            $currentStock = \App\Models\Stock::where('product_id', $this->product_id)
-                ->where('location_id', $this->location_id)
-                ->value('quantity') ?? 0;
-
-            $originalQuantity = 0;
-            if ($this->modeEdit && $this->ledger->product_id == $this->product_id && $this->ledger->location_id == $this->location_id && $this->ledger->stock_movement === 'out') {
-                $originalQuantity = $this->ledger->quantity;
-            }
-
-            if ($this->quantity > ($currentStock + $originalQuantity)) {
-                $this->addError('quantity', "Stok tidak mencukupi! Tersisa: ".($currentStock + $originalQuantity)." di lokasi ini.");
-                return;
-            }
-        }
-
-        $validated = $this->validate([
+        $rules = [
             'type'           => ['required', 'in:income,expense'],
             'title'          => ['required', 'string', 'max:255'],
-            'amount'         => ['required', 'numeric', 'min:0', 'max:999999999999.99'],
             'payment_status' => ['required', 'in:paid,unpaid'],
             'due_date'       => ['nullable', 'date'],
             'date'           => ['required', 'date'],
             'description'    => ['nullable', 'string'],
-            'reference'      => ['nullable', 'string', 'max:255'],
-            'product_id'     => ['nullable', 'exists:products,id'],
-            'location_id'    => ['nullable', 'exists:locations,id'],
+            'reference'      => [$tracksStock ? 'required' : 'nullable', 'string', 'max:255'],
             'customer_id'    => ['nullable', 'exists:customers,id'],
             'supplier_id'    => ['nullable', 'exists:suppliers,id'],
-            'quantity'       => ['nullable', 'integer', 'min:1', 'max:2147483647'],
-            'stock_movement' => ['nullable', 'in:in,out'],
             'proof_image'    => ['nullable', 'image', 'max:2048'],
-        ]);
+        ];
+
+        if ($tracksStock) {
+            $rules['items'] = ['required', 'array', 'min:1'];
+            $rules['items.*.product_id'] = ['required', 'exists:products,id'];
+            $rules['items.*.location_id'] = ['required', 'exists:locations,id'];
+            $rules['items.*.quantity'] = ['required', 'integer', 'min:1', 'max:2147483647'];
+            $rules['items.*.unit_price'] = ['required', 'numeric', 'min:0', 'max:999999999999.99'];
+        } else {
+            $rules['amount'] = ['required', 'numeric', 'min:0', 'max:999999999999.99'];
+        }
+
+        $validated = $this->validate($rules);
+        $items = $tracksStock ? array_values($validated['items']) : [];
+        unset($validated['items']);
+        $validated['product_id'] = null;
+        $validated['location_id'] = null;
+        $validated['quantity'] = null;
+        $validated['stock_movement'] = null;
+
+        if ($tracksStock) {
+            $validated['amount'] = number_format($this->itemsTotal, 2, '.', '');
+            if ((float) $validated['amount'] > 999999999999.99) {
+                $this->addError('items', 'Total transaksi melebihi batas nominal yang diizinkan.');
+                return;
+            }
+        }
 
         if ($this->proof_image) {
             $image = imagecreatefromstring(file_get_contents($this->proof_image->getRealPath()));
@@ -317,15 +381,76 @@ new #[Layout('layouts.app')] class extends Component {
             unset($validated['proof_image']);
         }
 
-        DB::transaction(function () use ($validated) {
-            if ($this->modeEdit) {
-                $this->ledger->update($validated);
-            } else {
-                $validated['user_id'] = auth()->id();
-                $validated['updated_by'] = auth()->id();
-                Ledger::create($validated);
-            }
-        });
+        try {
+            DB::transaction(function () use ($validated, $items, $tracksStock): void {
+                if ($tracksStock && $this->stock_movement === 'out') {
+                    $requested = collect($items)->groupBy(fn (array $item) => $item['product_id'].'_'.$item['location_id'])->sortKeys();
+                    $original = collect();
+                    if ($this->modeEdit) {
+                        $original = $this->ledger->items->groupBy(fn (LedgerItem $item) => $item->product_id.'_'.$item->location_id)
+                        ->map(fn ($group) => $group->sum('quantity') * ($this->ledger->type === 'income' ? 1 : -1));
+                        if ($this->ledger->stock_movement === 'out' && $this->ledger->product_id && $this->ledger->location_id) {
+                            $key = $this->ledger->product_id.'_'.$this->ledger->location_id;
+                            $original[$key] = ($original[$key] ?? 0) + (int) $this->ledger->quantity;
+                    } elseif ($this->ledger->stock_movement === 'in' && $this->ledger->product_id && $this->ledger->location_id) {
+                        $key = $this->ledger->product_id.'_'.$this->ledger->location_id;
+                        $original[$key] = ($original[$key] ?? 0) - (int) $this->ledger->quantity;
+                        }
+                    }
+
+                    foreach ($requested as $key => $group) {
+                        [$productId, $locationId] = explode('_', $key, 2);
+                        $stock = \App\Models\Stock::where('product_id', $productId)
+                            ->where('location_id', $locationId)
+                            ->lockForUpdate()
+                            ->first();
+                        $available = (int) ($stock?->quantity ?? 0) + (int) ($original[$key] ?? 0);
+                        $quantity = $group->sum(fn (array $item) => (int) $item['quantity']);
+                        if ($quantity > $available) {
+                            $productName = Product::find($productId)?->name ?? 'Produk';
+                            throw new \RuntimeException("Stok {$productName} tidak mencukupi di lokasi {$locationId}. Tersisa: {$available}.");
+                        }
+                    }
+                }
+
+                if ($this->modeEdit) {
+                    $this->ledger->update($validated);
+                    $ledger = $this->ledger;
+                    $existingByLocation = $ledger->items()->get()->groupBy(fn (LedgerItem $item) =>
+                        $item->product_id.'_'.$item->location_id
+                    );
+                } else {
+                    $validated['user_id'] = auth()->id();
+                    $validated['updated_by'] = auth()->id();
+                    $ledger = Ledger::create($validated);
+                    $existingByLocation = collect();
+                }
+
+                foreach ($items as $itemData) {
+                    $product = Product::findOrFail($itemData['product_id']);
+                    $location = Location::findOrFail($itemData['location_id']);
+                    $attributes = [
+                        ...$itemData,
+                        'product_name' => $product->name,
+                        'location_name' => $location->name,
+                    ];
+                    $key = $product->id.'_'.$location->id;
+                    $existing = $existingByLocation->get($key)?->shift();
+                    if ($existing) {
+                        $existing->update($attributes);
+                    } else {
+                        $ledger->items()->create($attributes);
+                    }
+                }
+
+                foreach ($existingByLocation as $remainingItems) {
+                    $remainingItems->each(fn (LedgerItem $item) => $item->delete());
+                }
+            });
+        } catch (\RuntimeException $exception) {
+            $this->addError('items', $exception->getMessage());
+            return;
+        }
 
         session()->flash('success', $this->modeEdit
             ? 'Catatan transaksi berhasil diperbarui.'
@@ -338,71 +463,14 @@ new #[Layout('layouts.app')] class extends Component {
 }; ?>
 
 <div class="space-y-6 max-w-3xl mx-auto"
-     x-data="{ showLocModal: false, showProdModal: false, showCustModal: false,
-            products: {{ $this->productList->mapWithKeys(fn($p) => [$p->id => ['price' => $p->price, 'cost' => $p->cost]]) }},
-            stocks: {{ json_encode(\App\Models\Stock::all()->mapWithKeys(fn($s) => ["{$s->product_id}_{$s->location_id}" => $s->quantity])) }},
-            isCustomPrice: false,
-            insufficientStock: false,
-            availableStock: 0,
-
-            calcExpectedAmount() {
-                if (!$wire.product_id || !$wire.quantity || $wire.quantity <= 0) return null;
-                let p = this.products[$wire.product_id];
-                if (!p) return null;
-                return $wire.type === 'income' ? (p.price * $wire.quantity) : (p.cost * $wire.quantity);
-            },
-
-            autoCalculate() {
-                let expected = this.calcExpectedAmount();
-                if (expected !== null) {
-                    $wire.amount = expected;
-                    this.isCustomPrice = false;
-                }
-            },
-
-            checkCustomPrice() {
-                let expected = this.calcExpectedAmount();
-                if (expected !== null && expected != $wire.amount) {
-                    this.isCustomPrice = true;
-                } else {
-                    this.isCustomPrice = false;
-                }
-            },
-
-            checkStockLimit() {
-                this.insufficientStock = false;
-                if ($wire.stock_movement === 'out' && $wire.product_id && $wire.location_id && $wire.quantity > 0) {
-                    let key = $wire.product_id + '_' + $wire.location_id;
-                    let available = parseFloat(this.stocks[key] || 0);
-
-                    @if($modeEdit)
-                    if ($wire.product_id == '{{ $ledger->product_id }}' && $wire.location_id == '{{ $ledger->location_id }}' && '{{ $ledger->stock_movement }}' === 'out') {
-                        available += parseFloat('{{ $ledger->quantity }}');
-                    }
-                    @endif
-
-                    if (parseFloat($wire.quantity) > available) {
-                        this.insufficientStock = true;
-                        this.availableStock = available;
-                    }
-                }
-            }
-         }"
-         x-init="
-            $watch('$wire.product_id', () => { autoCalculate(); checkStockLimit(); });
-            $watch('$wire.location_id', () => checkStockLimit());
-            $watch('$wire.quantity', () => { autoCalculate(); checkStockLimit(); });
-            $watch('$wire.type', () => autoCalculate());
-            $watch('$wire.stock_movement', () => checkStockLimit());
-            $watch('$wire.amount', () => checkCustomPrice());
-         "
+     x-data="{ showLocModal: false, showProdModal: false, showCustModal: false }"
      @open-modal.window="
         if ($event.detail[0] === 'modal-location') showLocModal = true;
         if ($event.detail[0] === 'modal-product') showProdModal = true;
         if ($event.detail[0] === 'modal-customer') showCustModal = true;
      "
      @close-modal.window="showLocModal = false; showProdModal = false; showCustModal = false;"
-     @product-added.window="products[$event.detail.id] = { price: $event.detail.price, cost: $event.detail.cost }; autoCalculate();">
+     >
 
     {{-- ── Banner Header ── --}}
     <div class="relative overflow-hidden rounded-lg border border-[#dce1de]/80 bg-gradient-to-r from-[#f5f6f3] via-white to-[#f5f6f3] p-5 sm:p-6 shadow-none flex items-center justify-between gap-4">
@@ -483,58 +551,69 @@ new #[Layout('layouts.app')] class extends Component {
                 <div class="p-5 bg-[#f5f6f3]/80 border border-[#dce1de]/80 rounded-lg space-y-4">
                     <div class="flex items-center gap-2">
                         <svg class="w-4 h-4 text-[#315b50]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-                        <span class="text-xs font-extrabold text-[#344950] uppercase tracking-wider">Detail Stok Barang</span>
+                        <span class="text-xs font-extrabold text-[#344950] uppercase tracking-wider">Detail Barang per Lokasi</span>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold text-[#52646a] mb-1.5 uppercase tracking-wider">Produk Terkait</label>
-                            <select wire:model.live="product_id"
-                                    class="w-full px-4 py-2.5 bg-white border border-[#dce1de] rounded-lg text-xs sm:text-sm font-medium text-[#344950] focus:ring-2 focus:ring-[#527c70]/20 focus:border-[#527c70] transition-all shadow-none">
-                                <option value="">— Pilih Produk —</option>
-                                @can('create-stok')
-                                    <option value="new" class="font-bold text-[#315b50]">+ Tambah Produk Baru...</option>
-                                @endcan
-                                @foreach($this->productList as $p)
-                                    <option value="{{ $p->id }}">{{ $p->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-[#52646a] mb-1.5 uppercase tracking-wider">Lokasi Stok</label>
-                            <select wire:model.live="location_id"
-                                    class="w-full px-4 py-2.5 bg-white border border-[#dce1de] rounded-lg text-xs sm:text-sm font-medium text-[#344950] focus:ring-2 focus:ring-[#527c70]/20 focus:border-[#527c70] transition-all shadow-none">
-                                <option value="">— Pilih Lokasi —</option>
-                                @can('create-lokasi')
-                                    <option value="new" class="font-bold text-[#315b50]">+ Tambah Lokasi Baru...</option>
-                                @endcan
-                                @foreach($this->locationList as $loc)
-                                    <option value="{{ $loc->id }}">{{ $loc->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
+                    <div class="flex justify-end">
+                        <button type="button" wire:click="addItem" class="text-xs font-extrabold text-[#315b50] hover:underline">+ Tambah baris barang</button>
                     </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold text-[#52646a] mb-1.5 uppercase tracking-wider">Kuantitas</label>
-                            <input wire:model="quantity" type="number" min="1" placeholder="Misal: 5"
-                                   class="w-full px-4 py-2.5 bg-white border border-[#dce1de] rounded-lg text-xs sm:text-sm font-medium text-[#344950] focus:ring-2 focus:ring-[#527c70]/20 focus:border-[#527c70] transition-all shadow-none" />
-                            <p x-show="insufficientStock" x-cloak class="text-[#9c5252] text-[11px] mt-1.5 font-bold flex items-center gap-1">
-                                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                                Stok tidak mencukupi! Tersisa: <span x-text="availableStock"></span> unit di lokasi ini.
-                            </p>
-                            @error('quantity') <p class="text-[#9c5252] text-xs mt-1 font-semibold">{{ $message }}</p> @enderror
+                    @foreach($items as $index => $item)
+                        <div wire:key="ledger-item-{{ $index }}" class="rounded-lg border border-[#dce1de] bg-white p-4 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[11px] font-extrabold uppercase tracking-wider text-[#64747a]">Barang {{ $index + 1 }}</span>
+                                @if(count($items) > 1)
+                                    <button type="button" wire:click="removeItem({{ $index }})" class="text-[11px] font-bold text-[#9c5252]">Hapus baris</button>
+                                @endif
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-bold text-[#52646a] mb-1.5">Produk</label>
+                                    <select wire:model.live="items.{{ $index }}.product_id" class="w-full px-3 py-2.5 bg-white border border-[#dce1de] rounded-lg text-xs font-medium text-[#344950]">
+                                        <option value="">— Pilih Produk —</option>
+                                        @can('create-stok')<option value="new">+ Tambah Produk Baru...</option>@endcan
+                                        @foreach($this->productList as $product)
+                                            <option value="{{ $product->id }}">{{ $product->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    @error('items.'.$index.'.product_id') <p class="text-[#9c5252] text-xs mt-1">{{ $message }}</p> @enderror
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-[#52646a] mb-1.5">Lokasi Stok</label>
+                                    <select wire:model.live="items.{{ $index }}.location_id" class="w-full px-3 py-2.5 bg-white border border-[#dce1de] rounded-lg text-xs font-medium text-[#344950]">
+                                        <option value="">— Pilih Lokasi —</option>
+                                        @can('create-lokasi')<option value="new">+ Tambah Lokasi Baru...</option>@endcan
+                                        @foreach($this->locationList as $location)
+                                            <option value="{{ $location->id }}">{{ $location->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    @error('items.'.$index.'.location_id') <p class="text-[#9c5252] text-xs mt-1">{{ $message }}</p> @enderror
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <div>
+                                    <label class="block text-xs font-bold text-[#52646a] mb-1.5">Kuantitas</label>
+                                    <input wire:model.live.debounce.300ms="items.{{ $index }}.quantity" type="number" min="1" placeholder="Misal: 5" class="w-full px-3 py-2.5 bg-white border border-[#dce1de] rounded-lg text-xs font-medium text-[#344950]" />
+                                    @error('items.'.$index.'.quantity') <p class="text-[#9c5252] text-xs mt-1">{{ $message }}</p> @enderror
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-[#52646a] mb-1.5">Harga per unit (Rp)</label>
+                                    <input wire:model.live.debounce.300ms="items.{{ $index }}.unit_price" type="number" min="0" step="0.01" class="w-full px-3 py-2.5 bg-white border border-[#dce1de] rounded-lg text-xs font-medium text-[#344950]" />
+                                    @error('items.'.$index.'.unit_price') <p class="text-[#9c5252] text-xs mt-1">{{ $message }}</p> @enderror
+                                </div>
+                                <p class="flex items-end rounded-lg bg-[#f5f6f3] px-3 py-2.5 text-xs font-extrabold text-[#344950]">
+                                    Subtotal: Rp {{ number_format((float) ($item['quantity'] ?? 0) * (float) ($item['unit_price'] ?? 0), 0, ',', '.') }}
+                                </p>
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-xs font-bold text-[#52646a] mb-1.5 uppercase tracking-wider">Mutasi Stok</label>
-                            <select wire:model="stock_movement" disabled
-                                    class="w-full px-4 py-2.5 bg-[#eef2ee]/80 border border-[#dce1de] rounded-lg text-xs sm:text-sm font-semibold text-[#64747a] cursor-not-allowed shadow-none">
-                                <option value="">— Pilih Mutasi —</option>
-                                <option value="in">Masuk (Stok Bertambah)</option>
-                                <option value="out">Keluar (Stok Berkurang)</option>
-                            </select>
-                        </div>
+                    @endforeach
+                    @error('items') <p class="text-[#9c5252] text-xs font-semibold">{{ $message }}</p> @enderror
+                    <div class="flex justify-end border-t border-[#dce1de] pt-3">
+                        <p class="text-sm font-extrabold text-[#172c35]">Total barang: Rp {{ number_format($this->itemsTotal, 0, ',', '.') }}</p>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-[#52646a] mb-1.5 uppercase tracking-wider">Nomor Invoice <span class="text-[#9c5252]">*</span></label>
+                        <input wire:model="reference" type="text" maxlength="255" placeholder="Contoh: INV-2026-001" required class="w-full px-4 py-2.5 bg-white border border-[#dce1de] rounded-lg text-xs sm:text-sm font-medium text-[#344950]" />
+                        @error('reference') <p class="text-[#9c5252] text-xs mt-1 font-semibold">{{ $message }}</p> @enderror
                     </div>
 
                     @if($title === 'Penjualan')
@@ -571,12 +650,8 @@ new #[Layout('layouts.app')] class extends Component {
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-xs font-bold text-[#52646a] mb-1.5 uppercase tracking-wider">Nominal Transaksi (Rp) <span class="text-[#9c5252]">*</span></label>
-                    <input wire:model="amount" type="number" min="0" step="100"
+                    <input @if(in_array($title, ['Penjualan', 'Pembelian stok'])) value="{{ $this->itemsTotal }}" readonly @else wire:model="amount" @endif type="number" min="0" step="100"
                            class="w-full px-4 py-2.5 bg-white border border-[#dce1de] rounded-lg text-xs sm:text-sm font-extrabold text-[#172c35] focus:ring-2 focus:ring-[#527c70]/20 focus:border-[#527c70] transition-all shadow-none" />
-                    <p x-show="isCustomPrice" x-cloak class="text-[#5e4820] text-[11px] mt-1.5 font-bold flex items-center gap-1">
-                        <svg class="w-3.5 h-3.5 shrink-0 text-[#6b5226]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                        Manual: Nominal disesuaikan khusus (berbeda dari standar produk).
-                    </p>
                     @error('amount') <p class="text-[#9c5252] text-xs mt-1 font-semibold">{{ $message }}</p> @enderror
                 </div>
 
@@ -634,11 +709,13 @@ new #[Layout('layouts.app')] class extends Component {
 
             @if($showOptional)
                 <div class="space-y-4 p-5 border border-[#dce1de] bg-[#f5f6f3]/30 rounded-lg">
+                    @unless(in_array($title, ['Penjualan', 'Pembelian stok']))
                     <div>
                         <label class="block text-xs font-bold text-[#52646a] mb-1.5 uppercase tracking-wider">No. Referensi <span class="text-[#71817f] font-normal">(opsional)</span></label>
                         <input wire:model="reference" type="text" placeholder="Misal: INV-2026-001"
                                class="w-full px-4 py-2.5 bg-white border border-[#dce1de] rounded-lg text-xs sm:text-sm font-medium text-[#344950] placeholder:text-[#71817f] focus:ring-2 focus:ring-[#527c70]/20 focus:border-[#527c70] transition-all shadow-none" />
                     </div>
+                    @endunless
 
                     <div>
                         <label class="block text-xs font-bold text-[#52646a] mb-1.5 uppercase tracking-wider">Catatan Keterangan <span class="text-[#71817f] font-normal">(opsional)</span></label>
@@ -662,7 +739,7 @@ new #[Layout('layouts.app')] class extends Component {
                 <a href="{{ route('pembukuan.index') }}" wire:navigate @click="playClick()"
                    class="btn-sound px-4 py-2 text-xs font-bold text-[#64747a] hover:text-[#344950] uppercase tracking-wider">Batal</a>
 
-                <button type="submit" @click="if(!insufficientStock) playSuccess()" :disabled="insufficientStock"
+                <button type="submit" @click="playSuccess()"
                         class="btn-sound px-6 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider text-white shadow-none transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed
                                {{ $type === 'income' ? 'bg-[#2f6b5c] hover:bg-[#2f6b5c] ' : 'bg-[#7a3d3d] hover:bg-[#7a3d3d] ' }}">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>

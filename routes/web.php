@@ -17,6 +17,7 @@ Route::middleware(['auth'])->group(function () {
     // sebelum komponen Livewire dimuat. Ini lapisan keamanan PERTAMA.
     Route::prefix('stok')->name('stok.')->middleware('can:view-stok')->group(function () {
         Volt::route('/histori', 'stok.histori')->name('histori');
+        Volt::route('/lokasi', 'stok.per-lokasi')->name('lokasi');
         Volt::route('/', 'stok.index')->name('index');
         Volt::route('/tambah', 'stok.form')->name('tambah')->middleware('can:create-stok');
         Volt::route('/{slug}/edit', 'stok.form')->name('edit')->middleware('can:edit-stok');
@@ -83,6 +84,10 @@ Route::middleware(['auth'])->group(function () {
         // Token Usage Management
         Volt::route('/token-usage', 'admin.token-usage.index')->name('token-usage.index');
     });
+
+    Volt::route('/admin/riwayat-aktivitas', 'admin.audit-log.index')
+        ->name('admin.audit-log.index')
+        ->middleware('can:view-audit-logs');
 
     // ── AI Assistant & Chat Session ────────────────────────────────────────
     Volt::route('/chat/{conversation?}', 'chat.index')->name('chat.index');
